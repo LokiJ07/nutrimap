@@ -100,9 +100,11 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
   <ul class="menu-links">
     <li data-url="home.php"><i class="fa fa-home"></i> Home</li>
     <li data-url="cno_reports.php"><i class="fa fa-file-alt"></i> Reports</li>
-    <li data-url="report_history.php"><i class="fa fa-history"></i> Report History</li>
-    <li data-url="barangay_data.php"><i class="fa fa-database"></i> Barangay Data</li>
-
+    <li data-url="barangay_data.php"><i class="fa fa-database"></i>All Barangay Data</li>
+    <li data-url="nutritional_map.php"><i class="fa fa-map"></i>Nutritional Map</li>
+    <li data-url="report_history.php"><i class="fas fa-tasks"></i> Data History</li>
+    <li data-url="cno_reports.php"><i class="fa fa-user"></i>Users</li>
+    <li data-url="cno_reports.php"><i class="fas fa-history"></i>Activity Logs</li>
     <!-- Settings dropdown -->
     <li class="settings-dropdown">
       <div class="settings-btn" id="settingsBtn">

@@ -213,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
 <body>
   <div class="layout">
     <?php include 'header.php'; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="body-layout">
       <!-- Sidebar -->
