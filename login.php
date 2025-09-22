@@ -6,11 +6,7 @@ require 'otp/mailer.php';
 $error = '';
 
 // ✅ If "Remember Me" cookies exist, auto-fill email
-if (isset($_COOKIE['remember_email'])) {
-    $rememberedEmail = $_COOKIE['remember_email'];
-} else {
-    $rememberedEmail = '';
-}
+$rememberedEmail = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
@@ -31,28 +27,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('remember_email', '', time() - 3600, "/"); // Clear if unchecked
             }
 
-            // ✅ Generate OTP
-            $otp = rand(100000, 999999);
-            $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));
-
-            $stmt = $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)");
-            $stmt->execute([$user['id'], $otp, $expires]);
-
-            // ✅ Save user info temporarily until OTP verification
-            $_SESSION['pending_user_id']    = $user['id'];
-            $_SESSION['pending_user_type']  = $user['user_type'];
-            $_SESSION['pending_first_name'] = $user['first_name'];
-            $_SESSION['pending_user_email'] = $user['email']; 
-            $_SESSION['pending_barangay']   = $user['barangay']; // ✅ save barangay
-
-            if (sendOTP($user['email'], $otp)) {
-                $_SESSION['otp_message'] = "We sent a One-Time Password (OTP) to your email.";
+            // ✅ Generate or retrieve device token
+            if (empty($_COOKIE['device_token'])) {
+                $device_token = bin2hex(random_bytes(16));
+                setcookie('device_token', $device_token, time() + (365 * 24 * 60 * 60), "/"); // 1 year
             } else {
-                $_SESSION['otp_message'] = "Failed to send OTP email. Please contact admin.";
+                $device_token = $_COOKIE['device_token'];
             }
 
-            header("Location: otp/verify_otp.php");
-            exit;
+            // ✅ Check if this device is already trusted
+            $checkDevice = $pdo->prepare("
+                SELECT id, session_id FROM login_history 
+                WHERE user_id = ? AND device_token = ? 
+                LIMIT 1
+            ");
+            $checkDevice->execute([$user['id'], $device_token]);
+            $existingDevice = $checkDevice->fetch(PDO::FETCH_ASSOC);
+
+            $session_id = session_id();
+            $browser = $_SERVER['HTTP_USER_AGENT'];
+            $ip = $_SERVER['REMOTE_ADDR'];
+
+            if ($existingDevice) {
+                // ✅ Trusted device → skip OTP and log in directly
+                $_SESSION['user_id']    = $user['id'];
+                $_SESSION['user_type']  = $user['user_type'];
+                $_SESSION['first_name'] = $user['first_name'];
+                $_SESSION['email']      = $user['email'];
+                $_SESSION['barangay']   = $user['barangay'];
+
+                // ✅ Update login time & session id
+                $update = $pdo->prepare("UPDATE login_history SET login_time = NOW(), logout_time = NULL, session_id = ? WHERE id = ?");
+                $update->execute([$session_id, $existingDevice['id']]);
+
+                // ✅ Save current session in users table
+                $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
+                    ->execute([$session_id, $user['id']]);
+
+                // Redirect based on role
+                if ($user['user_type'] === 'CNO') {
+                    header("Location: cno/home.php");
+                } else {
+                    header("Location: bns/home.php");
+                }
+                exit();
+
+            } else {
+                // ✅ New device → send OTP and save as pending
+                $historyStmt = $pdo->prepare("
+                    INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token, login_time)
+                    VALUES (?, ?, ?, ?, ?, NOW())
+                ");
+                $historyStmt->execute([$user['id'], $session_id, $browser, $ip, $device_token]);
+
+                // ✅ Save current session in users table for reference
+                $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
+                    ->execute([$session_id, $user['id']]);
+
+                // ✅ Generate OTP
+                $otp = rand(100000, 999999);
+                $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));
+
+                $stmt = $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)");
+                $stmt->execute([$user['id'], $otp, $expires]);
+
+                // ✅ Save user info temporarily until OTP verification
+                $_SESSION['pending_user_id']    = $user['id'];
+                $_SESSION['pending_user_type']  = $user['user_type'];
+                $_SESSION['pending_first_name'] = $user['first_name'];
+                $_SESSION['pending_user_email'] = $user['email'];
+                $_SESSION['pending_barangay']   = $user['barangay'];
+                $_SESSION['pending_device_token'] = $device_token;
+
+                if (sendOTP($user['email'], $otp)) {
+                    $_SESSION['otp_message'] = "We sent a One-Time Password (OTP) to your email.";
+                } else {
+                    $_SESSION['otp_message'] = "Failed to send OTP email. Please contact admin.";
+                }
+
+                header("Location: otp/verify_otp.php");
+                exit;
+            }
+
         } else {
             $error = "Invalid email/username or password!";
         }
@@ -61,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

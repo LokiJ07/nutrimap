@@ -42,6 +42,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_SESSION['pending_username'])) {
                 $_SESSION['username'] = $_SESSION['pending_username'];
             }
+               
+                  // ✅ Save device to login_history (if not already saved)
+            $session_id = session_id();
+            $browser = $_SERVER['HTTP_USER_AGENT'];
+            $ip = $_SERVER['REMOTE_ADDR'];
+
+            // Check if device already exists
+            $checkStmt = $pdo->prepare("
+                SELECT id FROM login_history
+                WHERE user_id = ? AND browser = ? AND ip_address = ?
+                LIMIT 1
+            ");
+            $checkStmt->execute([$user_id, $browser, $ip]);
+            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$existing) {
+                // Insert only if not already saved
+                $insertStmt = $pdo->prepare("
+                    INSERT INTO login_history (user_id, session_id, browser, ip_address)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $insertStmt->execute([$user_id, $session_id, $browser, $ip]);
+            } else {
+                // Update session_id if user logs in again on same device
+                $updateStmt = $pdo->prepare("
+                    UPDATE login_history SET session_id = ? WHERE id = ?
+                ");
+                $updateStmt->execute([$session_id, $existing['id']]);
+            }
 
             // ✅ clear pending values
             unset(
