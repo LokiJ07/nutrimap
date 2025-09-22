@@ -14,14 +14,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 
 $user_id = $_SESSION['user_id'];
 
-// ✅ Fetch user info
-$stmt = $pdo->prepare("SELECT first_name, last_name, barangay FROM users WHERE id = ?");
+// ✅ Fetch user info with profile_pic
+$stmt = $pdo->prepare("SELECT first_name, last_name, barangay, profile_pic FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $user_name = $user ? htmlspecialchars($user['first_name'] . " " . $user['last_name']) : "Guest";
 $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
+
+// ✅ Check profile picture
+$profile_pic = "../uploads/profile_placeholder.png";
+if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_pic'])) {
+    $profile_pic = "../uploads/" . htmlspecialchars($user['profile_pic']);
+}
 ?>
+
 <style>
 /* Your existing CSS (unchanged) */
 #sideMenu {
@@ -103,7 +110,7 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
     <li data-url="barangay_data.php"><i class="fa fa-database"></i>All Barangay Data</li>
     <li data-url="nutritional_map.php"><i class="fa fa-map"></i>Nutritional Map</li>
     <li data-url="report_history.php"><i class="fas fa-tasks"></i> Data History</li>
-    <li data-url="cno_reports.php"><i class="fa fa-user"></i>Users</li>
+    <li data-url="users.php"><i class="fa fa-user"></i>Users</li>
     <li data-url="cno_reports.php"><i class="fas fa-history"></i>Activity Logs</li>
     <!-- Settings dropdown -->
     <li class="settings-dropdown">
@@ -120,15 +127,16 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
 
   <div class="divider"></div>
 
-  <div class="sideMenu-footer">
-    <div class="user-info" id="userProfileBtn">
-      <img src="../uploads/profile_placeholder.png" alt="User">
-      <span><?php echo $user_name; ?></span>
-    </div>
-    <div class="footer-links">
-      <a href="../logout.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
-    </div>
+<div class="sideMenu-footer">
+  <div class="user-info" id="userProfileBtn">
+    <img src="<?php echo $profile_pic; ?>" alt="User">
+    <span><?php echo $user_name; ?></span>
   </div>
+  <div class="footer-links">
+    <a href="../logout.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+  </div>
+</div>
+
 </div>
 
 <script>

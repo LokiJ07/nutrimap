@@ -21,7 +21,10 @@ try {
             $stmt->execute([$email, $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user && password_verify($password, $user['password_hash'])) {
+           if ($user['status'] !== 'Active') {
+             $error = "Your account is inactive. Please contact the administrator.";
+               } elseif (password_verify($password, $user['password_hash'])) {
+
                 // ✅ Use cryptographically secure OTP
                 $otp = random_int(100000, 999999);
                 $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));

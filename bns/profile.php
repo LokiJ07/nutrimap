@@ -147,6 +147,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 <body>
   <div class="layout">
     <?php include 'header.php'; ?>
+    <?php include 'sidemenu.php'; ?>
     <div class="page-title">Profile</div>
 
     <div class="body-layout">

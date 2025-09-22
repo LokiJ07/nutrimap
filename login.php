@@ -18,7 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user['status'] !== 'Active') {
+          $error = "Your account is inactive. Please contact the administrator.";
+          } elseif (password_verify($password, $user['password_hash'])) {
 
             // ✅ Save Remember Me cookie for 7 days if checked
             if ($remember) {
