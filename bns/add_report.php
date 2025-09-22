@@ -136,8 +136,9 @@ if (session_status() === PHP_SESSION_NONE) {
   </style>
   </head>
   <body>
+     <?php include 'header.php'; ?>
     <div class="layout">
-      <?php include 'header.php'; ?>
+     
       <div class="body-layout">
         <main class="content">
           <a href="reports.php" class="btn back-btn">Back</a>

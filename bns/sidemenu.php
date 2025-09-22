@@ -123,7 +123,7 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
       <span><?php echo $user_name; ?></span>
     </div>
     <div class="footer-links">
-      <a href="../logout.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+      <a href="../index.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
     </div>
   </div>
 </div>
