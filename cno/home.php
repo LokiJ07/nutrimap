@@ -92,7 +92,7 @@ body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
 .table-container {background:#fff;padding:3px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 table {width:100%;border-collapse:collapse;font-size:14px;}
 th,td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
-thead {background:#0c4a6e;color:#fff;}
+thead {background:#009688;color:#fff;}
 .status-badge {padding:2px 8px;border-radius:12px;color:#fff;font-size:12px;}
 .status-Pending {background:#00bcd4;}
 .status-Approved {background:#4caf50;}
@@ -126,7 +126,7 @@ thead {background:#0c4a6e;color:#fff;}
           <div class="icon"><i class="fa fa-users"></i></div>
           <div>
             <h3>Total Users: <?= $totalUsers ?></h3>
-            <p>Admin: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
+            <p>CNO: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
           </div>
         </div>
         <div class="card card-reports">

@@ -107,7 +107,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
   <ul class="menu-links">
     <li data-url="home.php"><i class="fa fa-home"></i> Home</li>
     <li data-url="cno_reports.php"><i class="fa fa-file-alt"></i> Reports</li>
-    <li data-url="barangay_data.php"><i class="fa fa-database"></i>All Barangay Data</li>
+    <li data-url="all_barangay_data.php"><i class="fa fa-database"></i>All Barangay Data</li>
     <li data-url="nutritional_map.php"><i class="fa fa-map"></i>Nutritional Map</li>
     <li data-url="report_history.php"><i class="fas fa-tasks"></i> Data History</li>
     <li data-url="users.php"><i class="fa fa-user"></i>Users</li>

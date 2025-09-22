@@ -2,250 +2,167 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require '../db/config.php'; // adjust path if needed
+require '../db/config.php';
 
-// ✅ Current user
-  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
+// ✅ Only allow BNS
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     header("Location: ../login.php");
     exit();
 }
-$userId = $_SESSION['user_id'];   // <— add this line
+$userId = $_SESSION['user_id'];
+
 // ✅ Total reports
-$totalStmt = $pdo->prepare("SELECT COUNT(*) 
+$totalStmt = $pdo->prepare("
+    SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ?");
+    WHERE r.user_id = ?
+");
 $totalStmt->execute([$userId]);
 $totalReports = $totalStmt->fetchColumn();
 
 // ✅ Approved reports
-$approvedStmt = $pdo->prepare("SELECT COUNT(*) 
+$approvedStmt = $pdo->prepare("
+    SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Approved'");
+    WHERE r.user_id = ? AND r.status = 'Approved'
+");
 $approvedStmt->execute([$userId]);
 $approvedReports = $approvedStmt->fetchColumn();
 
 // ✅ Pending reports
-$pendingStmt = $pdo->prepare("SELECT COUNT(*) 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Pending'");
-$pendingStmt->execute([$userId]);
-$pendingReports = $pendingStmt->fetchColumn();
-
-// ✅ Approved reports list (My Reports sidebar)
-$approvedListStmt = $pdo->prepare("SELECT r.id, b.title 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Approved'
-    ORDER BY r.report_date DESC
-    LIMIT 5");
-$approvedListStmt->execute([$userId]);
-$approvedReportsList = $approvedListStmt->fetchAll();
-
-// ✅ Pending reports list (main panel)
-$pendingListStmt = $pdo->prepare("SELECT r.id, b.title, b.barangay, r.status, r.report_time, r.report_date
+$pendingStmt = $pdo->prepare("
+    SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
     WHERE r.user_id = ? AND r.status = 'Pending'
-    ORDER BY r.report_date DESC
-    LIMIT 5");
-$pendingListStmt->execute([$userId]);
-$pendingReportsList = $pendingListStmt->fetchAll();
+");
+$pendingStmt->execute([$userId]);
+$pendingReports = $pendingStmt->fetchColumn();
+
+// ✅ Pagination
+$limit = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+$totalRowsStmt = $pdo->prepare("SELECT COUNT(*) FROM reports WHERE user_id = ?");
+$totalRowsStmt->execute([$userId]);
+$totalRows = $totalRowsStmt->fetchColumn();
+$totalPages = ceil($totalRows / $limit);
+
+// ✅ Reports for main table
+$stmt = $pdo->prepare("
+    SELECT 
+        r.id,
+        b.title,
+        b.barangay,
+        r.status,
+        r.report_time,
+        r.report_date
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE r.user_id = :userId
+    ORDER BY r.report_date DESC, r.report_time DESC
+    LIMIT :limit OFFSET :offset
+");
+
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+
+$myReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CNO NutriMap — Dashboard</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-  body {
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background:#f5f5f5;
-  }
-  .layout {
-    display:flex;
-    height:100vh;
-    flex-direction:column;
-  }
-  .body-layout {
-    display:flex;
-    flex:1;
-  }
-  .sidebar {
-    width:250px;
-    background:#f9f9f9;
-    border-right:1px solid #ccc;
-    padding:15px;
-    display:flex;
-    flex-direction:column;
-  }
-  .myreports-header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-    font-weight:bold;
-  }
-  .new-btn {
-    background:#009688;
-    color:white;
-    border:none;
-    padding:4px 10px;
-    border-radius:4px;
-    cursor:pointer;
-    font-size:13px;
-    display:flex;
-    align-items:center;
-  }
-  .new-btn i { margin-right:5px; }
-  .sidebar .searchbox {
-    margin-bottom:20px;
-  }
-  .sidebar .searchbox input {
-    width:91%;
-    padding:6px 10px;
-  }
-  .showmore {
-    margin-top:auto;
-    font-size:14px;
-    color:#333;
-    cursor:pointer;
-  }
-  .content {
-    flex:1;
-    padding:15px;
-    display:flex;
-    flex-direction:column;
-  }
-  .content h2 {
-    margin:0 0 15px 0;
-    font-size:18px;
-  }
-  .cards {
-    display:flex;
-    gap:15px;
-    margin-bottom:20px;
-  }
-  .card {
-    flex:1;
-    color:white;
-    padding:15px;
-    border-radius:4px;
-    cursor:pointer;
-  }
-  .card .title { font-size:14px; }
-  .card .number { font-size:20px; font-weight:bold; }
-  .card.total { background:#003d3c; }
-  .card.approved { background:#006d6a; }
-  .card.pending { background:#009688; }
-  .panel {
-    background:white;
-    border:1px solid #ccc;
-    border-radius:4px;
-    padding:15px;
-    flex:1;
-    display:flex;
-    flex-direction:column;
-  }
-  .panel-header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-  }
-  .panel-header h3 { margin:0; font-size:16px; }
-  .view-all {
-    background:white;
-    border:1px solid #999;
-    padding:4px 10px;
-    font-size:14px;
-    border-radius:4px;
-    cursor:pointer;
-  }
-  table {
-    width:100%;
-    border-collapse:collapse;
-    font-size:14px;
-  }
-  th {
-    text-align:left;
-    padding:8px;
-    font-weight:bold;
-    border-bottom:1px solid #ccc;
-  }
-  tbody tr { height:35px; border-bottom:1px solid #eee; }
-  tbody td { padding:8px; color:#555; }
-  </style>
+<meta charset="UTF-8">
+<title>BNS Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
+.layout {display:flex;height:100vh;flex-direction:column;}
+.body-layout {display:flex;flex:1;}
+.sidebar {
+    width:230px;background:#f9f9f9;border-right:1px solid #ccc;padding:15px;display:flex;flex-direction:column;
+}
+.myreports-header {font-weight:bold;margin-bottom:10px;}
+.searchbox {margin-bottom:10px;}
+.searchbox input {width:100%;box-sizing:border-box;padding:6px 10px;font-size:14px;border:1px solid #ccc;border-radius:4px;}
+.content {flex:1;padding:10px;overflow-y:auto;}
+
+/* Cards */
+.dashboard-cards {display:flex;gap:20px;margin-bottom:10px;}
+.card {
+    flex:1;display:flex;align-items:center;gap:15px;
+    padding:20px;border-radius:8px;color:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.card .icon {font-size:30px;}
+.card-total {background:#003d3c;}
+.card-approved {background:#006d6a;}
+.card-pending {background:#009688;}
+
+/* Table */
+.table-container {background:#fff;padding:3px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+table {width:100%;border-collapse:collapse;font-size:14px;}
+th,td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+thead {background:#009688;color:#fff;}
+.status-badge {padding:2px 8px;border-radius:12px;color:#fff;font-size:12px;}
+.status-Pending {background:#00bcd4;}
+.status-Approved {background:#4caf50;}
+.status-Rejected {background:#f44336;}
+.btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
+.btn-view {background:#3498db;}
+.pagination {margin-top:15px;display:flex;justify-content:center;gap:5px;}
+.pagination a {padding:6px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;}
+.pagination a.active {background:#009688;color:#fff;}
+</style>
 </head>
 <body>
-  <div class="layout">
-    <?php include 'header.php'; ?>
-
-    <div class="body-layout">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="myreports-header">
-          <span>My reports</span>
-          <button class="new-btn" id="newBtn"><i class="fa fa-plus"></i> New</button>
-        </div>
-        <div class="searchbox">
-          <input type="text" placeholder="Find a report...">
-        </div>
-        <ul>
-          <?php foreach ($approvedReportsList as $report): ?>
-            <li><?= htmlspecialchars($report['title']) ?></li>
-          <?php endforeach; ?>
-        </ul>
-        <div class="showmore" id="showMoreBtn" onclick="window.location.href='report_history.php'">Show more:</div>
-      </aside>
-
-      <!-- Main -->
-      <main class="content">
-
-      <?php if (isset($_SESSION['success'])): ?>
-      <div id="successMessage" style="background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border-radius: 5px;">
-          <?= $_SESSION['success']; unset($_SESSION['success']); ?>
+<div class="layout">
+  <?php include 'header.php'; ?>
+  <?php include 'sidemenu.php'; ?>
+  <div class="body-layout">
+    <!-- ✅ Sidebar -->
+    <aside class="sidebar">
+      <div class="myreports-header">Search My Reports</div>
+      <div class="searchbox">
+        <input type="text" id="sidebarSearch" placeholder="Search my reports...">
       </div>
+    </aside>
 
-      <script>
-        setTimeout(() => {
-          const msg = document.getElementById('successMessage');
-          if (msg) {
-            msg.style.transition = 'opacity 1s';
-            msg.style.opacity = '0';
-            setTimeout(() => msg.remove(), 1000);
-          }
-        }, 20000);
-      </script>
-      <?php endif; ?>
-
+    <!-- ✅ Main Content -->
+    <main class="content">
       <h2>Dashboard</h2>
-      <div class="cards">
-        <div class="card total" id="totalCard">
-          <div class="title">Total Reports:</div>
-          <div class="number"><?= $totalReports ?></div>
+      <div class="dashboard-cards">
+        <div class="card card-total">
+          <div class="icon"><i class="fa fa-file-alt"></i></div>
+          <div>
+            <h3>Total Reports: <?= $totalReports ?></h3>
+          </div>
         </div>
-        <div class="card approved" id="approvedCard">
-          <div class="title">Approved:</div>
-          <div class="number"><?= $approvedReports ?></div>
+        <div class="card card-approved">
+          <div class="icon"><i class="fa fa-check-circle"></i></div>
+          <div>
+            <h3>Approved: <?= $approvedReports ?></h3>
+          </div>
         </div>
-        <div class="card pending" id="pendingCard">
-          <div class="title">Pending:</div>
-          <div class="number"><?= $pendingReports ?></div>
+        <div class="card card-pending">
+          <div class="icon"><i class="fa fa-clock"></i></div>
+          <div>
+            <h3>Pending: <?= $pendingReports ?></h3>
+          </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-header">
-          <h3>Pending Reports</h3>
-          <button class="view-all" id="viewAllBtn" onclick="window.location.href='reports.php'">View All</button>
-        </div>
-        <table>
+      <!-- ✅ Reports Table -->
+      <div class="table-container">
+        <h3>My Reports</h3>
+        <table id="reportsTable">
           <thead>
             <tr>
               <th>Title</th>
@@ -253,27 +170,54 @@ $pendingReportsList = $pendingListStmt->fetchAll();
               <th>Status</th>
               <th>Time</th>
               <th>Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($pendingReportsList as $report): ?>
-              <tr>
-                <td><?= htmlspecialchars($report['title']) ?></td>
-                <td><?= htmlspecialchars($report['barangay']) ?></td>
-                <td><?= htmlspecialchars($report['status']) ?></td>
-                <td><?= htmlspecialchars($report['report_time']) ?></td>
-                <td><?= htmlspecialchars($report['report_date']) ?></td>
-              </tr>
+          <?php if ($myReports): ?>
+            <?php foreach ($myReports as $r): ?>
+            <tr>
+              <td><?= htmlspecialchars($r['title']) ?></td>
+              <td><?= htmlspecialchars($r['barangay']) ?></td>
+              <td><span class="status-badge status-<?= $r['status'] ?>"><?= $r['status'] ?></span></td>
+              <td><?= htmlspecialchars($r['report_time']) ?></td>
+              <td><?= htmlspecialchars($r['report_date']) ?></td>
+              <td><a class="btn btn-view" href="view_report.php?id=<?= $r['id'] ?>">View</a></td>
+            </tr>
             <?php endforeach; ?>
-            <?php if (empty($pendingReportsList)): ?>
-              <tr><td colspan="5" style="text-align:center;color:#999;">No pending reports</td></tr>
-            <?php endif; ?>
+          <?php else: ?>
+            <tr><td colspan="6" style="text-align:center;color:#888;">No reports found</td></tr>
+          <?php endif; ?>
           </tbody>
         </table>
-      </div>
 
-      </main>
-    </div>
+        <!-- ✅ Pagination -->
+        <div class="pagination">
+          <?php if ($page > 1): ?>
+            <a href="?page=<?= $page-1 ?>">Prev</a>
+          <?php endif; ?>
+          <?php for ($i=1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+          <?php endfor; ?>
+          <?php if ($page < $totalPages): ?>
+            <a href="?page=<?= $page+1 ?>">Next</a>
+          <?php endif; ?>
+        </div>
+      </div>
+    </main>
   </div>
+</div>
+
+<script>
+// ✅ Sidebar search filters the table
+document.getElementById("sidebarSearch").addEventListener("keyup", function() {
+  let filter = this.value.toLowerCase();
+  let rows = document.querySelectorAll("#reportsTable tbody tr");
+  rows.forEach(row => {
+    let text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  });
+});
+</script>
 </body>
 </html>

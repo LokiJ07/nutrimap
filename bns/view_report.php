@@ -133,6 +133,7 @@ th{background:#ddd}
 <body>
 <div class="layout">
 <?php include 'header.php'; ?>
+<?php include 'sidemenu.php'; ?>
 <div class="body-layout">
 <div class="container">
 

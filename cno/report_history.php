@@ -73,9 +73,12 @@ th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
         <td class="status-<?= strtolower($report['status']) ?>"><?= htmlspecialchars($report['status']) ?></td>
         <td><?= htmlspecialchars($report['report_time']) ?></td>
         <td><?= htmlspecialchars($report['report_date']) ?></td>
-        <td>
-          <a class="btn btn-view" href="view_report.php?id=<?= $report['id'] ?>">View</a>
-        </td>
+    <td>
+  <button onclick="window.location.href='view_report.php?id=<?= $report['id'] ?>'" class="btn btn-view">
+    <i class="fa fa-eye"></i> View
+  </button>
+</td>
+
       </tr>
     <?php endforeach; ?>
   <?php else: ?>
