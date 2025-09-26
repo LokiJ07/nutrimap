@@ -8,105 +8,77 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
 }
 
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$msg = '';
+$msg = "";
 
-// Columns of bns_reports (exclude id)
-$allCols = [
-    'report_id','barangay','year','title',
-    'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6',
-    'ind7a','ind7b1_no','ind7b1_pct','ind7b2_no','ind7b2_pct',
-    'ind7b3_no','ind7b3_pct','ind7b4_no','ind7b4_pct',
-    'ind7b5_no','ind7b5_pct','ind7b6_no','ind7b6_pct',
-    'ind7b7_no','ind7b7_pct','ind7b8_no','ind7b8_pct',
-    'ind7b9_no','ind7b9_pct','ind8','ind9','ind10','ind11','ind12','ind13','ind14',
-    'ind15a_public','ind15a_private','ind15b_public','ind15b_private',
-    'ind16','ind17','ind18','ind19',
-    'ind20a_no','ind20a_pct','ind20b_no','ind20b_pct',
-    'ind20c_no','ind20c_pct','ind20d_no','ind20d_pct',
-    'ind20e_no','ind20e_pct','ind21','ind22','ind23','ind24','ind25',
-    'ind26a_no','ind26a_pct','ind26b_no','ind26b_pct',
-    'ind26c_no','ind26c_pct','ind26d_no','ind26d_pct',
-    'ind27a_no','ind27a_pct','ind27b_no','ind27b_pct',
-    'ind27c_no','ind27c_pct','ind27d_no','ind27d_pct',
-    'ind28a_no','ind28a_pct','ind28b_no','ind28b_pct',
-    'ind28c_no','ind28c_pct','ind28d_no','ind28d_pct',
-    'ind28e_no','ind28e_pct',
-    'ind29a_no','ind29a_pct','ind29b_no','ind29b_pct',
-    'ind29c_no','ind29c_pct','ind29d_no','ind29d_pct',
-    'ind29e_no','ind29e_pct',
-    'ind30a_no','ind30a_pct','ind30b_no','ind30b_pct',
-    'ind30c_no','ind30c_pct','ind30d_no','ind30d_pct',
-    'ind30e_no','ind30e_pct',
-    'ind31','ind32','ind33','ind34','ind35a','ind35b','ind36'
-];
-
-// Function to quote column names
-function quoteCols(array $cols){
-    return implode(',', array_map(fn($c)=>"`$c`",$cols));
-}
-
-// --- Handle restore or delete ---
+// Handle form actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $archivedId = (int)($_POST['id'] ?? 0);
 
-    if ($archivedId && in_array($action, ['restore','delete'], true)) {
-        try {
-            if ($action === 'restore') {
-                $pdo->beginTransaction();
+    try {
+        if ($action === 'restore' && $archivedId) {
+            $pdo->beginTransaction();
 
-                // 1️⃣ Get archived report data
-                $archived = $pdo->prepare("SELECT * FROM bns_reports_archive WHERE archived_id=:aid");
-                $archived->execute([':aid'=>$archivedId]);
-                $row = $archived->fetch(PDO::FETCH_ASSOC);
-                if (!$row) throw new Exception("Archived report not found.");
+            // Restore reports table
+            $pdo->prepare("
+                INSERT INTO reports (id, user_id, report_time, report_date, status)
+                SELECT report_id, :user_id, report_time, report_date, status
+                FROM bns_reports_archive
+                WHERE archived_id = :aid
+            ")->execute([
+                ':user_id' => $_SESSION['user_id'],
+                ':aid' => $archivedId
+            ]);
 
-                // 2️⃣ Restore main report first
-                $pdo->prepare("
-                    INSERT INTO reports (id, user_id, report_time, report_date, status)
-                    VALUES (:id, :user_id, :report_time, :report_date, :status)
-                ")->execute([
-                    ':id' => $row['report_id'],
-                    ':user_id' => $_SESSION['user_id'],
-                    ':report_time' => $row['report_time'] ?? date('H:i:s'),
-                    ':report_date' => $row['report_date'] ?? date('Y-m-d'),
-                    ':status' => $row['status'] ?? 'Pending'
-                ]);
+            // Restore bns_reports table
+            $pdo->prepare("
+                INSERT INTO bns_reports
+                SELECT * FROM bns_reports_archive
+                WHERE archived_id = :aid
+            ")->execute([':aid' => $archivedId]);
 
-                // 3️⃣ Restore bns_reports
-                $cols = quoteCols($allCols);
-                $placeholders = implode(',', array_map(fn($c)=>":$c",$allCols));
-                $stmtInsert = $pdo->prepare("INSERT INTO bns_reports ($cols) VALUES ($placeholders)");
-                $bind = [];
-                foreach ($allCols as $c) $bind[":$c"] = $row[$c] ?? null;
-                $stmtInsert->execute($bind);
+            // Delete from archive
+            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")
+                ->execute([':aid' => $archivedId]);
 
-                // 4️⃣ Delete from archive
-                $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id=:aid")
-                    ->execute([':aid'=>$archivedId]);
+            $pdo->commit();
+            $msg = "✅ Report restored successfully.";
 
-                $pdo->commit();
-                $msg = "Report restored successfully.";
-            } else {
-                $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id=:aid")
-                    ->execute([':aid'=>$archivedId]);
-                $msg = "Report permanently deleted.";
-            }
-        } catch (Exception $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            $msg = "Error: ".$e->getMessage();
+        } elseif ($action === 'delete' && $archivedId) {
+            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")
+                ->execute([':aid' => $archivedId]);
+            $msg = "🗑️ Report deleted permanently.";
+
+        } elseif ($action === 'delete_all') {
+            $pdo->exec("DELETE FROM bns_reports_archive");
+            $msg = "🗑️ All archived reports deleted permanently.";
         }
-    } else {
-        $msg = "Invalid request.";
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        $msg = "❌ Error: " . $e->getMessage();
     }
 }
 
-// --- Fetch archived reports ---
-$archives = $pdo->query("
+// Search & Sort
+$search = trim($_GET['search'] ?? '');
+$sort = ($_GET['sort'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+
+$whereClause = '';
+$params = [];
+if ($search) {
+    $whereClause = "WHERE title LIKE :s OR barangay LIKE :s";
+    $params[':s'] = "%$search%";
+}
+
+// Fetch archived reports
+$archives = $pdo->prepare("
     SELECT archived_id, report_id, title, barangay, year, archived_at
     FROM bns_reports_archive
-    ORDER BY archived_at DESC
-")->fetchAll(PDO::FETCH_ASSOC);
+    $whereClause
+    ORDER BY archived_at $sort
+");
+$archives->execute($params);
+$archives = $archives->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!doctype html>
@@ -124,17 +96,39 @@ th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
 button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointer;}
 .btn-restore{background:#27ae60;color:#fff;}
 .btn-delete{background:#e74c3c;color:#fff;}
+.btn-delete-all{background:#c0392b;color:#fff;margin-bottom:10px;}
 .message{padding:10px;margin-bottom:10px;border-radius:4px;background:#e8f4e8;color:#2c662d;}
+input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:4px;width:250px;}
+select{padding:6px;border:1px solid #ccc;border-radius:4px;}
+form.inline{display:inline;}
 </style>
 </head>
 <body>
-     <?php include 'header.php'; ?>
-     <?php include 'sidemenu.php'; ?>
+<?php include 'header.php'; ?>
+<?php include 'sidemenu.php'; ?>
 <div class="container">
     <h1>Archived BNS Reports</h1>
+
     <?php if($msg): ?>
         <div class="message"><?=htmlspecialchars($msg)?></div>
     <?php endif; ?>
+
+    <!-- Search & Sort -->
+    <form method="get" style="margin-bottom:10px;">
+        <input type="text" name="search" placeholder="Search by title or barangay" value="<?=htmlspecialchars($search)?>">
+        <select name="sort">
+            <option value="desc" <?= $sort==='desc'?'selected':'' ?>>Newest first</option>
+            <option value="asc" <?= $sort==='asc'?'selected':'' ?>>Oldest first</option>
+        </select>
+        <button type="submit">Search/Sort</button>
+    </form>
+
+    <!-- Delete All -->
+    <form method="post" onsubmit="return confirm('Delete all archived reports permanently?');">
+        <input type="hidden" name="action" value="delete_all">
+        <button type="submit" class="btn-delete-all">Delete All</button>
+    </form>
+
     <table>
         <thead>
             <tr>
@@ -157,12 +151,12 @@ button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointe
                 <td><?=htmlspecialchars($a['year'])?></td>
                 <td><?=htmlspecialchars($a['archived_at'])?></td>
                 <td>
-                    <form method="post" style="display:inline">
+                    <form method="post" class="inline">
                         <input type="hidden" name="id" value="<?= (int)$a['archived_id'] ?>">
                         <input type="hidden" name="action" value="restore">
                         <button class="btn-restore">Restore</button>
                     </form>
-                    <form method="post" style="display:inline" onsubmit="return confirm('Delete permanently?');">
+                    <form method="post" class="inline" onsubmit="return confirm('Delete permanently?');">
                         <input type="hidden" name="id" value="<?= (int)$a['archived_id'] ?>">
                         <input type="hidden" name="action" value="delete">
                         <button class="btn-delete">Delete</button>
@@ -170,7 +164,7 @@ button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointe
                 </td>
             </tr>
             <?php endforeach; else: ?>
-            <tr><td colspan="7" style="text-align:center;color:#888;">No archived reports</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:#888;">No archived reports found</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

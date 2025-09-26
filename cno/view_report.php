@@ -18,7 +18,7 @@ if ($report_id <= 0) {
 
 $stmt = $pdo->prepare("
     SELECT 
-        r.id AS reports_id,
+        r.id AS report_id,
         r.report_date,
         r.report_time,
         r.status,
