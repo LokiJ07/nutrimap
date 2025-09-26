@@ -36,12 +36,12 @@ body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;}
 .layout {display:flex;flex-direction:column;height:100vh;}
 .body-layout {display:flex;flex:1;}
 .content {flex:1;padding:15px;overflow-y:auto;}
-.toolbar {display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.toolbar {display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
 .toolbar-left input {padding:6px 8px;border:1px solid #ccc;border-radius:4px;width:220px;}
 .toolbar-left select {padding:6px;border:1px solid #ccc;border-radius:4px;}
 .add-btn {background:#009688;color:#fff;text-decoration:none;padding:8px 14px;border-radius:4px;font-size:14px;display:flex;align-items:center;gap:6px;}
 .add-btn:hover {background:#00796b;}
-.table-container {background:#fff;padding:15px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+.table-container {background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 table {width:100%;border-collapse:collapse;font-size:14px;}
 th, td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
 thead {background:#009688;color:#fff;}
@@ -58,10 +58,10 @@ thead {background:#009688;color:#fff;}
 <?php include 'header.php'; ?>
 <div class="body-layout">
 <main class="content">
-
   <!-- ✅ Toolbar with live search & sort -->
   <div class="toolbar">
     <div class="toolbar-left">
+      <h1>Reports</h1>
       <input type="text" id="searchInput" placeholder="Search by title or barangay">
       <select id="sortSelect">
         <option value="new">New → Old</option>
