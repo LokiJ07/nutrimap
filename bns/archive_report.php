@@ -18,37 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($action === 'restore' && $archivedId) {
             $pdo->beginTransaction();
-
-            // Restore reports table
             $pdo->prepare("
                 INSERT INTO reports (id, user_id, report_time, report_date, status)
                 SELECT report_id, :user_id, report_time, report_date, status
                 FROM bns_reports_archive
                 WHERE archived_id = :aid
-            ")->execute([
-                ':user_id' => $_SESSION['user_id'],
-                ':aid' => $archivedId
-            ]);
-
-            // Restore bns_reports table
-            $pdo->prepare("
-                INSERT INTO bns_reports
-                SELECT * FROM bns_reports_archive
-                WHERE archived_id = :aid
-            ")->execute([':aid' => $archivedId]);
-
-            // Delete from archive
-            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")
+            ")->execute([':user_id' => $_SESSION['user_id'], ':aid' => $archivedId]);
+            $pdo->prepare("INSERT INTO bns_reports SELECT * FROM bns_reports_archive WHERE archived_id = :aid")
                 ->execute([':aid' => $archivedId]);
-
+            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")->execute([':aid' => $archivedId]);
             $pdo->commit();
             $msg = "✅ Report restored successfully.";
-
         } elseif ($action === 'delete' && $archivedId) {
-            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")
-                ->execute([':aid' => $archivedId]);
+            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")->execute([':aid' => $archivedId]);
             $msg = "🗑️ Report deleted permanently.";
-
         } elseif ($action === 'delete_all') {
             $pdo->exec("DELETE FROM bns_reports_archive");
             $msg = "🗑️ All archived reports deleted permanently.";
@@ -59,26 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Search & Sort
-$search = trim($_GET['search'] ?? '');
-$sort = ($_GET['sort'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
-
-$whereClause = '';
-$params = [];
-if ($search) {
-    $whereClause = "WHERE title LIKE :s OR barangay LIKE :s";
-    $params[':s'] = "%$search%";
-}
-
-// Fetch archived reports
-$archives = $pdo->prepare("
+// Fetch all archived reports
+$archives = $pdo->query("
     SELECT archived_id, report_id, title, barangay, year, archived_at
     FROM bns_reports_archive
-    $whereClause
-    ORDER BY archived_at $sort
-");
-$archives->execute($params);
-$archives = $archives->fetchAll(PDO::FETCH_ASSOC);
+")->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!doctype html>
@@ -92,15 +60,15 @@ $archives = $archives->fetchAll(PDO::FETCH_ASSOC);
 body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;}
 .container{max-width:1200px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;}
 table{width:100%;border-collapse:collapse;margin-top:20px;}
-th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;cursor:default;}
 button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointer;}
 .btn-restore{background:#27ae60;color:#fff;}
 .btn-delete{background:#e74c3c;color:#fff;}
 .btn-delete-all{background:#c0392b;color:#fff;margin-bottom:10px;}
 .message{padding:10px;margin-bottom:10px;border-radius:4px;background:#e8f4e8;color:#2c662d;}
-input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:4px;width:250px;}
-select{padding:6px;border:1px solid #ccc;border-radius:4px;}
+input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:4px;width:250px;margin-bottom:10px;}
 form.inline{display:inline;}
+.sort-select{padding:6px;border:1px solid #ccc;border-radius:4px;margin-left:10px;}
 </style>
 </head>
 <body>
@@ -113,15 +81,15 @@ form.inline{display:inline;}
         <div class="message"><?=htmlspecialchars($msg)?></div>
     <?php endif; ?>
 
-    <!-- Search & Sort -->
-    <form method="get" style="margin-bottom:10px;">
-        <input type="text" name="search" placeholder="Search by title or barangay" value="<?=htmlspecialchars($search)?>">
-        <select name="sort">
-            <option value="desc" <?= $sort==='desc'?'selected':'' ?>>Newest first</option>
-            <option value="asc" <?= $sort==='asc'?'selected':'' ?>>Oldest first</option>
+    <!-- ✅ Live Search + Live Sort -->
+    <div style="margin-bottom:10px;">
+        <input type="text" id="searchInput" placeholder="Search archived reports by title or barangay">
+        Sort by:
+        <select id="sortSelect" class="sort-select">
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
         </select>
-        <button type="submit">Search/Sort</button>
-    </form>
+    </div>
 
     <!-- Delete All -->
     <form method="post" onsubmit="return confirm('Delete all archived reports permanently?');">
@@ -129,7 +97,7 @@ form.inline{display:inline;}
         <button type="submit" class="btn-delete-all">Delete All</button>
     </form>
 
-    <table>
+    <table id="archivesTable">
         <thead>
             <tr>
                 <th>Archive ID</th>
@@ -169,5 +137,36 @@ form.inline{display:inline;}
         </tbody>
     </table>
 </div>
+
+<script>
+// ✅ Live search
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+const tableBody = document.querySelector('#archivesTable tbody');
+
+function filterAndSort() {
+    const filter = searchInput.value.toLowerCase();
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    // Filter
+    let filteredRows = rows.filter(row => row.textContent.toLowerCase().includes(filter));
+
+    // Sort by Archived At column
+    const asc = sortSelect.value === 'asc';
+    filteredRows.sort((a, b) => {
+        const dateA = new Date(a.cells[5].textContent);
+        const dateB = new Date(b.cells[5].textContent);
+        return asc ? dateA - dateB : dateB - dateA;
+    });
+
+    // Re-render table
+    tableBody.innerHTML = '';
+    filteredRows.forEach(row => tableBody.appendChild(row));
+}
+
+searchInput.addEventListener('input', filterAndSort);
+sortSelect.addEventListener('change', filterAndSort);
+</script>
+
 </body>
 </html>
