@@ -17,13 +17,25 @@ if ($report_id <= 0) {
 }
 
 $stmt = $pdo->prepare("
-    SELECT r.id AS reports_id, r.report_date, r.report_time, r.status,
-           b.*
+    SELECT 
+        r.id AS reports_id,
+        r.report_date,
+        r.report_time,
+        r.status,
+
+        -- Normalized barangay name
+        CASE 
+            WHEN b.barangay = 'Bolobolo'   THEN 'Pedro sa Baculio'
+            WHEN b.barangay = 'Kibonbon'   THEN 'Quibonbon'
+            WHEN b.barangay = 'Calongonan' THEN 'San Francisco de Asis'
+            ELSE b.barangay
+        END AS barangay
     FROM reports r
     LEFT JOIN bns_reports b ON b.report_id = r.id
     WHERE r.id = :id
     LIMIT 1
 ");
+
 $stmt->execute(['id' => $report_id]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -43,12 +55,11 @@ function getBarangayLogo($barangay) {
         'Hinigdaan' => 'Hinigdaan.png',
         'Kalabaylabay' => 'Kalabaylabay.png',
         'Molugan' => 'Molugan.png',
-        'Pedro S. Baculio' => 'Pedro sa Baculio.png',
-        'Pedro sa Baculio' => 'Pedro sa Baculio.png',
+        'Bolobolo' => 'Pedro sa Baculio.png',
         'Poblacion' => 'Poblacion.png',
         'Quibonbon' => 'Quibonbon.png',
         'Sambulawan' => 'Sambulawan.png',
-        'San Francisco de Asis' => 'San Francisco de Asis.png',
+        'Calongonan' => 'San Francisco de Asis.png',
         'Sinaloc' => 'Sinaloc.png',
         'Taytay' => 'Taytay.png',
         'Ulaliman' => 'Ulaliman.png'

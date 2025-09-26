@@ -17,13 +17,25 @@ if ($report_id <= 0) {
 }
 
 $stmt = $pdo->prepare("
-    SELECT r.id AS reports_id, r.report_date, r.report_time, r.status,
-           b.*
+    SELECT 
+        r.id AS reports_id,
+        r.report_date,
+        r.report_time,
+        r.status,
+
+        -- Normalized barangay name
+        CASE 
+            WHEN b.barangay = 'Bolobolo'   THEN 'Pedro sa Baculio'
+            WHEN b.barangay = 'Kibonbon'   THEN 'Quibonbon'
+            WHEN b.barangay = 'Calongonan' THEN 'San Francisco de Asis'
+            ELSE b.barangay
+        END AS barangay
     FROM reports r
     LEFT JOIN bns_reports b ON b.report_id = r.id
     WHERE r.id = :id
     LIMIT 1
 ");
+
 $stmt->execute(['id' => $report_id]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

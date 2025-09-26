@@ -117,7 +117,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
         <i class="fa fa-chevron-down"></i>
       </div>
       <ul id="settingsMenu">
-        <li data-url="archive.php"><i class="fa fa-archive"></i> Archive</li>
+        <li data-url="archive_report.php"><i class="fa fa-archive"></i> Archive</li>
         <li data-url="security.php"><i class="fa fa-shield-alt"></i> Security</li>
       </ul>
     </li>

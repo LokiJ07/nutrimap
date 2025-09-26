@@ -138,8 +138,14 @@ $totalPages = ceil($totalReports / $limit);
                    <td class="actions">
                    <button onclick="window.location.href='view_report.php?id=<?= $r['id'] ?>'" class="view"><i class="fa fa-eye"></i> View</button>
                    <button onclick="window.location.href='edit_report.php?id=<?= $r['id'] ?>'" class="edit"><i class="fa fa-edit"></i> Edit</button>
-                   <button onclick="if(confirm('Are you sure?')) window.location.href='delete_report.php?id=<?= $r['id'] ?>'" class="delete"><i class="fa fa-trash"></i> Delete</button>
-                   </td>
+                  <form action="archive_report.php" method="post" style="display:inline;"
+      onsubmit="return confirm('Move this report to archive?');">
+    <input type="hidden" name="report_id" value="<?= $r['id'] ?>">
+    <button type="submit" class="delete">
+        <i class="fa fa-archive"></i> Archive
+    </button>
+</form>
+      </td>
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>

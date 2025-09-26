@@ -203,7 +203,7 @@
       <a href="landing_page/map.php" class="active">NUTRITIONAL MAP</a>
       <a href="#">GET TO KNOW US</a>
       <a href="#">CONTACT US</a>
-      <a href="login.php"><button class="login-btn">LOGIN</button></a>
+      <a href="../login.php"><button class="login-btn">LOGIN</button></a>
     </div>
   </div>
 
