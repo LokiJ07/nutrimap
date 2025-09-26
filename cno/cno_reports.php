@@ -241,7 +241,7 @@ document.getElementById('pending-reports-table-body').addEventListener('click', 
                    btn.classList.contains('decline-button') ? 'reject' : null;
     if(!action) return;
 
-    fetch('../update_report_status.php', {
+    fetch('update_status.php', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:`report_id=${reportId}&action=${action}`
