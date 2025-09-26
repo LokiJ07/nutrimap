@@ -203,7 +203,7 @@
       <a href="landing_page/map.php" class="active">NUTRITIONAL MAP</a>
       <a href="#">GET TO KNOW US</a>
       <a href="#">CONTACT US</a>
-      <a href="login.php"><button class="login-btn">LOGIN</button></a>
+      <a href="../login.php"><button class="login-btn">LOGIN</button></a>
     </div>
   </div>
 
@@ -219,11 +219,12 @@
       <div class="flex flex-wrap gap-4 mt-4 md:mt-0">
         <div>
           <label class="block text-sm font-medium text-gray-600">Select Year</label>
-          <select class="mt-1 block w-32 rounded border-gray-300 shadow-sm">
-            <option>All</option>
+       <select id="yearFilter" class="mt-1 block w-32 rounded border-gray-300 shadow-sm">
+            <option value="All">All</option>
             <option value="2025">2025</option>
             <option value="2024">2024</option>
-          </select>
+       </select>
+
         </div>
         <div>
           <!-- Full Barangay list -->
@@ -332,10 +333,7 @@
     </div>
 </footer>
 
-<!-- Link external CSS -->
-<link rel="stylesheet" href="css/footer.css">
-
-    
+    <!-- Dropdown Script -->    
     <script>
         const aboutBtn = document.getElementById('about-dropdown-btn');
         const aboutMenu = document.getElementById('about-dropdown-menu');
@@ -396,113 +394,125 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let geoLayer;
 let geoData;
 let activeField = null;
+let activeColor = null;
+let activeYear  = 'All';
 
 const legendItems = Array.from(document.querySelectorAll('#legend-buttons li'));
-const legendFields = legendItems.map(li => li.dataset.field);
 
-// Fetch GeoJSON
-fetch('get_map_data.php')
+// -------- Fetch once --------
+fetch('../landing_page/get_map_data.php')
   .then(r => r.json())
   .then(data => {
     geoData = data;
-    drawLayer(data); // default combined
+    drawLayer();   // draw all polygons once
   });
 
-// Draw layer
-function drawLayer(data) {
+// -------- Draw entire collection --------
+function drawLayer() {
   if (geoLayer) map.removeLayer(geoLayer);
 
-  geoLayer = L.geoJSON(data, {
-    style: feature => combinedStyle(feature),
+  geoLayer = L.geoJSON(geoData, {
+    style: feature => styleFeature(feature),
     onEachFeature: featureHandler
   }).addTo(map);
 }
 
-// Combined style for default map (all 9 indicators)
-function combinedStyle(feature) {
+// Style logic
+function styleFeature(feature) {
+  const props = feature.properties;
+  const yearOK = activeYear === 'All' || String(props.YEAR) === activeYear;
+
+  if (activeField && activeColor) {
+    const val = yearOK ? props[activeField.toUpperCase()] : null;
+    return {
+      color:'#333', weight:2, fillOpacity:0.7,
+      fillColor: getGradientColor(activeColor, val)
+    };
+  }
+
+  // default combined coloring (only if the feature’s year matches)
+  if (activeYear !== 'All' && !yearOK) {
+    return { color:'#333', weight:2, fillOpacity:0.2, fillColor:'#c0c0c0ff' };
+  }
+
   let r = 0, g = 0, b = 0, total = 0;
   legendItems.forEach(li => {
-    const val = feature.properties[li.dataset.field.toUpperCase()] ?? 0;
+    const val = props[li.dataset.field.toUpperCase()] ?? 0;
     const rgb = hexToRgb(li.dataset.color);
     r += rgb.r * val;
     g += rgb.g * val;
     b += rgb.b * val;
     total += val;
   });
-  if(total === 0) return { color:'#333', weight:2, fillOpacity:0.7, fillColor:'#ccc' };
-  r = Math.round(r/total);
-  g = Math.round(g/total);
-  b = Math.round(b/total);
-  return { color:'#333', weight:2, fillOpacity:0.7, fillColor:`rgb(${r},${g},${b})` };
+  if(total === 0) return { color:'#333', weight:2, fillOpacity:0.2, fillColor:'#ccc' };
+  return {
+    color:'#333', weight:2, fillOpacity:0.2,
+    fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})`
+  };
 }
 
-// Convert hex to rgb
 function hexToRgb(hex){
-  let c = parseInt(hex.slice(1),16);
+  const c = parseInt(hex.slice(1),16);
   return { r:(c>>16)&255, g:(c>>8)&255, b:c&255 };
 }
 
-
-// Tooltip
+// Tooltip shows only if year matches (or All)
 function featureHandler(feature, layer) {
   const name = feature.properties.BARANGAY || "Unknown";
   layer.on({
     mouseover(e) {
-      const lyr = e.target;
-      if (!activeField) {
-        // show all indicators
-        let tooltipHtml = `<b>${name}</b><br>`;
+      const props = feature.properties;
+      const yearOK = activeYear === 'All' || String(props.YEAR) === activeYear;
+      let html = `<b>${name}</b><br>`;
+
+      if (!yearOK) {
+        html += 'No data for selected year';
+      } else if (!activeField) {
         legendItems.forEach(li => {
-          const val = feature.properties[li.dataset.field.toUpperCase()] ?? '0';
-          tooltipHtml += `${li.dataset.label}: ${val}%<br>`;
+          const val = props[li.dataset.field.toUpperCase()] ?? '0';
+          html += `${li.dataset.label}: ${val}%<br>`;
         });
-        lyr.bindTooltip(tooltipHtml, { direction: 'center' }).openTooltip();
       } else {
         const li = document.querySelector(`#legend-buttons li[data-field="${activeField}"]`);
         const label = li ? li.dataset.label : activeField;
-        const val = feature.properties[activeField.toUpperCase()] ?? 'No User';
-        lyr.bindTooltip(`<b>${name}</b><br>${label}: ${val}%`, { direction: 'center' }).openTooltip();
+        const val = props[activeField.toUpperCase()] ?? 'No Data';
+        html += `${label}: ${val}%`;
       }
+      e.target.bindTooltip(html, { direction: 'center' }).openTooltip();
     },
     mouseout(e){ e.target.closeTooltip(); }
   });
 }
 
-// Legend click
+// -------- Legend click --------
 legendItems.forEach(li => {
   li.addEventListener('click', () => {
     activeField = li.dataset.field;
-    const baseColor = li.dataset.color;
-    geoLayer.eachLayer(layer => {
-      const val = layer.feature.properties[activeField.toUpperCase()];
-      layer.setStyle({ fillColor:getGradientColor(baseColor,val), fillOpacity:0.7 });
-    });
-    updateGradientScale(baseColor);
+    activeColor = li.dataset.color;
+    geoLayer.setStyle(styleFeature);
+    updateGradientScale(activeColor);
   });
 });
 
-// Barangay filter
-document.getElementById('barangayFilter').addEventListener('change', function() {
-  const selected = this.value;
-  if (!geoData) return;
-  const filtered = selected === 'All' ? geoData : {
-    type:'FeatureCollection',
-    features: geoData.features.filter(f => f.properties.BARANGAY?.toLowerCase() === selected.toLowerCase())
-  };
-  drawLayer(filtered);
-
-  if (activeField) {
-    const li = document.querySelector(`#legend-buttons li[data-field="${activeField}"]`);
-    if (!li) return;
-    const color = li.dataset.color;
-    geoLayer.eachLayer(layer => {
-      const val = layer.feature.properties[activeField.toUpperCase()];
-      layer.setStyle({ fillColor:getGradientColor(color,val), fillOpacity:0.7 });
+// -------- Filters --------
+document.getElementById('barangayFilter').addEventListener('change', function () {
+  const selected = this.value.toLowerCase();
+  geoLayer.eachLayer(layer => {
+    const name = layer.feature.properties.BARANGAY?.toLowerCase();
+    layer.setStyle({
+      ...styleFeature(layer.feature),
+      opacity: (selected === 'all' || selected === name) ? 1 : 0.3,
+      fillOpacity: (selected === 'all' || selected === name) ? 0.7 : 0.1
     });
-  }
+  });
 });
 
-// Helpers
+document.getElementById('yearFilter').addEventListener('change', function () {
+  activeYear = this.value;
+  geoLayer.setStyle(styleFeature);  // just restyle, no filtering
+});
+
+// -------- Helpers --------
 function lighten(hex, amount){
   const num = parseInt(hex.slice(1),16);
   let r=(num>>16)&0xff, g=(num>>8)&0xff, b=num&0xff;
@@ -515,7 +525,7 @@ function lighten(hex, amount){
 function getGradientColor(baseColor, value){
   if(value==null) return '#ccc';
   const ratio = Math.min(1,value/100);
-  return lighten(baseColor,0.8  *(1-ratio));
+  return lighten(baseColor,0.8*(1-ratio));
 }
 
 function updateGradientScale(baseColor){
@@ -530,7 +540,5 @@ function updateGradientScale(baseColor){
   }
 }
 </script>
-
-
 </body>
 </html>

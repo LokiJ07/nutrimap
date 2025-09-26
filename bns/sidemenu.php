@@ -3,6 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 require '../db/config.php';
 
 // ✅ Allow only CNO users
@@ -13,14 +14,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
 
 $user_id = $_SESSION['user_id'];
 
-// ✅ Fetch user info
-$stmt = $pdo->prepare("SELECT first_name, last_name, barangay FROM users WHERE id = ?");
+// ✅ Fetch user info with profile_pic
+$stmt = $pdo->prepare("SELECT first_name, last_name, barangay, profile_pic FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $user_name = $user ? htmlspecialchars($user['first_name'] . " " . $user['last_name']) : "Guest";
 $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
+
+// ✅ Check profile picture
+$profile_pic = "../uploads/profile_placeholder.png";
+if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_pic'])) {
+    $profile_pic = "../uploads/" . htmlspecialchars($user['profile_pic']);
+}
 ?>
+
 <style>
 /* Your existing CSS (unchanged) */
 #sideMenu {
@@ -109,7 +117,7 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
         <i class="fa fa-chevron-down"></i>
       </div>
       <ul id="settingsMenu">
-        <li data-url="archive.php"><i class="fa fa-archive"></i> Archive</li>
+        <li data-url="archive_report.php"><i class="fa fa-archive"></i> Archive</li>
         <li data-url="security.php"><i class="fa fa-shield-alt"></i> Security</li>
       </ul>
     </li>
@@ -117,15 +125,16 @@ $user_barangay = $user ? htmlspecialchars($user['barangay']) : "";
 
   <div class="divider"></div>
 
-  <div class="sideMenu-footer">
-    <div class="user-info" id="userProfileBtn">
-      <img src="../uploads/profile_placeholder.png" alt="User">
-      <span><?php echo $user_name; ?></span>
-    </div>
-    <div class="footer-links">
-      <a href="../index.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
-    </div>
+
+<div class="sideMenu-footer">
+  <div class="user-info" id="userProfileBtn">
+    <img src="<?php echo $profile_pic; ?>" alt="User">
+    <span><?php echo $user_name; ?></span>
   </div>
+  <div class="footer-links">
+    <a href="../index.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+  </div>
+</div>
 </div>
 
 <script>

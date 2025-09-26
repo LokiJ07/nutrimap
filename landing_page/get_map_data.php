@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-require '../db/config.php'; // adjust if your db_connect.php is in another folder
+require '../db/config.php'; // adjust if needed
 
-// 1. Load base GeoJSON (same directory)
+// 1. Load base GeoJSON
 $geojsonPath = __DIR__ . '/barangay_boundary.geojson';
 if (!file_exists($geojsonPath)) {
     http_response_code(500);
@@ -11,8 +11,11 @@ if (!file_exists($geojsonPath)) {
 }
 $geojson = json_decode(file_get_contents($geojsonPath), true);
 
-// 2. Query approved reports
+// 2. Query approved reports including the year from **bns_reports**
+// Make sure the column is really named `year`. If it’s something like `report_year`,
+// just change the name here and below.
 $sql = "SELECT b.barangay,
+               b.year,               -- ✅ fetch the year directly
                b.ind7b1_pct, b.ind7b2_pct, b.ind7b3_pct,
                b.ind7b4_pct, b.ind7b5_pct, b.ind7b6_pct,
                b.ind7b7_pct, b.ind7b8_pct, b.ind7b9_pct
@@ -22,19 +25,20 @@ $sql = "SELECT b.barangay,
 $stmt = $pdo->query($sql);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Convert DB rows into lookup (uppercase barangay name)
+// 3. Build a lookup keyed by barangay name
 $lookup = [];
 foreach ($data as $row) {
     $lookup[strtoupper(trim($row['barangay']))] = $row;
 }
 
-// 4. Merge into GeoJSON
+// 4. Merge database data into GeoJSON
 foreach ($geojson['features'] as &$feature) {
     $bName = strtoupper(trim($feature['properties']['BARANGAY']));
 
     if (isset($lookup[$bName])) {
         foreach ($lookup[$bName] as $key => $val) {
             if ($key !== 'barangay') {
+                // Add all columns (including year) to feature properties
                 $feature['properties'][strtoupper($key)] = $val;
             }
         }
@@ -43,5 +47,5 @@ foreach ($geojson['features'] as &$feature) {
     }
 }
 
-// 5. Return updated GeoJSON
+// 5. Output updated GeoJSON
 echo json_encode($geojson);

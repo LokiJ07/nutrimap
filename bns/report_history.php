@@ -153,7 +153,7 @@ $totalPages = ceil($totalReports / $limit);
                     <td><span class="status"><?= htmlspecialchars($r['status']) ?></span></td>
                     <td class="actions">
                       <button class="view"><i class="fa fa-eye"></i> View</button>
-                      <button class="delete"><i class="fa fa-trash"></i> Delete</button>
+                      <button onclick="if(confirm('Move this report to archive?')) window.location.href='archive_report.php?id=<?= $r['id'] ?>'" class="delete"><i class="fa fa-archive"></i> Archive</button>
                     </td>
                   </tr>
                 <?php endforeach; ?>

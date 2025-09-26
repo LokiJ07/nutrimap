@@ -76,7 +76,8 @@ $totalPages = ceil($totalReports / $limit);
     .status.Pending { background:#ffc107; color:#000; }
     .status.Approved { background:#28a745; }
     .status.Rejected { background:#dc3545; }
-    .actions button { border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-right:4px; color:#fff; }
+    .actions button {  border:none; padding:5px 10px; border-radius:4px;
+      cursor:pointer; font-size:12px; margin-right:4px; color:#fff; }
     .actions .view { background:#007bff; }
     .actions .edit { background:#28a745; }
     .actions .delete { background:#dc3545; }
@@ -134,11 +135,17 @@ $totalPages = ceil($totalReports / $limit);
                     <td><span class="status <?= htmlspecialchars($r['status']) ?>"><?= htmlspecialchars($r['status']) ?></span></td>
                     <td><?= date("h:i a", strtotime($r['report_time'])) ?></td>
                     <td><?= date("m/d/Y", strtotime($r['report_date'])) ?></td>
-                    <td class="actions">
-                      <a href="view_report.php?id=<?= $r['id'] ?>" class="view"><i class="fa fa-eye"></i> View</a>
-                      <a href="edit_report.php?id=<?= $r['id'] ?>" class="edit"><i class="fa fa-edit"></i> Edit</a>
-                      <a href="delete_report.php?id=<?= $r['id'] ?>" class="delete" onclick="return confirm('Are you sure?')"><i class="fa fa-trash"></i> Delete</a>
-                    </td>
+                   <td class="actions">
+                   <button onclick="window.location.href='view_report.php?id=<?= $r['id'] ?>'" class="view"><i class="fa fa-eye"></i> View</button>
+                   <button onclick="window.location.href='edit_report.php?id=<?= $r['id'] ?>'" class="edit"><i class="fa fa-edit"></i> Edit</button>
+                  <form action="archive_report.php" method="post" style="display:inline;"
+      onsubmit="return confirm('Move this report to archive?');">
+    <input type="hidden" name="report_id" value="<?= $r['id'] ?>">
+    <button type="submit" class="delete">
+        <i class="fa fa-archive"></i> Archive
+    </button>
+</form>
+      </td>
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>

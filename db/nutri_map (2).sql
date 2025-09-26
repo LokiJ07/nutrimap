@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 18, 2025 at 05:07 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Sep 22, 2025 at 01:28 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `cno_db`
+-- Database: `nutri_map`
 --
 
 -- --------------------------------------------------------
@@ -149,13 +149,40 @@ CREATE TABLE `bns_reports` (
 --
 
 INSERT INTO `bns_reports` (`id`, `report_id`, `barangay`, `year`, `title`, `ind1`, `ind2`, `ind3`, `ind4a`, `ind4b`, `ind5`, `ind6`, `ind7a`, `ind7b1_no`, `ind7b1_pct`, `ind7b2_no`, `ind7b2_pct`, `ind7b3_no`, `ind7b3_pct`, `ind7b4_no`, `ind7b4_pct`, `ind7b5_no`, `ind7b5_pct`, `ind7b6_no`, `ind7b6_pct`, `ind7b7_no`, `ind7b7_pct`, `ind7b8_no`, `ind7b8_pct`, `ind7b9_no`, `ind7b9_pct`, `ind8`, `ind9`, `ind10`, `ind11`, `ind12`, `ind13`, `ind14`, `ind15a_public`, `ind15a_private`, `ind15b_public`, `ind15b_private`, `ind16`, `ind17`, `ind18`, `ind19`, `ind20a_no`, `ind20a_pct`, `ind20b_no`, `ind20b_pct`, `ind20c_no`, `ind20c_pct`, `ind20d_no`, `ind20d_pct`, `ind20e_no`, `ind20e_pct`, `ind21`, `ind22`, `ind23`, `ind24`, `ind25`, `ind26a_no`, `ind26a_pct`, `ind26b_no`, `ind26b_pct`, `ind26c_no`, `ind26c_pct`, `ind26d_no`, `ind26d_pct`, `ind27a_no`, `ind27a_pct`, `ind27b_no`, `ind27b_pct`, `ind27c_no`, `ind27c_pct`, `ind27d_no`, `ind27d_pct`, `ind28a_no`, `ind28a_pct`, `ind28b_no`, `ind28b_pct`, `ind28c_no`, `ind28c_pct`, `ind28d_no`, `ind28d_pct`, `ind28e_no`, `ind28e_pct`, `ind29a_no`, `ind29a_pct`, `ind29b_no`, `ind29b_pct`, `ind29c_no`, `ind29c_pct`, `ind29d_no`, `ind29d_pct`, `ind29e_no`, `ind29e_pct`, `ind30a_no`, `ind30a_pct`, `ind30b_no`, `ind30b_pct`, `ind30c_no`, `ind30c_pct`, `ind30d_no`, `ind30d_pct`, `ind30e_no`, `ind30e_pct`, `ind31`, `ind32`, `ind33`, `ind34`, `ind35a`, `ind35b`, `ind36`) VALUES
-(1, 3, 'Amoros', '2025', '', 1, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 1, 0, 0),
-(2, 4, 'Amoros', '2025', '', 1, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 1, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 1, 0, 0),
-(3, 5, 'Amoros', '2025', '', 1, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(4, 6, 'Amoros', '2025', '', 1, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(5, 7, 'Amoros', '2025', '', 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(6, 8, 'Amoros', '2025', '', 112, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 123, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(7, 9, 'Amoros', '2025', '', 1, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
+(10, 12, 'Calongonan', '2025', 'TheF', 12313, 213, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(11, 13, 'Sambulawan', '2025', 'Broda', 12, 21, 213, 0, 0, 0, 0, 0.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 15.00, 0, 51.00, 0, 51.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(12, 14, 'Sambulawan', '2025', '412', 21, 0, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 41.00, 0, 412.00, 0, 14.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `login_history`
+--
+
+CREATE TABLE `login_history` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `session_id` varchar(128) NOT NULL,
+  `browser` varchar(100) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `login_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `logout_time` timestamp NULL DEFAULT NULL,
+  `device_token` varchar(64) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `login_history`
+--
+
+INSERT INTO `login_history` (`id`, `user_id`, `session_id`, `browser`, `ip_address`, `login_time`, `logout_time`, `device_token`) VALUES
+(1, 10, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 03:57:24', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(2, 10, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 03:56:44', NULL, NULL),
+(3, 8, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:21:07', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(4, 8, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 04:12:29', NULL, NULL),
+(5, 12, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:22:08', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(6, 12, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:22:48', NULL, NULL),
+(7, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:27', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(8, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:57', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -176,15 +203,15 @@ CREATE TABLE `otp_codes` (
 --
 
 INSERT INTO `otp_codes` (`id`, `user_id`, `otp_code`, `created_at`, `expires_at`) VALUES
-(9, 2, '970074', '2025-09-15 05:23:48', '2025-09-15 07:28:48'),
-(10, 2, '699247', '2025-09-15 11:57:40', '2025-09-15 14:02:40'),
-(11, 5, '949655', '2025-09-15 14:36:52', '2025-09-15 16:41:52'),
-(12, 5, '796328', '2025-09-15 14:37:01', '2025-09-15 16:42:01'),
-(13, 2, '258143', '2025-09-16 03:31:44', '2025-09-16 05:36:44'),
-(14, 2, '227212', '2025-09-17 13:22:29', '2025-09-17 15:27:29'),
-(15, 2, '284633', '2025-09-18 01:00:43', '2025-09-18 03:05:43'),
-(16, 2, '171406', '2025-09-18 01:00:49', '2025-09-18 03:05:49'),
-(17, 2, '316970', '2025-09-18 03:05:36', '2025-09-18 05:10:36');
+(26, 10, '947964', '2025-09-21 13:18:32', '2025-09-21 15:23:32'),
+(27, 12, '591477', '2025-09-21 13:20:37', '2025-09-21 15:25:37'),
+(28, 10, '780619', '2025-09-21 15:00:21', '2025-09-21 17:05:21'),
+(29, 8, '751915', '2025-09-21 15:11:58', '2025-09-21 17:16:58'),
+(30, 8, '352666', '2025-09-21 15:12:02', '2025-09-21 17:17:02'),
+(31, 10, '216510', '2025-09-22 03:56:26', '2025-09-22 06:01:26'),
+(32, 8, '430813', '2025-09-22 04:12:00', '2025-09-22 06:17:00'),
+(33, 12, '915745', '2025-09-22 11:22:08', '2025-09-22 13:27:08'),
+(34, 10, '201614', '2025-09-22 11:26:27', '2025-09-22 13:31:27');
 
 -- --------------------------------------------------------
 
@@ -205,13 +232,9 @@ CREATE TABLE `reports` (
 --
 
 INSERT INTO `reports` (`id`, `user_id`, `report_time`, `report_date`, `status`) VALUES
-(3, 2, '04:15:32', '2025-09-18', 'Pending'),
-(4, 2, '04:16:20', '2025-09-18', 'Pending'),
-(5, 2, '04:23:42', '2025-09-18', 'Pending'),
-(6, 2, '04:32:07', '2025-09-18', 'Pending'),
-(7, 2, '04:41:52', '2025-09-18', 'Pending'),
-(8, 2, '04:43:02', '2025-09-18', 'Pending'),
-(9, 2, '05:06:26', '2025-09-18', 'Pending');
+(12, 10, '15:19:58', '2025-09-21', 'Approved'),
+(13, 12, '15:21:49', '2025-09-21', 'Approved'),
+(14, 12, '15:24:58', '2025-09-21', 'Approved');
 
 -- --------------------------------------------------------
 
@@ -227,19 +250,24 @@ CREATE TABLE `users` (
   `phone_number` varchar(20) NOT NULL,
   `email` varchar(150) NOT NULL,
   `address` varchar(255) NOT NULL,
-  `barangay` enum('CNO','Amoros','Bolisong','Cogon','Himaya','Hinigdaan','Kalabaylabay','Molugan','Pedro S. Baculio','Poblacion','Quibonbon','Sambulawan','San Francisco de Asis','Sinaloc','Taytay','Ulaliman') NOT NULL,
+  `barangay` enum('CNO','Amoros','Bolisong','Cogon','Himaya','Hinigdaan','Kalabaylabay','Molugan','Bolobolo','Poblacion','Kibonbon','Sambulawan','Calongonan','Sinaloc','Taytay','Ulaliman') NOT NULL,
+  `profile_pic` varchar(255) DEFAULT NULL,
   `user_type` enum('BNS','CNO') NOT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `current_session` varchar(128) DEFAULT NULL,
+  `password_changed` tinyint(1) NOT NULL DEFAULT 0,
+  `status` enum('Active','Inactive') NOT NULL DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`, `email`, `address`, `barangay`, `user_type`, `password_hash`, `created_at`) VALUES
-(2, 'Dan', 'Javier', 'dan', '09781716517', 'danmarkpetalcurin@gmail.com', 'st, joseph', 'Amoros', 'BNS', '$2y$10$z3vwZl.fpBSJAlPXAz4HTe8rKCVJTRd1CuYUun1YW9Se3s31NTydS', '2025-09-13 13:18:11'),
-(5, 'arl', 'ly', 'arly', '09476445486', 'audreyabigailhisanza.9@gmail.com', 'Tankulan', 'CNO', 'CNO', '$2y$10$hTi9BrY3K5Q0NOo35AA9oO5ahG3KG4ZTzssgWVturWIwI2rRJQi06', '2025-09-15 14:36:11');
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`, `email`, `address`, `barangay`, `profile_pic`, `user_type`, `password_hash`, `created_at`, `current_session`, `password_changed`, `status`) VALUES
+(8, 'CNO', 'ADMIN', 'CNO', '09264686830', 'louizkylaspona@gmail.com', 'Mangima Tankulan', 'CNO', '1758540105_CCS_Logo_2.png', 'CNO', '$2y$10$Xm/8kdPuxuROCeJfzlcU6.rrR0CizxiD3R7CCAy/lKlwIaZCGFJJq', '2025-09-21 13:06:17', '2hauhvi1j0u8lcgslp2m8ovncv', 0, 'Active'),
+(10, 'BNS', 'Brgy', 'bns', '09264686830', 'loki072002@gmail.com', 'Mangima Tankulan', 'Calongonan', '1758514208_2.png', 'BNS', '$2y$10$zO97F06lMGhmM.Cap0dhu.P4bn/7GyR4zMNMFnd3YS/zOK0WDjEoa', '2025-09-21 13:16:32', '89jbjpmh218tvv08dbf3v77i0p', 0, 'Active'),
+(12, 'we', 'we', 'we', '21', 'goodies34512@gmail.com', 'Mangima Tankulan', 'Sambulawan', '1758540182_image_1.jpg', 'BNS', '$2y$10$XKrEFbJZtEkhhDpDq9vOsOQoQZ1H2ubMfaN2oEPSE8crsIW2OYoMW', '2025-09-21 13:18:02', '89jbjpmh218tvv08dbf3v77i0p', 0, 'Active');
 
 --
 -- Indexes for dumped tables
@@ -251,6 +279,13 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`
 ALTER TABLE `bns_reports`
   ADD PRIMARY KEY (`id`),
   ADD KEY `report_id` (`report_id`);
+
+--
+-- Indexes for table `login_history`
+--
+ALTER TABLE `login_history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `login_history_ibfk_1` (`user_id`);
 
 --
 -- Indexes for table `otp_codes`
@@ -281,25 +316,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `bns_reports`
 --
 ALTER TABLE `bns_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `login_history`
+--
+ALTER TABLE `login_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `otp_codes`
 --
 ALTER TABLE `otp_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `reports`
 --
 ALTER TABLE `reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
@@ -310,6 +351,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `bns_reports`
   ADD CONSTRAINT `bns_reports_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `reports` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `login_history`
+--
+ALTER TABLE `login_history`
+  ADD CONSTRAINT `login_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `reports`

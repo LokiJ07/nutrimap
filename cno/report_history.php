@@ -33,8 +33,7 @@ $allReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <meta charset="utf-8">
 <title>CNO - Reports History</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f5f5;}
 .container{max-width:1200px;margin:20px auto;padding:20px;background:#fff;border-radius:6px;box-shadow:0 0 6px rgba(0,0,0,.1);}
@@ -74,9 +73,12 @@ th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
         <td class="status-<?= strtolower($report['status']) ?>"><?= htmlspecialchars($report['status']) ?></td>
         <td><?= htmlspecialchars($report['report_time']) ?></td>
         <td><?= htmlspecialchars($report['report_date']) ?></td>
-        <td>
-          <a class="btn btn-view" href="view_report.php?id=<?= $report['id'] ?>">View</a>
-        </td>
+    <td>
+  <button onclick="window.location.href='view_report.php?id=<?= $report['id'] ?>'" class="btn btn-view">
+    <i class="fa fa-eye"></i> View
+  </button>
+</td>
+
       </tr>
     <?php endforeach; ?>
   <?php else: ?>

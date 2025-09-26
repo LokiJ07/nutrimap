@@ -100,28 +100,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <div id="sidemenu-container"></div>
 
-<!-- <script>
-document.getElementById('menuBtn').addEventListener('click', async () => {
-  const container = document.getElementById('sidemenu-container');
-
-  // Load side menu only once
-  if (!container.innerHTML.trim()) {
-    const response = await fetch('sidemenu.php');
-    const html = await response.text();
-    container.innerHTML = html;
-
-    // Attach close button listener
-    const menu = document.getElementById('sideMenu');
-    const closeBtn = menu.querySelector('.close-btn');
-    closeBtn.addEventListener('click', () => menu.classList.remove('open'));
-  }
-
-  // Open menu
-  const menu = document.getElementById('sideMenu');
-  if (menu) menu.classList.add('open');
-});
-</script> -->
-
 <script>
 document.getElementById('menuBtn').addEventListener('click', async () => {
   const container = document.getElementById('sidemenu-container');

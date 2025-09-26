@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require '../db/config.php';
 
 // ✅ Require login
-  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
+  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     header("Location: ../login.php");
     exit();
 }
@@ -147,6 +147,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 <body>
   <div class="layout">
     <?php include 'header.php'; ?>
+    <?php include 'sidebar.php'; ?>
     <div class="page-title">Profile</div>
 
     <div class="body-layout">
