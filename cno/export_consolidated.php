@@ -1,7 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require '../db/config.php';
-require_once('../vendor/autoload.php'); // TCPDF
+require_once('../vendor/autoload.php');   // TCPDF
 
 // ---------- Access Control ----------
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
@@ -18,6 +18,61 @@ function val(array $a, string $k, string $fmt = 'int'): string {
     return htmlspecialchars((string)$a[$k]);
 }
 
+// ---------- Query Totals ----------
+$base = [
+ 'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a','ind8','ind9',
+ 'ind10','ind11','ind12','ind13','ind14','ind16','ind17','ind18','ind19',
+ 'ind21','ind22','ind23','ind24','ind25','ind31','ind32','ind33','ind34','ind36'
+];
+$groups = [
+ '7b'=>['ind7b1','ind7b2','ind7b3','ind7b4','ind7b5','ind7b6','ind7b7','ind7b8','ind7b9'],
+ '20'=>['ind20a','ind20b','ind20c','ind20d','ind20e'],
+ '26'=>['ind26a','ind26b','ind26c','ind26d'],
+ '27'=>['ind27a','ind27b','ind27c','ind27d'],
+ '28'=>['ind28a','ind28b','ind28c','ind28d','ind28e'],
+ '29'=>['ind29a','ind29b','ind29c','ind29d','ind29e'],
+ '30'=>['ind30a','ind30b','ind30c','ind30d','ind30e']
+];
+$sel=[];
+foreach($base as $f) $sel[]="SUM(bns.$f) AS $f";
+foreach($groups as $arr){
+    foreach($arr as $f){
+        $sel[]="SUM(bns.{$f}_no)  AS {$f}_no";
+        $sel[]="SUM(bns.{$f}_pct) AS {$f}_pct";
+    }
+}
+$sel[]="SUM(bns.ind15a_public)  AS ind15a_public";
+$sel[]="SUM(bns.ind15a_private) AS ind15a_private";
+$sel[]="SUM(bns.ind15b_public)  AS ind15b_public";
+$sel[]="SUM(bns.ind15b_private) AS ind15b_private";
+$sel[]="SUM(bns.ind35a) AS ind35a";
+$sel[]="SUM(bns.ind35b) AS ind35b";
+
+$sql="
+SELECT ".implode(',', $sel)."
+FROM bns_reports bns
+JOIN reports r ON bns.report_id = r.id
+WHERE r.status='approved'
+AND bns.id IN (
+    SELECT MAX(br2.id)
+    FROM bns_reports br2
+    JOIN reports r2 ON r2.id = br2.report_id
+    WHERE r2.status='approved'
+    GROUP BY br2.barangay
+)";
+$totals = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+if(!$totals) die('No data to export');
+
+// ---------- PDF Setup ----------
+$pdf = new TCPDF('P','mm','A4',true,'UTF-8',false);
+$pdf->SetCreator('Nutrimap');
+$pdf->SetAuthor('CNO');
+$pdf->SetTitle('Consolidated Barangay Situation Analysis');
+$pdf->SetMargins(10,15,10);
+$pdf->SetAutoPageBreak(true,15);
+$pdf->SetFont('times','',11);
+
+// ---------- Table Builder ----------
 function makeTable(array $rows): string {
     $html  = '<table cellpadding="4" cellspacing="0" width="100%" style="border-collapse:collapse;">';
     $html .= '<thead><tr>'
@@ -43,68 +98,13 @@ function makeTable(array $rows): string {
     return $html;
 }
 
-$report_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($report_id <= 0) {
-    die("Report not found!");
-}
-
-// ---------- Prepare fields ----------
-$base = ['ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a','ind8','ind9',
-         'ind10','ind11','ind12','ind13','ind14','ind16','ind17','ind18','ind19',
-         'ind21','ind22','ind23','ind24','ind25','ind31','ind32','ind33','ind34','ind36'];
-$groups = [
-    '7b'=>['ind7b1','ind7b2','ind7b3','ind7b4','ind7b5','ind7b6','ind7b7','ind7b8','ind7b9'],
-    '20'=>['ind20a','ind20b','ind20c','ind20d','ind20e'],
-    '26'=>['ind26a','ind26b','ind26c','ind26d'],
-    '27'=>['ind27a','ind27b','ind27c','ind27d'],
-    '28'=>['ind28a','ind28b','ind28c','ind28d','ind28e'],
-    '29'=>['ind29a','ind29b','ind29c','ind29d','ind29e'],
-    '30'=>['ind30a','ind30b','ind30c','ind30d','ind30e']
-];
-$sel = [];
-foreach($base as $f) $sel[] = "SUM(bns.$f) AS $f";
-foreach($groups as $arr){
-    foreach($arr as $f){
-        $sel[] = "SUM(bns.{$f}_no)  AS {$f}_no";
-        $sel[] = "SUM(bns.{$f}_pct) AS {$f}_pct";
-    }
-}
-$sel[]="SUM(bns.ind15a_public)  AS ind15a_public";
-$sel[]="SUM(bns.ind15a_private) AS ind15a_private";
-$sel[]="SUM(bns.ind15b_public)  AS ind15b_public";
-$sel[]="SUM(bns.ind15b_private) AS ind15b_private";
-$sel[]="SUM(bns.ind35a) AS ind35a";
-$sel[]="SUM(bns.ind35b) AS ind35b";
-
-
-// ---------- Fetch the report ----------
-$sql = "SELECT ".implode(",", $sel)." 
-        FROM bns_reports bns
-        JOIN reports r ON bns.report_id = r.id
-        WHERE r.status = 'approved' AND bns.report_id = :report_id
-        LIMIT 1";
-$stmt = $pdo->prepare($sql);
-$stmt->execute(['report_id'=>$report_id]);
-$totals = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$totals) die("Report not found or not approved!");
-
-// ---------- PDF Setup ----------
-$pdf = new TCPDF('P','mm','A4',true,'UTF-8',false);
-$pdf->SetCreator('Nutrimap');
-$pdf->SetAuthor('CNO');
-$pdf->SetTitle('Barangay Situation Analysis');
-$pdf->SetMargins(10,15,10);
-$pdf->SetAutoPageBreak(true,15);
-$pdf->SetFont('times','',11);
-
 // ---------- Page 1 ----------
 $pdf->AddPage();
 $pdf->SetFont('times','B',14);
-$pdf->Cell(0,0,"Barangay Report",0,1,'C');
+$pdf->Cell(0,0,'Consolidated Barangay Situation Analysis',0,1,'C');
 $pdf->Ln(6);
 $pdf->SetFont('times','',11);
 
-// ---------- Build tables ----------
 $p1 = [
     ['Total Population', val($totals,'ind1')],
     ['Number of households', val($totals,'ind2')],
@@ -116,10 +116,16 @@ $p1 = [
     ['Preschool children measured during OPT Plus', val($totals,'ind7a','dec2')],
     ['Percent measured coverage (OPT Plus)', val($totals,'ind7a','pct')]
 ];
-$nutri = ['Severely underweight','Underweight','Normal weight','Severely wasted',
-          'Wasted','Overweight','Obese','Severely stunted','Stunted'];
+$nutri = [
+ 'Severely underweight','Underweight','Normal weight','Severely wasted',
+ 'Wasted','Overweight','Obese','Severely stunted','Stunted'
+];
 for($i=1;$i<=9;$i++){
-    $p1[] = [$nutri[$i-1], val($totals,"ind7b{$i}_no"), val($totals,"ind7b{$i}_pct",'pct')];
+    $p1[] = [
+        $nutri[$i-1],
+        val($totals,"ind7b{$i}_no"),
+        val($totals,"ind7b{$i}_pct",'pct')
+    ];
 }
 $p1 = array_merge($p1, [
     ['Infants 0–5 months old', val($totals,'ind8')],
@@ -181,15 +187,25 @@ $p3 = [];
 foreach(['a'=>'Barangay/City garbage collection','b'=>'Own compost pit','c'=>'Burning','d'=>'Dumping'] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
 }
-foreach(['a'=>'Pipe water system','b'=>'Well – Level II','c'=>'Deep well with communal source (Level II)',
-         'd'=>'Mineral water / water dispensing stores','e'=>'Open shallow dug well (Level I)'] as $c=>$lbl){
+foreach([
+    'a'=>'Pipe water system','b'=>'Well – Level II',
+    'c'=>'Deep well with communal source (Level II)',
+    'd'=>'Mineral water / water dispensing stores',
+    'e'=>'Open shallow dug well (Level I)'
+] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind28{$c}_no"), val($totals,"ind28{$c}_pct",'pct')];
 }
-foreach(['a'=>'Vegetable garden','b'=>'Livestock/poultry','c'=>'Combination vegetable garden & livestock/poultry',
-         'd'=>'Fishponds','e'=>'No garden'] as $c=>$lbl){
+foreach([
+    'a'=>'Vegetable garden','b'=>'Livestock/poultry',
+    'c'=>'Combination vegetable garden & livestock/poultry',
+    'd'=>'Fishponds','e'=>'No garden'
+] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind29{$c}_no"), val($totals,"ind29{$c}_pct",'pct')];
 }
-foreach(['a'=>'Concrete','b'=>'Semi concrete','c'=>'Wooden house','d'=>'Nipa bamboo house','e'=>'Barong-barong makeshift'] as $c=>$lbl){
+foreach([
+    'a'=>'Concrete','b'=>'Semi concrete','c'=>'Wooden house',
+    'd'=>'Nipa bamboo house','e'=>'Barong-barong makeshift'
+] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind30{$c}_no"), val($totals,"ind30{$c}_pct",'pct')];
 }
 $p3 = array_merge($p3, [
@@ -204,4 +220,4 @@ $p3 = array_merge($p3, [
 $pdf->writeHTML(makeTable($p3), true, false, false, false, '');
 
 // ---------- Output ----------
-$pdf->Output('Barangay_Situation_Analysis.pdf','I');
+$pdf->Output('Consolidated_Barangay_Situation_Analysis.pdf','I');
