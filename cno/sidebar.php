@@ -111,7 +111,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
     <li data-url="nutritional_map.php"><i class="fa fa-map"></i>Nutritional Map</li>
     <li data-url="report_history.php"><i class="fas fa-tasks"></i> Data History</li>
     <li data-url="users.php"><i class="fa fa-user"></i>Users</li>
-    <li data-url="cno_reports.php"><i class="fas fa-history"></i>Activity Logs</li>
+    <li data-url="activity_logs.php"><i class="fas fa-history"></i>Activity Logs</li>
     <!-- Settings dropdown -->
     <li class="settings-dropdown">
       <div class="settings-btn" id="settingsBtn">

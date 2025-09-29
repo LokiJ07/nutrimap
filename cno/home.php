@@ -87,7 +87,10 @@ body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
     margin-top:8px;background:#fff;color:#115e59;
     border:none;padding:6px 10px;border-radius:4px;cursor:pointer;
 }
-
+.card-users button {
+    margin-top:0px;background:#fff;color:#115e59;
+    border:none;padding:6px 10px;border-radius:4px;cursor:pointer;
+}
 /* Table */
 .table-container {background:#fff;padding:3px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 table {width:100%;border-collapse:collapse;font-size:14px;}
@@ -123,24 +126,26 @@ thead {background:#009688;color:#fff;}
       <h2>Dashboard</h2>
       <div class="dashboard-cards">
         <div class="card card-users">
-          <div class="icon"><i class="fa fa-users"></i></div>
-          <div>
-            <h3>Total Users: <?= $totalUsers ?></h3>
-            <p>CNO: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
-          </div>
-        </div>
+  <!-- ✅ Make icon clickable -->
+  <div onclick="window.location.href='users.php'" style="cursor:pointer; font-size:32px; color: #06adb3ff;">
+    <i class="fa fa-users"></i>
+  </div>
+  <div>
+    <h3>Total Users: <?= $totalUsers ?></h3>
+    <p>CNO: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
+  </div>
+</div>
         <div class="card card-reports">
-          <div class="icon"><i class="fa fa-file-alt"></i></div>
+          <div  onclick="window.location.href='cno_reports.php'" style="cursor:pointer; font-size:32px; color: #e0e0e0ff;"><i class="fa fa-file-alt"></i></div>
           <div>
             <h3>Total Reports: <?= $totalReports ?></h3>
             <p>Approved: <?= $approvedReports ?> | Pending: <?= $pendingReports ?></p>
           </div>
         </div>
         <div class="card card-barangays">
-          <div class="icon"><i class="fa fa-map-marker-alt"></i></div>
+          <div  onclick="window.location.href='users.php'" style="cursor:pointer; font-size:32px; color: #071d10ff;"><i class="fa fa-map-marker-alt"></i></div>
           <div>
             <h3>Total Barangays: <?= $totalBarangays ?></h3>
-            <button onclick="window.location.href='nutritional_map.php'">View Map</button>
           </div>
         </div>
       </div>
