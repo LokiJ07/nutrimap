@@ -111,6 +111,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <head>
   <meta charset="UTF-8">
   <title>Add Report — CNO NutriMap</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
   body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; font-size:13px; }

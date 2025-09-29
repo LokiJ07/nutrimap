@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db/config.php';
+require '../db/config.php';
 
 // Handle form submission
 $message = "";
@@ -29,7 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         try {
             $stmt->execute([$first_name, $last_name, $username, $email, $phone_number, $address, $barangay, $user_type, $hash]);
-            $message = "✅ Account created successfully!";
+            
+            // Redirect to users.php after successful insert
+            header("Location: users.php");
+            exit();
+            
         } catch (PDOException $e) {
             if ($e->errorInfo[1] == 1062) {
                 $message = "⚠️ Username or Email already exists!";
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -137,17 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:22px;cursor:pointer;">☰</span>
-        <h2>CNO NutriMap</h2>
-    </div>
-    <input type="text" placeholder="Search...">
-    <div style="font-size:20px;cursor:pointer;">🔔</div>
-</div>
+
 
 <div class="container">
     <div class="card">
+
+        <div style="margin-bottom:15px;">
+        <a href="users.php" style="display:inline-block; text-decoration:none; background: #02ad9fff; color:#fff; padding:8px 16px; border-radius:6px; font-size:14px;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">← Back</a>
+    </div>
         <h2>Create Account</h2>
 
         <?php if ($message): ?>
@@ -206,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="toggle-eye" data-target="confirm_password">🙈</span>
             </div>
 
-            <button type="submit">Register</button>
+            <button type="submit">Add User</button>
         </form>
     </div>
 </div>

@@ -4,7 +4,7 @@ require '../db/config.php';
 require_once('../vendor/autoload.php'); // TCPDF
 
 // ---------- Access Control ----------
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     header("Location: ../login.php");
     exit();
 }

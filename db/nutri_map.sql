@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2025 at 01:28 PM
+-- Generation Time: Sep 26, 2025 at 05:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -149,9 +149,137 @@ CREATE TABLE `bns_reports` (
 --
 
 INSERT INTO `bns_reports` (`id`, `report_id`, `barangay`, `year`, `title`, `ind1`, `ind2`, `ind3`, `ind4a`, `ind4b`, `ind5`, `ind6`, `ind7a`, `ind7b1_no`, `ind7b1_pct`, `ind7b2_no`, `ind7b2_pct`, `ind7b3_no`, `ind7b3_pct`, `ind7b4_no`, `ind7b4_pct`, `ind7b5_no`, `ind7b5_pct`, `ind7b6_no`, `ind7b6_pct`, `ind7b7_no`, `ind7b7_pct`, `ind7b8_no`, `ind7b8_pct`, `ind7b9_no`, `ind7b9_pct`, `ind8`, `ind9`, `ind10`, `ind11`, `ind12`, `ind13`, `ind14`, `ind15a_public`, `ind15a_private`, `ind15b_public`, `ind15b_private`, `ind16`, `ind17`, `ind18`, `ind19`, `ind20a_no`, `ind20a_pct`, `ind20b_no`, `ind20b_pct`, `ind20c_no`, `ind20c_pct`, `ind20d_no`, `ind20d_pct`, `ind20e_no`, `ind20e_pct`, `ind21`, `ind22`, `ind23`, `ind24`, `ind25`, `ind26a_no`, `ind26a_pct`, `ind26b_no`, `ind26b_pct`, `ind26c_no`, `ind26c_pct`, `ind26d_no`, `ind26d_pct`, `ind27a_no`, `ind27a_pct`, `ind27b_no`, `ind27b_pct`, `ind27c_no`, `ind27c_pct`, `ind27d_no`, `ind27d_pct`, `ind28a_no`, `ind28a_pct`, `ind28b_no`, `ind28b_pct`, `ind28c_no`, `ind28c_pct`, `ind28d_no`, `ind28d_pct`, `ind28e_no`, `ind28e_pct`, `ind29a_no`, `ind29a_pct`, `ind29b_no`, `ind29b_pct`, `ind29c_no`, `ind29c_pct`, `ind29d_no`, `ind29d_pct`, `ind29e_no`, `ind29e_pct`, `ind30a_no`, `ind30a_pct`, `ind30b_no`, `ind30b_pct`, `ind30c_no`, `ind30c_pct`, `ind30d_no`, `ind30d_pct`, `ind30e_no`, `ind30e_pct`, `ind31`, `ind32`, `ind33`, `ind34`, `ind35a`, `ind35b`, `ind36`) VALUES
-(10, 12, 'Calongonan', '2025', 'TheF', 12313, 213, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(11, 13, 'Sambulawan', '2025', 'Broda', 12, 21, 213, 0, 0, 0, 0, 0.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 15.00, 0, 51.00, 0, 51.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(12, 14, 'Sambulawan', '2025', '412', 21, 0, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 41.00, 0, 412.00, 0, 14.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
+(10, 12, '', '2025', 'TheF', 12313, 213, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(11, 13, '', '2025', 'Broda', 12, 21, 213, 0, 0, 0, 0, 0.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 51.00, 0, 15.00, 0, 51.00, 0, 51.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(14, 14, '', '2025', '412', 21, 0, 0, 0, 0, 0, 0, 0.00, 0, 100.00, 0, 100.00, 0, 41.00, 0, 412.00, 0, 14.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(15, 15, 'Sambulawan', '2025', 'GOODSH*T', 9999, 999, 999, 999, 9999, 999, 999, 99.00, 0, 100.00, 0, 100.00, 0, 100.00, 0, 99.00, 0, 99.00, 0, 99.00, 0, 99.00, 0, 99.00, 0, 99.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(16, 16, 'Sambulawan', '2025', '21', 12, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(17, 17, 'Sambulawan', '2025', '2', 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bns_reports_archive`
+--
+
+CREATE TABLE `bns_reports_archive` (
+  `archived_id` int(11) NOT NULL,
+  `archived_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `archived_by` int(11) DEFAULT NULL,
+  `report_id` int(11) NOT NULL,
+  `barangay` varchar(100) NOT NULL,
+  `year` year(4) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `ind1` int(11) DEFAULT NULL,
+  `ind2` int(11) DEFAULT NULL,
+  `ind3` int(11) DEFAULT NULL,
+  `ind4a` int(11) DEFAULT NULL,
+  `ind4b` int(11) DEFAULT NULL,
+  `ind5` int(11) DEFAULT NULL,
+  `ind6` int(11) DEFAULT NULL,
+  `ind7a` decimal(5,2) DEFAULT NULL,
+  `ind7b1_no` int(11) DEFAULT NULL,
+  `ind7b1_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b2_no` int(11) DEFAULT NULL,
+  `ind7b2_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b3_no` int(11) DEFAULT NULL,
+  `ind7b3_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b4_no` int(11) DEFAULT NULL,
+  `ind7b4_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b5_no` int(11) DEFAULT NULL,
+  `ind7b5_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b6_no` int(11) DEFAULT NULL,
+  `ind7b6_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b7_no` int(11) DEFAULT NULL,
+  `ind7b7_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b8_no` int(11) DEFAULT NULL,
+  `ind7b8_pct` decimal(5,2) DEFAULT NULL,
+  `ind7b9_no` int(11) DEFAULT NULL,
+  `ind7b9_pct` decimal(5,2) DEFAULT NULL,
+  `ind8` int(11) DEFAULT NULL,
+  `ind9` int(11) DEFAULT NULL,
+  `ind10` int(11) DEFAULT NULL,
+  `ind11` int(11) DEFAULT NULL,
+  `ind12` int(11) DEFAULT NULL,
+  `ind13` int(11) DEFAULT NULL,
+  `ind14` int(11) DEFAULT NULL,
+  `ind15a_public` int(11) DEFAULT NULL,
+  `ind15a_private` int(11) DEFAULT NULL,
+  `ind15b_public` int(11) DEFAULT NULL,
+  `ind15b_private` int(11) DEFAULT NULL,
+  `ind16` int(11) DEFAULT NULL,
+  `ind17` int(11) DEFAULT NULL,
+  `ind18` int(11) DEFAULT NULL,
+  `ind19` decimal(5,2) DEFAULT NULL,
+  `ind20a_no` int(11) DEFAULT NULL,
+  `ind20a_pct` decimal(5,2) DEFAULT NULL,
+  `ind20b_no` int(11) DEFAULT NULL,
+  `ind20b_pct` decimal(5,2) DEFAULT NULL,
+  `ind20c_no` int(11) DEFAULT NULL,
+  `ind20c_pct` decimal(5,2) DEFAULT NULL,
+  `ind20d_no` int(11) DEFAULT NULL,
+  `ind20d_pct` decimal(5,2) DEFAULT NULL,
+  `ind20e_no` int(11) DEFAULT NULL,
+  `ind20e_pct` decimal(5,2) DEFAULT NULL,
+  `ind21` int(11) DEFAULT NULL,
+  `ind22` int(11) DEFAULT NULL,
+  `ind23` int(11) DEFAULT NULL,
+  `ind24` int(11) DEFAULT NULL,
+  `ind25` int(11) DEFAULT NULL,
+  `ind26a_no` int(11) DEFAULT NULL,
+  `ind26a_pct` decimal(5,2) DEFAULT NULL,
+  `ind26b_no` int(11) DEFAULT NULL,
+  `ind26b_pct` decimal(5,2) DEFAULT NULL,
+  `ind26c_no` int(11) DEFAULT NULL,
+  `ind26c_pct` decimal(5,2) DEFAULT NULL,
+  `ind26d_no` int(11) DEFAULT NULL,
+  `ind26d_pct` decimal(5,2) DEFAULT NULL,
+  `ind27a_no` int(11) DEFAULT NULL,
+  `ind27a_pct` decimal(5,2) DEFAULT NULL,
+  `ind27b_no` int(11) DEFAULT NULL,
+  `ind27b_pct` decimal(5,2) DEFAULT NULL,
+  `ind27c_no` int(11) DEFAULT NULL,
+  `ind27c_pct` decimal(5,2) DEFAULT NULL,
+  `ind27d_no` int(11) DEFAULT NULL,
+  `ind27d_pct` decimal(5,2) DEFAULT NULL,
+  `ind28a_no` int(11) DEFAULT NULL,
+  `ind28a_pct` decimal(5,2) DEFAULT NULL,
+  `ind28b_no` int(11) DEFAULT NULL,
+  `ind28b_pct` decimal(5,2) DEFAULT NULL,
+  `ind28c_no` int(11) DEFAULT NULL,
+  `ind28c_pct` decimal(5,2) DEFAULT NULL,
+  `ind28d_no` int(11) DEFAULT NULL,
+  `ind28d_pct` decimal(5,2) DEFAULT NULL,
+  `ind28e_no` int(11) DEFAULT NULL,
+  `ind28e_pct` decimal(5,2) DEFAULT NULL,
+  `ind29a_no` int(11) DEFAULT NULL,
+  `ind29a_pct` decimal(5,2) DEFAULT NULL,
+  `ind29b_no` int(11) DEFAULT NULL,
+  `ind29b_pct` decimal(5,2) DEFAULT NULL,
+  `ind29c_no` int(11) DEFAULT NULL,
+  `ind29c_pct` decimal(5,2) DEFAULT NULL,
+  `ind29d_no` int(11) DEFAULT NULL,
+  `ind29d_pct` decimal(5,2) DEFAULT NULL,
+  `ind29e_no` int(11) DEFAULT NULL,
+  `ind29e_pct` decimal(5,2) DEFAULT NULL,
+  `ind30a_no` int(11) DEFAULT NULL,
+  `ind30a_pct` decimal(5,2) DEFAULT NULL,
+  `ind30b_no` int(11) DEFAULT NULL,
+  `ind30b_pct` decimal(5,2) DEFAULT NULL,
+  `ind30c_no` int(11) DEFAULT NULL,
+  `ind30c_pct` decimal(5,2) DEFAULT NULL,
+  `ind30d_no` int(11) DEFAULT NULL,
+  `ind30d_pct` decimal(5,2) DEFAULT NULL,
+  `ind30e_no` int(11) DEFAULT NULL,
+  `ind30e_pct` decimal(5,2) DEFAULT NULL,
+  `ind31` int(11) DEFAULT NULL,
+  `ind32` int(11) DEFAULT NULL,
+  `ind33` int(11) DEFAULT NULL,
+  `ind34` int(11) DEFAULT NULL,
+  `ind35a` int(11) DEFAULT NULL,
+  `ind35b` int(11) DEFAULT NULL,
+  `ind36` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -175,14 +303,16 @@ CREATE TABLE `login_history` (
 --
 
 INSERT INTO `login_history` (`id`, `user_id`, `session_id`, `browser`, `ip_address`, `login_time`, `logout_time`, `device_token`) VALUES
-(1, 10, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 03:57:24', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(1, 10, '0g4pc8sqogvkriqetvl5unshgt', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 14:52:23', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
 (2, 10, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 03:56:44', NULL, NULL),
-(3, 8, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:21:07', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(3, 8, '0g4pc8sqogvkriqetvl5unshgt', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 13:35:34', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
 (4, 8, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 04:12:29', NULL, NULL),
-(5, 12, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:22:08', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(5, 12, '67kd4du5tuo4nknp82s0dg1trd', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 06:53:28', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
 (6, 12, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:22:48', NULL, NULL),
-(7, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:27', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
-(8, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:57', NULL, NULL);
+(7, 10, 'g9rga0rbasm7a3phvbp7rt09jr', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 13:58:05', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(8, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:57', NULL, NULL),
+(9, 12, '8vsueecltnic705kk3f66fgdh4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 03:18:17', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(10, 12, '8vsueecltnic705kk3f66fgdh4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 03:18:56', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -211,7 +341,8 @@ INSERT INTO `otp_codes` (`id`, `user_id`, `otp_code`, `created_at`, `expires_at`
 (31, 10, '216510', '2025-09-22 03:56:26', '2025-09-22 06:01:26'),
 (32, 8, '430813', '2025-09-22 04:12:00', '2025-09-22 06:17:00'),
 (33, 12, '915745', '2025-09-22 11:22:08', '2025-09-22 13:27:08'),
-(34, 10, '201614', '2025-09-22 11:26:27', '2025-09-22 13:31:27');
+(34, 10, '201614', '2025-09-22 11:26:27', '2025-09-22 13:31:27'),
+(35, 12, '698628', '2025-09-26 03:18:17', '2025-09-26 05:23:17');
 
 -- --------------------------------------------------------
 
@@ -234,7 +365,10 @@ CREATE TABLE `reports` (
 INSERT INTO `reports` (`id`, `user_id`, `report_time`, `report_date`, `status`) VALUES
 (12, 10, '15:19:58', '2025-09-21', 'Approved'),
 (13, 12, '15:21:49', '2025-09-21', 'Approved'),
-(14, 12, '15:24:58', '2025-09-21', 'Approved');
+(14, 12, '06:08:47', '2025-09-26', 'Approved'),
+(15, 12, '08:54:32', '2025-09-26', 'Approved'),
+(16, 12, '09:12:13', '2025-09-26', 'Rejected'),
+(17, 12, '09:18:02', '2025-09-26', 'Rejected');
 
 -- --------------------------------------------------------
 
@@ -265,9 +399,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`, `email`, `address`, `barangay`, `profile_pic`, `user_type`, `password_hash`, `created_at`, `current_session`, `password_changed`, `status`) VALUES
-(8, 'CNO', 'ADMIN', 'CNO', '09264686830', 'louizkylaspona@gmail.com', 'Mangima Tankulan', 'CNO', '1758540105_CCS_Logo_2.png', 'CNO', '$2y$10$Xm/8kdPuxuROCeJfzlcU6.rrR0CizxiD3R7CCAy/lKlwIaZCGFJJq', '2025-09-21 13:06:17', '2hauhvi1j0u8lcgslp2m8ovncv', 0, 'Active'),
-(10, 'BNS', 'Brgy', 'bns', '09264686830', 'loki072002@gmail.com', 'Mangima Tankulan', 'Calongonan', '1758514208_2.png', 'BNS', '$2y$10$zO97F06lMGhmM.Cap0dhu.P4bn/7GyR4zMNMFnd3YS/zOK0WDjEoa', '2025-09-21 13:16:32', '89jbjpmh218tvv08dbf3v77i0p', 0, 'Active'),
-(12, 'we', 'we', 'we', '21', 'goodies34512@gmail.com', 'Mangima Tankulan', 'Sambulawan', '1758540182_image_1.jpg', 'BNS', '$2y$10$XKrEFbJZtEkhhDpDq9vOsOQoQZ1H2ubMfaN2oEPSE8crsIW2OYoMW', '2025-09-21 13:18:02', '89jbjpmh218tvv08dbf3v77i0p', 0, 'Active');
+(8, 'CNO', 'ADMIN', 'CNO', '09264686830', 'louizkylaspona@gmail.com', 'Mangima Tankulan', 'CNO', '1758540105_CCS_Logo_2.png', 'CNO', '$2y$10$Xm/8kdPuxuROCeJfzlcU6.rrR0CizxiD3R7CCAy/lKlwIaZCGFJJq', '2025-09-21 13:06:17', '0g4pc8sqogvkriqetvl5unshgt', 0, 'Active'),
+(10, 'BNS', 'Brgy', 'bns', '09264686830', 'loki072002@gmail.com', 'Mangima Tankulan', 'Calongonan', '1758514208_2.png', 'BNS', '$2y$10$zO97F06lMGhmM.Cap0dhu.P4bn/7GyR4zMNMFnd3YS/zOK0WDjEoa', '2025-09-21 13:16:32', '0g4pc8sqogvkriqetvl5unshgt', 0, 'Active'),
+(12, 'we', 'we', 'we', '21', 'goodies34512@gmail.com', 'Mangima Tankulan', 'Sambulawan', '1758540182_image_1.jpg', 'BNS', '$2y$10$XKrEFbJZtEkhhDpDq9vOsOQoQZ1H2ubMfaN2oEPSE8crsIW2OYoMW', '2025-09-21 13:18:02', '67kd4du5tuo4nknp82s0dg1trd', 0, 'Active');
 
 --
 -- Indexes for dumped tables
@@ -279,6 +413,12 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`
 ALTER TABLE `bns_reports`
   ADD PRIMARY KEY (`id`),
   ADD KEY `report_id` (`report_id`);
+
+--
+-- Indexes for table `bns_reports_archive`
+--
+ALTER TABLE `bns_reports_archive`
+  ADD PRIMARY KEY (`archived_id`);
 
 --
 -- Indexes for table `login_history`
@@ -316,25 +456,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `bns_reports`
 --
 ALTER TABLE `bns_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `bns_reports_archive`
+--
+ALTER TABLE `bns_reports_archive`
+  MODIFY `archived_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `login_history`
 --
 ALTER TABLE `login_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `otp_codes`
 --
 ALTER TABLE `otp_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `reports`
 --
 ALTER TABLE `reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `users`
