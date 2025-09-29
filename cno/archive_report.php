@@ -2,11 +2,11 @@
   session_start();
   require '../db/config.php';
 
-  // ✅ Require login
-  if (!isset($_SESSION['user_id'])) {
-      header("Location: ../auth/login.php");
-      exit();
-  }
+// ✅ Only CNO
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+    header("Location: ../login.php");
+    exit();
+}
 
   $userId = $_SESSION['user_id'];
 
