@@ -1,136 +1,179 @@
-<?php
-/*******************************************************
- * archived_reports.php  –  ALL-IN-ONE
- * -----------------------------------------------------
- * • Lists all archived BNS reports.
- * • Restores a report back to bns_reports.
- * • Permanently deletes an archived report.
- *******************************************************/
-session_start();
-require '../db/config.php';   // adjust the path if needed
+  <?php
+  session_start();
+  require '../db/config.php';
 
-// ✅ 1. Security: only CNO can access
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
-    header("Location: ../login.php");
-    exit();
-}
+  // ✅ Require login
+  if (!isset($_SESSION['user_id'])) {
+      header("Location: ../auth/login.php");
+      exit();
+  }
 
-// ✅ 2. Handle Actions (restore / delete) in the same file
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $id     = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+  $userId = $_SESSION['user_id'];
 
-    if ($id > 0 && in_array($action, ['restore','delete'], true)) {
-        try {
-            if ($action === 'restore') {
-                $pdo->beginTransaction();
-                // NOTE: include all columns you need to restore
-                $pdo->exec("
-                    INSERT INTO bns_reports
-                    SELECT report_id, barangay, year, title,
-                           ind1, ind2, ind3
-                           -- add all other columns here!
-                    FROM bns_reports_archive
-                    WHERE archived_id = {$id}
-                ");
-                $pdo->exec("DELETE FROM bns_reports_archive WHERE archived_id = {$id}");
-                $pdo->commit();
-                $msg = "Report restored successfully.";
-            }
-            elseif ($action === 'delete') {
-                $stmt = $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = ?");
-                $stmt->execute([$id]);
-                $msg = "Report permanently deleted.";
-            }
-        } catch (Exception $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            $msg = "Error: " . $e->getMessage();
-        }
-    } else {
-        $msg = "Invalid action or ID.";
-    }
-}
+  // ✅ Handle optional messages
+  $message = $_GET['msg'] ?? '';
 
-// ✅ 3. Fetch all archived reports to display
-$stmt = $pdo->query("
-    SELECT archived_id, report_id, barangay, year, title, archived_at
-    FROM bns_reports_archive
-    ORDER BY archived_at DESC
-");
-$archives = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Archived BNS Reports</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;}
-.container{max-width:1200px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 0 6px rgba(0,0,0,.1);}
-h1{margin-top:0;}
-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px;}
-th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
-button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointer;}
-.btn-restore{background:#27ae60;color:#fff;}
-.btn-delete{background:#e74c3c;color:#fff;}
-.message{padding:10px;margin-bottom:10px;border-radius:4px;background:#e8f4e8;color:#2c662d;}
-</style>
-</head>
-<body>
-    <?php include 'header.php';?>
-    <?php include 'sidebar.php';?>
-<div class="container">
-    <h1>Archived BNS Reports</h1>
+  // ✅ Fetch archived reports for the logged-in user only
+  $stmt = $pdo->prepare("
+      SELECT r.*, u.username, b.title, b.barangay
+      FROM reports r
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN bns_reports b ON b.report_id = r.id
+      WHERE r.status = 'Archived' AND r.user_id = :uid
+      ORDER BY r.report_date DESC, r.report_time DESC
+  ");
+  $stmt->execute(['uid' => $userId]);
+  $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  ?>
 
-    <?php if (!empty($msg)): ?>
-      <div class="message"><?= htmlspecialchars($msg) ?></div>
-    <?php endif; ?>
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>CNO NutriMap — Archive</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+      body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f5f5f5; }
+      .layout { display:flex; height:100vh; flex-direction:column; }
+      .body-layout { flex:1; display:flex; }
+      .content { flex:1; padding:15px; display:flex; flex-direction:column; }
 
-    <table>
-        <thead>
-            <tr>
-                <th>Archive ID</th>
-                <th>Report ID</th>
-                <th>Title</th>
-                <th>Barangay</th>
-                <th>Year</th>
-                <th>Archived At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php if ($archives): ?>
-            <?php foreach ($archives as $a): ?>
-            <tr>
-                <td><?= htmlspecialchars($a['archived_id']) ?></td>
-                <td><?= htmlspecialchars($a['report_id']) ?></td>
-                <td><?= htmlspecialchars($a['title']) ?></td>
-                <td><?= htmlspecialchars($a['barangay']) ?></td>
-                <td><?= htmlspecialchars($a['year']) ?></td>
-                <td><?= htmlspecialchars($a['archived_at']) ?></td>
-                <td>
-                    <form method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="<?= $a['archived_id'] ?>">
-                        <input type="hidden" name="action" value="restore">
-                        <button class="btn-restore" type="submit">Restore</button>
-                    </form>
-                    <form method="post" style="display:inline;" 
-                          onsubmit="return confirm('Permanently delete this record?');">
-                        <input type="hidden" name="id" value="<?= $a['archived_id'] ?>">
-                        <input type="hidden" name="action" value="delete">
-                        <button class="btn-delete" type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr><td colspan="7" style="text-align:center;color:#888;">No archived reports</td></tr>
-        <?php endif; ?>
-        </tbody>
-    </table>
-</div>
+      .card { background:#fff; border:1px solid #ccc; border-radius:8px; padding:15px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+      .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+      .toolbar-left input { padding:8px 10px; border:1px solid #ccc; border-radius:6px; width:240px; }
+      .toolbar-right select { padding:8px; border:1px solid #ccc; border-radius:6px; }
 
-</body>
-</html>
+      .archive-list { display:flex; flex-direction:column; gap:8px; }
+      .archive-item {
+        background:#fff; border:1px solid #ccc; border-radius:6px; padding:12px;
+        display:flex; justify-content:space-between; align-items:center;
+        position:relative; box-shadow:0 1px 3px rgba(0,0,0,0.08);
+      }
+      .archive-item:hover { background:#f0f8ff; cursor:pointer; }
+      .archive-title { font-size:15px; font-weight:600; color:#333; }
+      .archive-meta { font-size:13px; color:#555; margin-top:3px; }
+
+      /* Three-dot menu */
+      .menu-container { position:relative; }
+      .menu-btn { background:none; border:none; cursor:pointer; font-size:18px; color:#555; }
+      .menu-content {
+        display:none; position:absolute; right:0; top:25px; background:#fff; border:1px solid #ccc;
+        border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.15); z-index:10; min-width:160px;
+      }
+      .menu-content a { display:block; padding:8px 12px; font-size:14px; color:#333; text-decoration:none; }
+      .menu-content a:hover { background:#f5f5f5; }
+      .menu-container.active .menu-content { display:block; }
+
+      .status { padding:3px 8px; border-radius:10px; font-size:12px; color:#fff; }
+      .status.Pending { background:#ffc107; color:#000; }
+      .status.Approved { background:#28a745; }
+      .status.Rejected { background:#dc3545; }
+      .status.Archived { background:#6c757d; }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <?php include 'header.php'; ?>
+      <div class="body-layout">
+        <div class="content">
+
+          <!-- 🔹 Search + Sort -->
+          <div class="card">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+                  <h3 style="margin:0;">Archive</h3>
+                  <div class="toolbar-left" style="position:relative; margin-left:15px;">
+                    <i class="fa fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#888;"></i>
+                    <input type="text" id="search" placeholder="Search reports..." style="padding-left:30px;">
+                  </div>
+                  <div class="toolbar-right" style="margin-left:auto;">
+                    <label for="sort">Sort By:</label>
+                    <select id="sort">
+                      <option value="title">A → Z</option>
+                      <option value="date">Newest → Oldest</option>
+                    </select>
+                  </div>
+              </div>
+          </div>
+
+          <!-- 🔹 Archived reports list -->
+          <div class="archive-list" id="archiveList">
+            <?php if ($reports): ?>
+              <?php foreach ($reports as $r): ?>
+                <div class="archive-item">
+                  <div>
+                    <div class="archive-title"><?= htmlspecialchars($r['title'] ?? 'Untitled Report') ?></div>
+                    <div class="archive-meta">
+                      User: <?= htmlspecialchars($r['username']) ?> | 
+                      Barangay: <?= htmlspecialchars($r['barangay'] ?? '-') ?> | 
+                      <?= date("m-d-Y", strtotime($r['report_date'])) ?> <?= date("h:i a", strtotime($r['report_time'])) ?>
+                    </div>
+                  </div>
+                  <div class="menu-container" onclick="event.stopPropagation();">
+                    <button class="menu-btn"><i class="fa fa-ellipsis-v"></i></button>
+                    <div class="menu-content">
+                      <a href="view_report.php?id=<?= $r['id'] ?>" target="_blank"><i class="fa fa-eye"></i> View</a>
+                      <a href="archive/restore_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Restore this report?')"><i class="fa fa-undo"></i> Restore</a>
+                      <a href="archive/delete_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Delete this report permanently?')"><i class="fa fa-trash"></i> Delete Permanently</a>
+                    </div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <p style="color:#555;">No archived reports found.</p>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+  // Toggle menu
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.parentElement.classList.toggle('active');
+    });
+  });
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.menu-container').forEach(c => c.classList.remove('active'));
+  });
+
+  // 🔹 Reusable search function
+  function filterArchive(searchTerm) {
+    const q = searchTerm.toLowerCase();
+    document.querySelectorAll('.archive-item').forEach(item => {
+      const title = item.querySelector('.archive-title').textContent.toLowerCase();
+      const meta = item.querySelector('.archive-meta').textContent.toLowerCase();
+      item.style.display = title.includes(q) || meta.includes(q) ? '' : 'none';
+    });
+  }
+
+  // Attach search input
+  document.getElementById('search').addEventListener('input', function() {
+    filterArchive(this.value);
+  });
+
+  // Sort functionality
+  document.getElementById('sort').addEventListener('change', function() {
+    const value = this.value;
+    const list = document.getElementById('archiveList');
+    const items = Array.from(list.querySelectorAll('.archive-item'));
+
+    items.sort((a, b) => {
+      if (value === 'title') {
+        return a.querySelector('.archive-title').textContent.localeCompare(
+          b.querySelector('.archive-title').textContent
+        );
+      } else {
+        const dateA = new Date(a.querySelector('.archive-meta').textContent.split('|')[2].trim());
+        const dateB = new Date(b.querySelector('.archive-meta').textContent.split('|')[2].trim());
+        return dateB - dateA;
+      }
+    });
+
+    items.forEach(item => list.appendChild(item));
+  });  
+  </script>
+  </body>
+  </html>
