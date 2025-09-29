@@ -66,11 +66,13 @@ h1{font-size:1.5rem;font-weight:bold;margin-bottom:1rem;}
 select{padding:.25rem .75rem;border:1px solid #d1d5db;border-radius:.375rem;}
 table{width:100%;border-collapse:collapse;}
 thead{background:#f9fafb;}
-th,td{padding:.75rem;text-align:left;font-size:.875rem;border:1px solid #e5e7eb;}
+th,td{padding:1rem;text-align:left;font-size:.875rem;border:1px solid #e5e7eb;}
 th{text-transform:uppercase;font-weight:600;font-size:.75rem;color:#6b7280;}
 td{color:#374151;}
-.approve-button{color:#16a34a;background:#dcfce7;border-radius:.375rem;padding:.25rem .75rem;border:none;cursor:pointer;}
-.approve-button:hover{background:#bbf7d0;}
+.btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
+.btn-view {background:#3498db;}
+.approve-button{color: #01af41ff;background:#dcfce7;border-radius:.375rem;padding:.25rem .75rem;border:none;cursor:pointer;}
+.approve-button:hover{background: #bbf7d0;}
 .decline-button{color:#dc2626;background:#fee2e2;border-radius:.375rem;padding:.25rem .75rem;border:none;cursor:pointer;}
 #message-box{margin-top:1rem;font-weight:bold;padding:.5rem 1rem;border-radius:.375rem;display:none;}
 .hidden{display:none;}
@@ -131,6 +133,7 @@ td{color:#374151;}
             <td>
                 <button class="approve-button">Approve</button>
                 <button class="decline-button">Decline</button>
+                <a class="btn btn-view" href="view_report.php?id=<?= $r['id'] ?>">View</a>
             </td>
         </tr>
         <?php endforeach; ?>

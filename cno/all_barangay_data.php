@@ -89,7 +89,6 @@ h1 {margin-top:0;}
     <?php foreach ($barangayReports as $r): ?>
       <div class="list-item" data-barangay="<?= htmlspecialchars($r['barangay']) ?>">
         <strong>
-          <a href="view_report.php?id=<?= urlencode($r['report_id']) ?>">
             <?= htmlspecialchars($r['barangay']) ?> Health and Nutrition Data
           </a>
         </strong>
