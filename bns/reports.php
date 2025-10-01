@@ -14,9 +14,10 @@ $userId = $_SESSION['user_id'];
 
 // --- Fetch all user reports ---
 $stmt = $pdo->prepare("
-    SELECT r.id, b.title, b.barangay, r.status, r.report_time, r.report_date
+    SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date
     FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
+     JOIN users u ON r.user_id = u.id
+    LEFT JOIN bns_reports b ON r.id = b.report_id
     WHERE r.user_id = ?
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
@@ -33,6 +34,7 @@ $myReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;}
+.user-avatar {width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle;object-fit:cover;}
 .layout {display:flex;flex-direction:column;height:100vh;}
 .body-layout {display:flex;flex:1;}
 .content {flex:1;padding:15px;overflow-y:auto;}
@@ -44,7 +46,7 @@ body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;}
 .add-btn:hover {background:#00796b;}
 .table-container {background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 table {width:100%;border-collapse:collapse;font-size:14px;}
-th, td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+th, td {padding:5px;text-align:left;border-bottom:1px solid #ddd;}
 thead {background: #009688;color:#fff; cursor: pointer;}
 .status-badge {padding:2px 8px;border-radius:12px;color:#fff;font-size:12px;}
 .status-Pending {background:#00bcd4;}
@@ -82,8 +84,8 @@ thead {background: #009688;color:#fff; cursor: pointer;}
     <table id="reportsTable">
       <thead>
         <tr>
+          <th>User</th>
           <th>Title</th>
-          <th>Barangay</th>
           <th>Status</th>
           <th>Time</th>
           <th>Date</th>
@@ -94,8 +96,14 @@ thead {background: #009688;color:#fff; cursor: pointer;}
         <?php if ($myReports): ?>
           <?php foreach ($myReports as $r): ?>
           <tr>
+            <td>
+              <?php if (!empty($r['profile_pic']) && file_exists("../uploads/".$r['profile_pic'])): ?>
+                  <img src="../uploads/<?= htmlspecialchars($r['profile_pic']) ?>" class="user-avatar" alt="Profile">
+                <?php else: ?>
+                  <img src="../uploads/default.png" class="user-avatar" alt="Default">
+                <?php endif; ?>
+              <?= htmlspecialchars($r['username']) ?></td>
             <td><?= htmlspecialchars($r['title']) ?></td>
-            <td><?= htmlspecialchars($r['barangay']) ?></td>
             <td><span class="status-badge status-<?= $r['status'] ?>"><?= $r['status'] ?></span></td>
             <td><?= htmlspecialchars($r['report_time']) ?></td>
             <td><?= htmlspecialchars($r['report_date']) ?></td>
