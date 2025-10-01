@@ -1,7 +1,7 @@
 <?php
 // logout.php
 session_start();
-
+require 'db/config.php';
 // ✅ Log activity before destroying the session
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
