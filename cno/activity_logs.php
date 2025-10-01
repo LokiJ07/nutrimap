@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require '../db/config.php';
 
 // ✅ Only CNO
@@ -8,167 +8,131 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     exit();
 }
 
-$userId = $_SESSION['user_id'] ?? null;
-
 // --- Pagination ---
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page = max($page, 1); // prevent negative page
+if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-// --- Filters ---
+// --- Search & Sort ---
 $search = $_GET['search'] ?? '';
-$roleFilter = $_GET['role'] ?? 'All';
-$sort = $_GET['sort'] ?? 'new';
+$sortOpt = $_GET['sort'] ?? 'new';  // ’new’ default
+// sortOpt can be: 'new', 'old', 'az', 'za'
+$allowedSort = ['new', 'old', 'az', 'za'];
+if (!in_array($sortOpt, $allowedSort)) {
+    $sortOpt = 'new';
+}
 
-// --- Query ---
-$query = "
+// Build ORDER BY clause
+$orderClause = "ORDER BY al.created_at DESC";  // default new → old
+if ($sortOpt === 'old') {
+    $orderClause = "ORDER BY al.created_at ASC";
+} elseif ($sortOpt === 'az') {
+    $orderClause = "ORDER BY u.first_name ASC, u.last_name ASC";
+} elseif ($sortOpt === 'za') {
+    $orderClause = "ORDER BY u.first_name DESC, u.last_name DESC";
+}
+
+// --- Total rows for pagination (consider search)
+$countSql = "
+    SELECT COUNT(*) 
+    FROM activity_logs al
+    JOIN users u ON al.user_id = u.id
+    WHERE 1=1
+";
+if ($search !== '') {
+    $s = "%". $search ."%";
+    $countSql .= " AND (
+        u.first_name LIKE :search
+        OR u.last_name LIKE :search
+        OR al.action LIKE :search
+        OR al.details LIKE :search
+    )";
+}
+$countStmt = $pdo->prepare($countSql);
+if ($search !== '') {
+    $countStmt->bindValue(':search', $s, PDO::PARAM_STR);
+}
+$countStmt->execute();
+$totalRows = $countStmt->fetchColumn();
+$totalPages = ceil($totalRows / $limit);
+
+// --- Fetch logs with sort, search, pagination ---
+$sql = "
     SELECT al.id, al.action, al.details, al.created_at,
            u.first_name, u.last_name, u.user_type, u.barangay
     FROM activity_logs al
     JOIN users u ON al.user_id = u.id
     WHERE 1=1
 ";
-
-$params = [];
-
-if (!empty($search)) {
-    $query .= " AND (u.first_name LIKE :search 
-                 OR u.last_name LIKE :search 
-                 OR al.action LIKE :search 
-                 OR al.details LIKE :search)";
-    $params[':search'] = "%$search%";
+if ($search !== '') {
+    $sql .= " AND (
+        u.first_name LIKE :search
+        OR u.last_name LIKE :search
+        OR al.action LIKE :search
+        OR al.details LIKE :search
+    )";
 }
-if ($roleFilter !== 'All') {
-    $query .= " AND u.user_type = :roleFilter";
-    $params[':roleFilter'] = $roleFilter;
-}
+$sql .= " $orderClause LIMIT :limit OFFSET :offset";
 
-switch ($sort) {
-    case 'az': $query .= " ORDER BY u.first_name ASC"; break;
-    case 'old': $query .= " ORDER BY al.created_at ASC"; break;
-    case 'new':
-    default: $query .= " ORDER BY al.created_at DESC"; break;
-}
-
-$query .= " LIMIT :limit OFFSET :offset";
-$stmt = $pdo->prepare($query);
-
-// Bind values
-foreach ($params as $key => $val) {
-    $stmt->bindValue($key, $val);
+$stmt = $pdo->prepare($sql);
+if ($search !== '') {
+    $stmt->bindValue(':search', $s, PDO::PARAM_STR);
 }
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// ✅ Count total
-$countQuery = "
-    SELECT COUNT(*) FROM activity_logs al
-    JOIN users u ON al.user_id = u.id
-    WHERE 1=1
-";
-$countParams = [];
-
-if (!empty($search)) {
-    $countQuery .= " AND (u.first_name LIKE :search 
-                     OR u.last_name LIKE :search 
-                     OR al.action LIKE :search 
-                     OR al.details LIKE :search)";
-    $countParams[':search'] = "%$search%";
-}
-if ($roleFilter !== 'All') {
-    $countQuery .= " AND u.user_type = :roleFilter";
-    $countParams[':roleFilter'] = $roleFilter;
-}
-
-$countStmt = $pdo->prepare($countQuery);
-foreach ($countParams as $key => $val) {
-    $countStmt->bindValue($key, $val);
-}
-$countStmt->execute();
-$totalRows = $countStmt->fetchColumn();
-$totalPages = ceil($totalRows / $limit);
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CNO NutriMap — Logs</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Activity Logs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f5f5f5; }
-    .layout { display:flex; flex-direction:column; height:100vh; }
-    .body-layout { display:flex; flex:1; }
-    .content { flex:1; padding:20px; display:flex; flex-direction:column; }
-    .panel { background:#fff; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); margin-bottom:20px; }
-    .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
-    .filters { display:flex; justify-content:space-between; align-items:center; }
-    .search-bar input { width:250px; padding:6px 10px; border:1px solid #ccc; border-radius:6px; }
-    .filter-options { display:flex; gap:10px; }
-    .filter-options select { padding:6px; border:1px solid #ccc; border-radius:6px; }
-    table { width:100%; border-collapse:collapse; font-size:14px; }
-    th, td { padding:10px; border-bottom:1px solid #eee; }
-    th { font-weight:bold; color:#333; }
-    .pagination { display:flex; gap:5px; }
-    .pagination a {
-      padding:6px 12px; border:1px solid #ccc; border-radius:6px;
-      background:#fff; font-size:13px; text-decoration:none; color:#333;
-    }
-    .pagination .active { background:#009688; color:#fff; }
-    .pagination a.disabled { color:#aaa; pointer-events:none; background:#f9f9f9; }
+    body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; margin: 0; }
+    .layout { display: flex; flex-direction: column; height: 100vh; }
+    .body-layout { display: flex; flex: 1; }
+    .content { flex: 1; padding: 20px; overflow-y: auto; }
+    .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+    .filters input { width: 250px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .filters select { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .table-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    thead { background: #009688; color: #fff; }
+    .pagination { margin-top: 15px; display: flex; justify-content: center; gap: 5px; }
+    .pagination a { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; text-decoration: none; color: #333; }
+    .pagination a.active { background: #009688; color: #fff; }
+    .pagination a.disabled { color: #aaa; pointer-events: none; background: #f9f9f9; }
   </style>
 </head>
 <body>
   <div class="layout">
     <?php include 'header.php'; ?>
     <?php include 'sidebar.php'; ?>
-
     <div class="body-layout">
       <main class="content">
+        <h2>Activity Logs</h2>
 
-        <!-- Card 1: Search + Filters -->
-        <div class="panel">
-          <form method="get" class="filters">
-            <div class="search-bar">
-              <input type="text" name="search" placeholder="Search user or action..."
-                     value="<?= htmlspecialchars($search) ?>"
-                     onkeypress="if(event.key==='Enter'){this.form.submit();}">
-            </div>
-            <div class="filter-options">
-              <select name="role" onchange="this.form.submit()">
-                <option value="All" <?= $roleFilter==='All'?'selected':'' ?>>All</option>
-                <option value="BNS" <?= $roleFilter==='BNS'?'selected':'' ?>>BNS</option>
-                <option value="CNO" <?= $roleFilter==='CNO'?'selected':'' ?>>CNO</option>
-              </select>
-              <select name="sort" onchange="this.form.submit()">
-                <option value="new" <?= $sort==='new'?'selected':'' ?>>New to Old</option>
-                <option value="old" <?= $sort==='old'?'selected':'' ?>>Old to New</option>
-                <option value="az" <?= $sort==='az'?'selected':'' ?>>A–Z</option>
-              </select>
-            </div>
-          </form>
+        <div class="filters">
+          <input type="text" id="logSearch" placeholder="Search logs...">
+        <form method="get" style="margin:0;">
+  <select name="sort" onchange="this.form.submit()">
+    <option value="new" <?= $sortOpt === 'new' ? 'selected' : '' ?>>New → Old</option>
+    <option value="old" <?= $sortOpt === 'old' ? 'selected' : '' ?>>Old → New</option>
+    <option value="az" <?= $sortOpt === 'az' ? 'selected' : '' ?>>A → Z</option>
+    <option value="za" <?= $sortOpt === 'za' ? 'selected' : '' ?>>Z → A</option>
+  </select>
+  <input type="hidden" name="page" value="<?= $page ?>">
+</form>
+
         </div>
 
-        <!-- Card 2: Logs Table -->
-        <div class="panel">
-          <div class="panel-header">
-            <h3>Logs</h3>
-            <div class="pagination">
-              <a href="?page=<?= $page-1 ?>&search=<?= urlencode($search) ?>&role=<?= $roleFilter ?>&sort=<?= $sort ?>"
-                 class="<?= $page<=1?'disabled':'' ?>">Prev</a>
-              <?php for ($i=1; $i<=$totalPages; $i++): ?>
-                <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&role=<?= $roleFilter ?>&sort=<?= $sort ?>"
-                   class="<?= $i==$page?'active':'' ?>"><?= $i ?></a>
-              <?php endfor; ?>
-              <a href="?page=<?= $page+1 ?>&search=<?= urlencode($search) ?>&role=<?= $roleFilter ?>&sort=<?= $sort ?>"
-                 class="<?= $page>=$totalPages?'disabled':'' ?>">Next</a>
-            </div>
-          </div>
-
-          <table>
+        <div class="table-container">
+          <table id="logsTable">
             <thead>
               <tr>
                 <th>Date & Time</th>
@@ -180,7 +144,7 @@ $totalPages = ceil($totalRows / $limit);
               </tr>
             </thead>
             <tbody>
-              <?php if (count($logs) > 0): ?>
+              <?php if ($logs): ?>
                 <?php foreach ($logs as $log): ?>
                   <tr>
                     <td><?= htmlspecialchars($log['created_at']) ?></td>
@@ -192,14 +156,39 @@ $totalPages = ceil($totalRows / $limit);
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>
-                <tr><td colspan="6" style="text-align:center;">No logs found</td></tr>
+                <tr><td colspan="6" style="text-align:center;color:#888;">No logs found</td></tr>
               <?php endif; ?>
             </tbody>
           </table>
-        </div>
 
+       <div class="pagination">
+  <?php if ($page > 1): ?>
+    <a href="?page=<?= $page-1 ?>&sort=<?= $sortOpt ?>">Prev</a>
+  <?php endif; ?>
+  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?page=<?= $i ?>&sort=<?= $sortOpt ?>"
+       class="<?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
+  <?php endfor; ?>
+  <?php if ($page < $totalPages): ?>
+    <a href="?page=<?= $page+1 ?>&sort=<?= $sortOpt ?>">Next</a>
+  <?php endif; ?>
+</div>
+
+        </div>
       </main>
     </div>
   </div>
+
+<script>
+// Client-side filter (same as reports)
+document.getElementById("logSearch").addEventListener("keyup", function() {
+  let filter = this.value.toLowerCase();
+  let rows = document.querySelectorAll("#logsTable tbody tr");
+  rows.forEach(row => {
+    let text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  });
+});
+</script>
 </body>
 </html>

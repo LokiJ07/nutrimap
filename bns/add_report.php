@@ -90,6 +90,17 @@ if (session_status() === PHP_SESSION_NONE) {
           $stmt2 = $pdo->prepare($sql);
           $stmt2->execute($params);
 
+                  // 3️⃣ Log activity
+        $logStmt = $pdo->prepare("
+            INSERT INTO activity_logs (user_id, action, details, created_at)
+            VALUES (:user_id, :action, :details, NOW())
+        ");
+        $logStmt->execute([
+            ':user_id' => $user_id,
+            ':action' => 'Report Added',
+            ':details' => "Report ID: $report_id, Created for Barangay: $barangay, Year: $year, Title: '$title'"
+        ]);
+
           // Commit transaction
           $pdo->commit();
 

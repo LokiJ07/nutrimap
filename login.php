@@ -8,6 +8,12 @@ $error = '';
 // ✅ If "Remember Me" cookies exist, auto-fill email
 $rememberedEmail = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : '';
 
+// ✅ Activity log function
+function logActivity($pdo, $user_id, $action, $details = null) {
+    $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)");
+    $stmt->execute([$user_id, $action, $details]);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
@@ -18,9 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user['status'] !== 'Active') {
-          $error = "Your account is inactive. Please contact the administrator.";
-          } elseif (password_verify($password, $user['password_hash'])) {
+        if ($user && password_verify($password, $user['password_hash'])) {
 
             // ✅ Save Remember Me cookie for 7 days if checked
             if ($remember) {
@@ -66,6 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
                     ->execute([$session_id, $user['id']]);
 
+                // ✅ Log activity
+                logActivity($pdo, $user['id'], "User logged in", "Trusted device login from IP $ip");
+
                 // Redirect based on role
                 if ($user['user_type'] === 'CNO') {
                     header("Location: cno/home.php");
@@ -94,12 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$user['id'], $otp, $expires]);
 
                 // ✅ Save user info temporarily until OTP verification
-                $_SESSION['pending_user_id']    = $user['id'];
-                $_SESSION['pending_user_type']  = $user['user_type'];
-                $_SESSION['pending_first_name'] = $user['first_name'];
-                $_SESSION['pending_user_email'] = $user['email'];
-                $_SESSION['pending_barangay']   = $user['barangay'];
+                $_SESSION['pending_user_id']      = $user['id'];
+                $_SESSION['pending_user_type']    = $user['user_type'];
+                $_SESSION['pending_first_name']   = $user['first_name'];
+                $_SESSION['pending_user_email']   = $user['email'];
+                $_SESSION['pending_barangay']     = $user['barangay'];
                 $_SESSION['pending_device_token'] = $device_token;
+
+                // ✅ Log activity for new device
+                logActivity($pdo, $user['id'], "OTP sent for new device login", "Device token: $device_token, IP: $ip");
 
                 if (sendOTP($user['email'], $otp)) {
                     $_SESSION['otp_message'] = "We sent a One-Time Password (OTP) to your email.";

@@ -2,11 +2,11 @@
   session_start();
   require '../db/config.php';
 
-// ✅ Only BNS
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
-    header("Location: ../login.php");
-    exit();
-}
+  // ✅ Require login
+  if (!isset($_SESSION['user_id'])) {
+      header("Location: ../auth/login.php");
+      exit();
+  }
 
   $userId = $_SESSION['user_id'];
 
