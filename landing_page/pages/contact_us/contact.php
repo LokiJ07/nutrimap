@@ -152,7 +152,7 @@
         </div>
         <nav class="nav">
             <a href="../../../index.php" class="nav-link home-btn">Home</a>
-            <a href="landing_page/map.php" class="nav-link">Map</a>
+            <a href="../../map.php" class="nav-link">Map</a>
             <div class="dropdown">
                 <a href="../about_us/about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
                 <div class="dropdown-content">
@@ -162,7 +162,7 @@
                     <a href="../about_us/mission.php">Mission <i class="fas fa-caret-right"></i></a>
                 </div>
             </div>
-            <a href="landing_page/pages/contact_us/contact.php" class="nav-link">Contact Us</a>
+            <a href="contact.php" class="nav-link">Contact Us</a>
             <a href="../login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>

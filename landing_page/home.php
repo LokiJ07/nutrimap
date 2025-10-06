@@ -354,29 +354,28 @@
             <div>
                 <h3 class="footer-title">About Us</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="pages/about_us/history.php">History</a></li>
+                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
+                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
+                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
                 </ul>
             </div>
             <!-- Links Column 2 -->
             <div>
                 <h3 class="footer-title">Quick Links</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/map_us/map.php">Map</a></li>
-                    <li><a href="pages/contact_us/get_in_touch.php">Contact Us</a></li>
-                    <li><a href="pages/contact_us/downloadable_form.php">Downloadable Forms</a></li>
+                    <li><a href="landing_page/map.php">Map</a></li>
+                    <li><a href="landing_page/pages/contact_us/contact.php">Contact Us</a></li>
                 </ul>
             </div>
             <!-- Legal & Support Column -->
             <div>
                 <h3 class="footer-title">Legal & Support</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/legal_and_support/terms_of_use.php">Terms of Use</a></li>
-                    <li><a href="pages/legal_and_support/privacy_policy.php">Privacy Policy</a></li>
-                    <li><a href="pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="pages/help_and_support/faqs.php">FAQs</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
+                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
+                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
                 </ul>
             </div>
         </div>
