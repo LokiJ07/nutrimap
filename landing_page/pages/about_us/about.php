@@ -231,7 +231,7 @@
     <!-- Header -->
     <header class="header">
         <div class="logo">
-            <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo">
+            <!-- <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo"> -->
             <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
         <nav class="nav">
