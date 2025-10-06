@@ -255,7 +255,7 @@
                     <a href="mission.php">Mission <i class="fas fa-caret-right"></i></a>
                 </div>
             </div>
-            <a href="../../pages/contact_us/contact.php" class="nav-link">Contact Us</a>
+            <a href="../contact_us/contact.php" class="nav-link">Contact Us</a>
             <a href="../../../login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>

@@ -20,87 +20,150 @@
         .arrow-down {
             transform: rotate(180deg);
         }
+
+          /* Header */
+      .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo .cno-color {
+    color: #00a0a0;
+}
+
+.logo-space {
+    margin-right: 8px;
+}
+
+.nav {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #666;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+    color: #000;
+}
+
+.home-btn {
+    background-color: #fff;
+    color: #00a0a0 !important;
+}
+
+.login-btn {
+    background-color: #00a0a0;
+    color: #fff !important;
+    border: 1px solid #00a0a0;
+    padding: 10px 25px;
+}
+
+.login-btn:hover {
+    background-color: #007f7f;
+}
+
+/* --- Dropdown Styling --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+    overflow: hidden;
+    left: 0;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
     <!-- Header Section -->
-    <header class="flex justify-between items-center p-6 lg:px-10 bg-white shadow-md z-20">
-        <div class="flex items-center">
-            <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
-            <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1">NutriMap</span>
+           <header class="header">
+        <div class="logo">
+            <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
-        <nav class="flex items-center space-x-6">
-            <a href="../../../index.php" class="text-gray-600 hover:text-gray-900 font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out">Home</a>
-            <a href="../../map.php" class="text-gray-600 hover:text-gray-900 font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out">Map</a>
-            
-            <!-- About Dropdown with rotating arrow -->
-            <div class="relative">
-                <button id="about-button" class="flex items-center space-x-2 text-gray-800 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none">
-                    <span>About CNO</span>
-                    <svg id="arrow-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 arrow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div id="about-dropdown-menu" class="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl py-2 hidden transition-all duration-300 ease-out">
-                    <a href="../../pages/about_us/profile.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Profile</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <a href="../../pages/about_us/history.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>History</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <a href="../../pages/about_us/mission.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Mission</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <a href="../../pages/about_us/vision.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Vision</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
+        <nav class="nav">
+            <a href="../../../index.php" class="nav-link home-btn">Home</a>
+            <a href="landing_page/map.php" class="nav-link">Map</a>
+            <div class="dropdown">
+                <a href="../about_us/about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
+                <div class="dropdown-content">
+                    <a href="../about_us/profile.php">Profile <i class="fas fa-caret-right"></i></a>
+                    <a href="../about_us/history.php">History <i class="fas fa-caret-right"></i></a>
+                    <a href="../about_us/vision.php">Vision <i class="fas fa-caret-right"></i></a>
+                    <a href="../about_us/mission.php">Mission <i class="fas fa-caret-right"></i></a>
                 </div>
             </div>
-
-            <!-- Contact Dropdown with rotating arrow -->
-            <div class="relative">
-                <button id="contact-button" class="flex items-center space-x-2 bg-[#00a0a0] text-white font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out shadow-md focus:outline-none">
-                    <span>Contact</span>
-                    <svg id="contact-arrow-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white arrow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div id="contact-dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl py-2 hidden transition-all duration-300 ease-out">
-                    <a href="../../pages/contact_us/contact.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Get In Touch</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <a href="../../pages/contact_us/downloadable_form.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Downloadable Form</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <a href="../../pages/contact_us/feedback.php" class="group flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#00a0a0] rounded-md">
-                        <span>Feedback</span>
-                        <svg class="h-4 w-4 text-gray-500 group-hover:block invisible group-hover:visible transition-all duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <a href="../../Frontend/login.php" class="bg-white text-[#00a0a0] border border-[#00a0a0] font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out hover:bg-gray-50">Login</a>
+            <a href="landing_page/pages/contact_us/contact.php" class="nav-link">Contact Us</a>
+            <a href="../login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>
 
