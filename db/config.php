@@ -1,9 +1,9 @@
 <?php
 
-$DB_HOST = 'localhost';   
-$DB_NAME = 'nutri_map';      
-$DB_USER = 'root';        
-$DB_PASS = '';           
+$DB_HOST = 'sql309.infinityfree.com';   
+$DB_NAME = 'if0_40031431_nutri_db';      
+$DB_USER = 'if0_40031431';        
+$DB_PASS = 'louizky12';           
 $DB_CHARSET = 'utf8mb4';
 
 $dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=$DB_CHARSET";
