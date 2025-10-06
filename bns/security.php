@@ -3,10 +3,12 @@ session_start();
 require '../db/config.php';
 
 // ✅ Require login
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
+// ✅ Require login & check CNO role
+  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
+    header("Location: ../login.php");
     exit();
 }
+
 
 $user_id = $_SESSION['user_id'];
 

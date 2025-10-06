@@ -106,7 +106,7 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
 
   // Load side menu only once
   if (!container.innerHTML.trim()) {
-    const response = await fetch('sidebar.php');
+    const response = await fetch('sidemenu.php');
     const html = await response.text();
     container.innerHTML = html;
 

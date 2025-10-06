@@ -110,6 +110,7 @@ thead {background:#009688;color:#fff;}
 </head>
 <body>
 <div class="layout">
+  
   <?php include 'header.php'; ?>
   <?php include 'sidebar.php'; ?>
   <div class="body-layout">
