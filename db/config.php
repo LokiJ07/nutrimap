@@ -18,3 +18,8 @@ try {
 } catch (PDOException $e) {
     exit('Database connection failed: ' . $e->getMessage());
 }
+
+//FTP Username : if0_40031431 
+//FTP Password : NutriLab2025X  
+//FTP Hostname : ftpupload.net
+//FTP Port (optional) : 21
