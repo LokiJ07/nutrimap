@@ -237,25 +237,36 @@ let currentPage = 1;
 const pageSize = 5;
 let totalNotifications = 0;
 let totalUnread = 0;
-let lastUnreadCount = 0;
 let showUnreadOnly = false;
-let sseLastId = 0;
-
+let lastAlertedId = 0; // 🟢 Remember last notified ID
+let initialized = false; // 🟢 prevents alert on page load
+const notificationSound = new Audio('notification.wav');
 const badge = document.getElementById('notificationBadge');
 const modal = document.getElementById('notificationModal');
+const bell = document.getElementById('bellBtn');
 const closeModal = document.getElementById('closeNotificationModal');
 const btnPrev = document.getElementById('prevPage');
 const btnNext = document.getElementById('nextPage');
-const bell = document.getElementById('bellBtn');
-const notificationSound = new Audio('notification.wav'); 
 
-// 🟢 Allow sound to play only after first user interaction
+// 🟩 Create a toast container (if not existing)
+let toastContainer = document.getElementById('toastContainer');
+if (!toastContainer) {
+  toastContainer = document.createElement('div');
+  toastContainer.id = 'toastContainer';
+  toastContainer.style.position = 'fixed';
+  toastContainer.style.top = '20px';        // 🟢 top instead of bottom
+  toastContainer.style.left = '50%';        // center horizontally
+  toastContainer.style.transform = 'translateX(-50%)'; 
+  toastContainer.style.zIndex = '9999';
+  document.body.appendChild(toastContainer);
+}
+
+// 🟩 Allow sound after first user click
 document.addEventListener('click', () => {
   notificationSound.play().then(() => notificationSound.pause());
 }, { once: true });
 
 function updateBadge(count) {
-  totalUnread = count;
   badge.style.display = count > 0 ? 'inline-block' : 'none';
   badge.innerText = count > 0 ? count : '';
 }
@@ -265,31 +276,67 @@ async function fetchUnreadCount() {
     const response = await fetch('get_notifications.php?count_unread=1');
     const data = await response.json();
     updateBadge(data.totalUnread);
-
-    // 🟩 Detect new notification by comparing unread counts
-    if (data.totalUnread > lastUnreadCount) {
-      playNotificationEffect();
-    }
-
-    lastUnreadCount = data.totalUnread;
   } catch (err) {
     console.error('Error fetching unread count:', err);
   }
 }
 
-function playNotificationEffect() {
-  // 🔔 Play sound once
+let lastToastMessage = ""; // 🟢 track last shown toast
+
+function playNotificationEffect(message = "New notification received!") {
+  if (message === lastToastMessage) return; // 🛑 prevent repeat
+  lastToastMessage = message;
+
   try {
     notificationSound.currentTime = 0;
     notificationSound.play().catch(e => console.warn('Sound blocked:', e));
   } catch (e) {
-    console.warn('Sound play failed:', e);
+    console.warn('Sound failed:', e);
   }
 
-  // 🔔 Add pulse effect
+  // 🔔 Pulse bell
   bell.classList.add('pulse');
   setTimeout(() => bell.classList.remove('pulse'), 1000);
+
+  // 💬 Show toast once
+  showToast(message);
+
+  // 🧹 Reset after a few seconds (so same message can reappear later if needed)
+  setTimeout(() => { lastToastMessage = ""; }, 8000);
 }
+
+// 🟧 Toast creation
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.innerText = `🔔 ${message}`;
+  toast.style.background = '#333';
+  toast.style.color = '#fff';
+  toast.style.padding = '10px 16px';
+  toast.style.borderRadius = '8px';
+  toast.style.marginTop = '8px';
+  toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+  toast.style.opacity = '0';
+  toast.style.transition = 'opacity 0.5s, transform 0.5s';
+  toast.style.transform = 'translateY(-20px)'; // 🟢 slides down from top
+  toastContainer.appendChild(toast);
+
+  // Fade in (slide down)
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  }, 100);
+
+  // Fade out and remove after 4 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-20px)';
+    setTimeout(() => toast.remove(), 500);
+  }, 4000);
+}
+
+// 🟦 global flag: true only when SSE triggers new data
+
+let isLiveUpdate = false;
 
 async function fetchNotifications() {
   try {
@@ -318,11 +365,22 @@ async function fetchNotifications() {
     btnPrev.disabled = currentPage <= 1;
     btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
 
+    // 🟩 Only play sound/toast when truly new notif appears via SSE
+    if (data.notifications.length > 0) {
+      const newest = data.notifications[0];
+      if (initialized && isLiveUpdate && newest.id > lastAlertedId) {
+        playNotificationEffect(newest.message);
+      }
+      lastAlertedId = Math.max(lastAlertedId, newest.id);
+    }
+
+    if (!initialized) initialized = true;
+    isLiveUpdate = false; // reset after handling
+
   } catch (err) {
     console.error('Error fetching notifications:', err);
   }
 }
-
 btnPrev.addEventListener('click', () => {
   if (currentPage > 1) {
     currentPage--;
@@ -365,19 +423,16 @@ async function markAsRead(id) {
   }
 }
 
-// 🟦 SSE setup
+// 🟦 SSE live update
 let eventSource;
 function initSSE() {
   if (eventSource) eventSource.close();
   eventSource = new EventSource('notifications_stream.php');
 
   eventSource.onmessage = function() {
-    // Whenever there's a new notification — refresh unread count
+    isLiveUpdate = true;  // ✅ mark that new data came from SSE
     fetchUnreadCount();
-
-    if (modal.style.display === 'flex') {
-      fetchNotifications();
-    }
+    fetchNotifications();
   };
 
   eventSource.onerror = function() {
@@ -388,6 +443,7 @@ function initSSE() {
 
 function initializeNotifications() {
   fetchUnreadCount();
+  fetchNotifications();
   initSSE();
 }
 initializeNotifications();
@@ -422,4 +478,3 @@ document.getElementById('showAllBtn').addEventListener('click', () => {
   fetchNotifications();
 });
 </script>
-

@@ -250,21 +250,38 @@ document.getElementById('pending-reports-table-body').addEventListener('click', 
         body:`report_id=${reportId}&action=${action}`
     })
     .then(r=>r.json())
-    .then(data=>{
-        if(data.status==='approved'){
-            row.querySelector('.status').textContent='Approved';
-            row.querySelector('td:last-child').remove();
-            document.getElementById('approved-reports-table-body').appendChild(row);
-            showMessage('Report approved',true);
-        } else if(data.status==='rejected'){
-            row.querySelector('.status').textContent='Rejected';
-            row.querySelector('td:last-child').remove();
-            document.getElementById('rejected-reports-table-body').appendChild(row);
-            showMessage('Report rejected',false);
-        } else if(data.error){
-            showMessage(data.error,false);
-        }
-    }).catch(err=>console.error(err));
+.then(data => {
+    console.log('Server Response:', data); // Debug line — optional
+    if (data.error) {
+        showMessage(data.error, false);
+        return;
+    }
+
+    // Normalize status (Approved/Rejected)
+    const status = (data.status || '').toLowerCase();
+
+    if (status === 'approved') {
+        row.querySelector('.status').textContent = 'Approved';
+        row.querySelector('td:last-child').remove();
+        document.getElementById('approved-reports-table-body').appendChild(row);
+        showMessage('Report approved', true);
+    } 
+    else if (status === 'rejected') {
+        row.querySelector('.status').textContent = 'Rejected';
+        row.querySelector('td:last-child').remove();
+        document.getElementById('rejected-reports-table-body').appendChild(row);
+        showMessage('Report rejected', false);
+    } 
+    else {
+        console.error('Unexpected response:', data);
+        showMessage('Unexpected server response', false);
+    }
+})
+.catch(err => {
+    console.error('Fetch error:', err);
+    showMessage('Network error', false);
+});
+
 });
 
 // Filters & Sorting
