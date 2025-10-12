@@ -43,7 +43,7 @@ if (session_status() === PHP_SESSION_NONE) {
           // 2️⃣ Prepare data for bns_reports
           $fields = [
               'report_id', 'barangay', 'year', 'title',
-              'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a',
+              'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7','ind7a',
               'ind7b1_no','ind7b1_pct','ind7b2_no','ind7b2_pct','ind7b3_no','ind7b3_pct',
               'ind7b4_no','ind7b4_pct','ind7b5_no','ind7b5_pct','ind7b6_no','ind7b6_pct',
               'ind7b7_no','ind7b7_pct','ind7b8_no','ind7b8_pct','ind7b9_no','ind7b9_pct',
@@ -224,7 +224,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
               <tr><td>5. Total number of households with preschool children 0-59 months</td><td><input type="number" name="ind5"></td></tr>
               <tr><td>6. Actual population of preschool children 0-59 months</td><td><input type="number" name="ind6"></td></tr>
-              <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td></td></tr>
+              <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td><input type="number" name="ind7"></td></tr>
               <tr><td>7a. Percent (%) measured coverage (OPT Plus)</td><td><input type="number" step="0.01" name="ind7a"></td></tr>
   <tr>
     <td>7b. Number and percent (%) of preschool children according to Nutritional Status</td>
