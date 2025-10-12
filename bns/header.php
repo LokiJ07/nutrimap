@@ -78,6 +78,20 @@
   display: none;
 }
 
+/* Bell pulse animation when new notification arrives */
+@keyframes bellPulse {
+  0% { transform: scale(1); color: #333; }
+  25% { transform: scale(1.2); color: #ff4444; }
+  50% { transform: scale(1); color: #ff4444; }
+  75% { transform: scale(1.2); color: #ff4444; }
+  100% { transform: scale(1); color: #333; }
+}
+
+.bell.pulse i {
+  animation: bellPulse 0.8s ease;
+}
+
+
 /* Container for dynamic side menu */
 #sidemenu-container {
   position: fixed;
@@ -128,10 +142,10 @@
     <span class="close" id="closeNotificationModal" style="position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer;">&times;</span>
     <h2>Notifications</h2>
     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
-  <button id="markAllReadBtn" style="padding: 6px 12px;">Mark All as Read</button>
-  <button id="filterUnreadBtn" style="padding: 6px 12px;">Show Read</button>
-  <button id="showAllBtn" style="padding: 6px 12px; display:none;">Show All</button>
-</div>
+      <button id="markAllReadBtn" style="padding: 6px 12px;">Mark All as Read</button>
+      <button id="filterUnreadBtn" style="padding: 6px 12px;">Show Unread</button>
+      <button id="showAllBtn" style="padding: 6px 12px; display:none;">Show All</button>
+    </div>
     <table id="notificationTable" style="width: 100%; border-collapse: collapse;">
       <thead>
         <tr>
@@ -152,8 +166,9 @@
   </div>
 </div>
 
-<!-- Add your existing scripts here -->
 <script>
+  
+// Side menu logic (unchanged from previous)
 document.getElementById('menuBtn').addEventListener('click', async () => {
   const container = document.getElementById('sidemenu-container');
 
@@ -217,131 +232,122 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
   if (menu) menu.classList.add('open');
 });
 
-// Notification System with Pagination and Read/Unread Indicators
-
-// Variables for pagination and filter
+// Notification System
 let currentPage = 1;
 const pageSize = 5;
 let totalNotifications = 0;
+let totalUnread = 0;
 let lastUnreadCount = 0;
-let showUnreadOnly = false; // toggle for unread filter
+let showUnreadOnly = false;
+let sseLastId = 0;
 
-// DOM elements
 const badge = document.getElementById('notificationBadge');
 const modal = document.getElementById('notificationModal');
 const closeModal = document.getElementById('closeNotificationModal');
-
 const btnPrev = document.getElementById('prevPage');
 const btnNext = document.getElementById('nextPage');
-
 const bell = document.getElementById('bellBtn');
 const notificationSound = new Audio('notification.wav'); 
 
-// Fetch notifications with pagination and filter
+// 🟢 Allow sound to play only after first user interaction
+document.addEventListener('click', () => {
+  notificationSound.play().then(() => notificationSound.pause());
+}, { once: true });
+
+function updateBadge(count) {
+  totalUnread = count;
+  badge.style.display = count > 0 ? 'inline-block' : 'none';
+  badge.innerText = count > 0 ? count : '';
+}
+
+async function fetchUnreadCount() {
+  try {
+    const response = await fetch('get_notifications.php?count_unread=1');
+    const data = await response.json();
+    updateBadge(data.totalUnread);
+
+    // 🟩 Detect new notification by comparing unread counts
+    if (data.totalUnread > lastUnreadCount) {
+      playNotificationEffect();
+    }
+
+    lastUnreadCount = data.totalUnread;
+  } catch (err) {
+    console.error('Error fetching unread count:', err);
+  }
+}
+
+function playNotificationEffect() {
+  // 🔔 Play sound once
+  try {
+    notificationSound.currentTime = 0;
+    notificationSound.play().catch(e => console.warn('Sound blocked:', e));
+  } catch (e) {
+    console.warn('Sound play failed:', e);
+  }
+
+  // 🔔 Add pulse effect
+  bell.classList.add('pulse');
+  setTimeout(() => bell.classList.remove('pulse'), 1000);
+}
+
 async function fetchNotifications() {
   try {
-    const response = await fetch(`get_notifications.php?page=${currentPage}&size=${pageSize}`);
+    const response = await fetch(`get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`);
     const data = await response.json();
-
     totalNotifications = data.totalCount;
+    totalUnread = data.totalUnread;
 
-    // Count unread notifications
-    const totalUnread = data.notifications.filter(n => !n.read).length;
-
-    // Update badge for unread count
-    if (totalUnread > 0) {
-      badge.innerText = totalUnread;
-      badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
-    }
-
-    // Filter notifications if showUnreadOnly is true
-    let notifications = data.notifications;
-    if (showUnreadOnly) {
-      notifications = notifications.filter(n => !n.read);
-    }
-
-    // Populate table
     const tbody = document.querySelector('#notificationTable tbody');
     tbody.innerHTML = '';
 
-    notifications.forEach(notif => {
+    data.notifications.forEach(notif => {
       const tr = document.createElement('tr');
       tr.style.cursor = 'pointer';
-
-      // Style unread notifications (bold)
-      if (!notif.read) {
-        tr.style.fontWeight = 'bold';
-      }
-
-      // Message
-      const msgTd = document.createElement('td');
-      msgTd.innerText = notif.message;
-      tr.appendChild(msgTd);
-
-      // Date
-      const dateTd = document.createElement('td');
-      dateTd.innerText = notif.date;
-      tr.appendChild(dateTd);
-
-      // Status
-      const statusTd = document.createElement('td');
-      statusTd.innerText = notif.read ? 'Read' : 'New';
-      tr.appendChild(statusTd);
-
-      // Mark as read on click
-      tr.onclick = () => {
-        markAsRead(notif.id);
-      };
-
+      if (!notif.read) tr.style.fontWeight = 'bold';
+      tr.innerHTML = `
+        <td>${notif.message}</td>
+        <td>${notif.date}</td>
+        <td>${notif.read ? 'Read' : 'New'}</td>
+      `;
+      tr.onclick = () => markAsRead(notif.id);
       tbody.appendChild(tr);
     });
 
-    // Pagination control
+    const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
     btnPrev.disabled = currentPage <= 1;
-    btnNext.disabled = (currentPage * pageSize) >= totalNotifications;
-
-    // Save last unread count for sound check
-    lastUnreadCount = totalUnread;
+    btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
 
   } catch (err) {
     console.error('Error fetching notifications:', err);
   }
 }
 
-// Pagination button handlers
-document.getElementById('prevPage').addEventListener('click', () => {
+btnPrev.addEventListener('click', () => {
   if (currentPage > 1) {
     currentPage--;
     fetchNotifications();
   }
 });
-document.getElementById('nextPage').addEventListener('click', () => {
-  if ((currentPage * pageSize) < totalNotifications) {
+
+btnNext.addEventListener('click', () => {
+  const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
+  if ((currentPage * pageSize) < effectiveTotal) {
     currentPage++;
     fetchNotifications();
   }
 });
 
-// Show modal on bell click
-document.getElementById('bellBtn').addEventListener('click', () => {
+bell.addEventListener('click', () => {
   currentPage = 1;
   fetchNotifications();
-  document.getElementById('notificationModal').style.display = 'flex';
+  modal.style.display = 'flex';
+  fetchUnreadCount();
 });
 
-// Close modal
-document.getElementById('closeNotificationModal').onclick = () => {
-  document.getElementById('notificationModal').style.display = 'none';
-};
-window.onclick = (e) => {
-  if (e.target === document.getElementById('notificationModal')) {
-    document.getElementById('notificationModal').style.display = 'none';
-  }
-};
+closeModal.onclick = () => modal.style.display = 'none';
+window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-// Mark individual notification as read
 async function markAsRead(id) {
   try {
     const response = await fetch('mark_as_read.php', {
@@ -351,56 +357,69 @@ async function markAsRead(id) {
     });
     const result = await response.json();
     if (result.status === 'success') {
-      fetchNotifications(); // update badge and list
+      fetchNotifications();
+      fetchUnreadCount();
     }
   } catch (err) {
     console.error('Error marking as read:', err);
   }
 }
 
-// Periodic check for new notifications
-setInterval(async () => {
-  if (document.getElementById('notificationModal').style.display === 'none') {
-    await fetchNotifications();
-    // Check for new notifications to play sound
-    const response = await fetch(`get_notifications.php?page=${currentPage}&size=${pageSize}`);
-    const data = await response.json();
-    const unreadCount = data.notifications.filter(n => !n.read).length;
-    if (unreadCount > lastUnreadCount) {
-      notificationSound.play();
-    }
-    lastUnreadCount = unreadCount;
-  }
-}, 5000); // every 5 seconds
+// 🟦 SSE setup
+let eventSource;
+function initSSE() {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource('notifications_stream.php');
 
-// Button: Mark all as read
+  eventSource.onmessage = function() {
+    // Whenever there's a new notification — refresh unread count
+    fetchUnreadCount();
+
+    if (modal.style.display === 'flex') {
+      fetchNotifications();
+    }
+  };
+
+  eventSource.onerror = function() {
+    console.log('SSE connection lost, reconnecting...');
+    setTimeout(initSSE, 3000);
+  };
+}
+
+function initializeNotifications() {
+  fetchUnreadCount();
+  initSSE();
+}
+initializeNotifications();
+
+// 🟧 Mark all as read
 document.getElementById('markAllReadBtn').addEventListener('click', async () => {
   try {
-    const response = await fetch('mark_as_read.php', {
-      method: 'POST',
-    });
+    const response = await fetch('mark_as_read.php', { method: 'POST' });
     const result = await response.json();
     if (result.status === 'success') {
       fetchNotifications();
+      fetchUnreadCount();
     }
   } catch (err) {
     console.error('Error marking all as read:', err);
   }
 });
 
-// Button: Show only unread
 document.getElementById('filterUnreadBtn').addEventListener('click', () => {
   showUnreadOnly = true;
   document.getElementById('showAllBtn').style.display = 'inline-block';
   document.getElementById('filterUnreadBtn').style.display = 'none';
+  currentPage = 1;
   fetchNotifications();
 });
 
-// Button: Show all
 document.getElementById('showAllBtn').addEventListener('click', () => {
   showUnreadOnly = false;
   document.getElementById('showAllBtn').style.display = 'none';
   document.getElementById('filterUnreadBtn').style.display = 'inline-block';
+  currentPage = 1;
   fetchNotifications();
 });
 </script>
+
