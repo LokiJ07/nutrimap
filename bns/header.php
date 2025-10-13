@@ -263,8 +263,13 @@ if (!toastContainer) {
 
 // 🟩 Allow sound after first user click
 document.addEventListener('click', () => {
-  notificationSound.play().then(() => notificationSound.pause());
-}, { once: true });
+  // Load and unlock the sound silently
+  notificationSound.muted = true;
+  notificationSound.play().then(() => {
+    notificationSound.pause();
+    notificationSound.muted = false; // unmute for real notifications
+  }).catch(() => {});
+}, { once: true }); 
 
 function updateBadge(count) {
   badge.style.display = count > 0 ? 'inline-block' : 'none';
@@ -273,7 +278,7 @@ function updateBadge(count) {
 
 async function fetchUnreadCount() {
   try {
-    const response = await fetch('get_notifications.php?count_unread=1');
+    const response = await fetch('notification/get_notifications.php?count_unread=1');
     const data = await response.json();
     updateBadge(data.totalUnread);
   } catch (err) {
@@ -340,7 +345,7 @@ let isLiveUpdate = false;
 
 async function fetchNotifications() {
   try {
-    const response = await fetch(`get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`);
+    const response = await fetch(`notification/get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`);
     const data = await response.json();
     totalNotifications = data.totalCount;
     totalUnread = data.totalUnread;
@@ -408,7 +413,7 @@ window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; 
 
 async function markAsRead(id) {
   try {
-    const response = await fetch('mark_as_read.php', {
+    const response = await fetch('notification/mark_as_read.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}`,
@@ -427,7 +432,7 @@ async function markAsRead(id) {
 let eventSource;
 function initSSE() {
   if (eventSource) eventSource.close();
-  eventSource = new EventSource('notifications_stream.php');
+  eventSource = new EventSource('notification/notifications_stream.php');
 
   eventSource.onmessage = function() {
     isLiveUpdate = true;  // ✅ mark that new data came from SSE
@@ -451,7 +456,7 @@ initializeNotifications();
 // 🟧 Mark all as read
 document.getElementById('markAllReadBtn').addEventListener('click', async () => {
   try {
-    const response = await fetch('mark_as_read.php', { method: 'POST' });
+    const response = await fetch('notification/mark_as_read.php', { method: 'POST' });
     const result = await response.json();
     if (result.status === 'success') {
       fetchNotifications();
