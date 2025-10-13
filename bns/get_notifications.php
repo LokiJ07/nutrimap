@@ -3,73 +3,62 @@ session_start();
 require '../db/config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    if (isset($_GET['count_unread'])) {
-        echo json_encode(['totalUnread' => 0]);
-        exit;
-    } elseif (isset($_GET['latest_id'])) {
-        echo json_encode(['latestId' => 0]);
-        exit;
-    } else {
-        echo json_encode(['totalCount' => 0, 'totalUnread' => 0, 'notifications' => []]);
-        exit;
-    }
+    echo json_encode(['totalCount' => 0, 'totalUnread' => 0, 'notifications' => []]);
+    exit;
 }
 
 $userId = $_SESSION['user_id'];
 
-// Handle latest ID only
-if (isset($_GET['latest_id']) && $_GET['latest_id'] == 1) {
-    $stmt = $pdo->prepare("SELECT COALESCE(MAX(id), 0) AS latestId FROM notifications WHERE user_id = :user_id");
-    $stmt->execute([':user_id' => $userId]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo json_encode(['latestId' => (int)$row['latestId']]);
-    exit;
-}
-
-// Handle unread count only
-if (isset($_GET['count_unread']) && $_GET['count_unread'] == 1) {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = :user_id AND read_status = 0");
-    $stmt->execute([':user_id' => $userId]);
-    echo json_encode(['totalUnread' => $stmt->fetchColumn()]);
-    exit;
-}
-
-// Total count query
-$stmtCount = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = :user_id");
-$stmtCount->execute([':user_id' => $userId]);
-$totalCount = $stmtCount->fetchColumn();
-
-// Unread count
-$stmtUnread = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = :user_id AND read_status = 0");
-$stmtUnread->execute([':user_id' => $userId]);
-$totalUnread = $stmtUnread->fetchColumn();
-
-// Pagination params
+// Pagination
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $size = isset($_GET['size']) ? intval($_GET['size']) : 5;
 $offset = ($page - 1) * $size;
+
+// Optional: unread only
 $unreadOnly = isset($_GET['unread_only']) && $_GET['unread_only'] == 1;
 
-// Base query for notifications
-$whereClause = "WHERE user_id = :user_id";
-$params = [':user_id' => $userId];
+// Total unread notifications (including old ones without sender_id)
+$stmtUnread = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM notifications n
+    LEFT JOIN users u ON n.sender_id = u.id
+    WHERE n.user_id = :user_id AND n.read_status = 0
+      AND (u.user_type = 'CNO' OR n.sender_id IS NULL)
+");
+$stmtUnread->execute([':user_id' => $userId]);
+$totalUnread = $stmtUnread->fetchColumn();
+
+// Total count
+$stmtCount = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM notifications n
+    LEFT JOIN users u ON n.sender_id = u.id
+    WHERE n.user_id = :user_id
+      AND (u.user_type = 'CNO' OR n.sender_id IS NULL)
+");
+$stmtCount->execute([':user_id' => $userId]);
+$totalCount = $stmtCount->fetchColumn();
+
+// Fetch notifications with pagination
+$whereClause = "WHERE n.user_id = :user_id AND (u.user_type = 'CNO' OR n.sender_id IS NULL)";
 if ($unreadOnly) {
-    $whereClause .= " AND read_status = 0";
-    $totalCount = $totalUnread; // Override total for unread filter
+    $whereClause .= " AND n.read_status = 0";
+    $totalCount = $totalUnread;
 }
 
 $stmt = $pdo->prepare("
-    SELECT id, message, 
-           DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') AS date,
-           read_status 
-    FROM notifications 
-    $whereClause 
-    ORDER BY date DESC 
+    SELECT n.id, n.message, DATE_FORMAT(n.date, '%Y-%m-%d %H:%i:%s') AS date, n.read_status
+    FROM notifications n
+    LEFT JOIN users u ON n.sender_id = u.id
+    $whereClause
+    ORDER BY n.date DESC
     LIMIT :size OFFSET :offset
 ");
-$params[':size'] = $size;
-$params[':offset'] = $offset;
-$stmt->execute($params);
+
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+$stmt->bindValue(':size', $size, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 
 $notifications = [];
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

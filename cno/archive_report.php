@@ -73,7 +73,6 @@ form.inline{display:inline;}
 </head>
 <body>
 <?php include 'header.php'; ?>
-<?php include 'sidemenu.php'; ?>
 <div class="container">
     <h1>Archived BNS Reports</h1>
 
