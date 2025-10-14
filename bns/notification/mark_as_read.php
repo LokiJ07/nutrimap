@@ -1,6 +1,6 @@
 <?php
 session_start();
-require '../db/config.php';
+require '../../db/config.php';
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Not logged in']);

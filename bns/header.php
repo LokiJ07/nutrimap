@@ -232,15 +232,17 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
   if (menu) menu.classList.add('open');
 });
 
+
 // Notification System
 let currentPage = 1;
 const pageSize = 5;
 let totalNotifications = 0;
 let totalUnread = 0;
 let showUnreadOnly = false;
-let lastAlertedId = 0; // 🟢 Remember last notified ID
-let initialized = false; // 🟢 prevents alert on page load
-const notificationSound = new Audio('notification.wav');
+let lastAlertedId = 0;
+let initialized = false;
+const basePath = 'notification/'; // ✅ correct relative folder
+const notificationSound = new Audio(basePath + 'notification.wav');
 const badge = document.getElementById('notificationBadge');
 const modal = document.getElementById('notificationModal');
 const bell = document.getElementById('bellBtn');
@@ -248,28 +250,27 @@ const closeModal = document.getElementById('closeNotificationModal');
 const btnPrev = document.getElementById('prevPage');
 const btnNext = document.getElementById('nextPage');
 
-// 🟩 Create a toast container (if not existing)
+// 🟩 Create toast container
 let toastContainer = document.getElementById('toastContainer');
 if (!toastContainer) {
   toastContainer = document.createElement('div');
   toastContainer.id = 'toastContainer';
   toastContainer.style.position = 'fixed';
-  toastContainer.style.top = '20px';        // 🟢 top instead of bottom
-  toastContainer.style.left = '50%';        // center horizontally
-  toastContainer.style.transform = 'translateX(-50%)'; 
+  toastContainer.style.top = '20px';
+  toastContainer.style.left = '50%';
+  toastContainer.style.transform = 'translateX(-50%)';
   toastContainer.style.zIndex = '9999';
   document.body.appendChild(toastContainer);
 }
 
-// 🟩 Allow sound after first user click
+// 🟩 Unlock sound on first click
 document.addEventListener('click', () => {
-  // Load and unlock the sound silently
   notificationSound.muted = true;
   notificationSound.play().then(() => {
     notificationSound.pause();
-    notificationSound.muted = false; // unmute for real notifications
+    notificationSound.muted = false;
   }).catch(() => {});
-}, { once: true }); 
+}, { once: true });
 
 function updateBadge(count) {
   badge.style.display = count > 0 ? 'inline-block' : 'none';
@@ -278,7 +279,7 @@ function updateBadge(count) {
 
 async function fetchUnreadCount() {
   try {
-    const response = await fetch('notification/get_notifications.php?count_unread=1');
+    const response = await fetch(basePath + 'get_notifications.php?count_unread=1');
     const data = await response.json();
     updateBadge(data.totalUnread);
   } catch (err) {
@@ -286,10 +287,10 @@ async function fetchUnreadCount() {
   }
 }
 
-let lastToastMessage = ""; // 🟢 track last shown toast
+let lastToastMessage = "";
 
 function playNotificationEffect(message = "New notification received!") {
-  if (message === lastToastMessage) return; // 🛑 prevent repeat
+  if (message === lastToastMessage) return;
   lastToastMessage = message;
 
   try {
@@ -299,18 +300,13 @@ function playNotificationEffect(message = "New notification received!") {
     console.warn('Sound failed:', e);
   }
 
-  // 🔔 Pulse bell
   bell.classList.add('pulse');
   setTimeout(() => bell.classList.remove('pulse'), 1000);
 
-  // 💬 Show toast once
   showToast(message);
-
-  // 🧹 Reset after a few seconds (so same message can reappear later if needed)
   setTimeout(() => { lastToastMessage = ""; }, 8000);
 }
 
-// 🟧 Toast creation
 function showToast(message) {
   const toast = document.createElement('div');
   toast.innerText = `🔔 ${message}`;
@@ -322,16 +318,14 @@ function showToast(message) {
   toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
   toast.style.opacity = '0';
   toast.style.transition = 'opacity 0.5s, transform 0.5s';
-  toast.style.transform = 'translateY(-20px)'; // 🟢 slides down from top
+  toast.style.transform = 'translateY(-20px)';
   toastContainer.appendChild(toast);
 
-  // Fade in (slide down)
   setTimeout(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
   }, 100);
 
-  // Fade out and remove after 4 seconds
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(-20px)';
@@ -339,13 +333,13 @@ function showToast(message) {
   }, 4000);
 }
 
-// 🟦 global flag: true only when SSE triggers new data
-
 let isLiveUpdate = false;
 
 async function fetchNotifications() {
   try {
-    const response = await fetch(`notification/get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`);
+    const response = await fetch(
+      basePath + `get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`
+    );
     const data = await response.json();
     totalNotifications = data.totalCount;
     totalUnread = data.totalUnread;
@@ -370,7 +364,6 @@ async function fetchNotifications() {
     btnPrev.disabled = currentPage <= 1;
     btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
 
-    // 🟩 Only play sound/toast when truly new notif appears via SSE
     if (data.notifications.length > 0) {
       const newest = data.notifications[0];
       if (initialized && isLiveUpdate && newest.id > lastAlertedId) {
@@ -380,12 +373,12 @@ async function fetchNotifications() {
     }
 
     if (!initialized) initialized = true;
-    isLiveUpdate = false; // reset after handling
-
+    isLiveUpdate = false;
   } catch (err) {
     console.error('Error fetching notifications:', err);
   }
 }
+
 btnPrev.addEventListener('click', () => {
   if (currentPage > 1) {
     currentPage--;
@@ -413,7 +406,7 @@ window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; 
 
 async function markAsRead(id) {
   try {
-    const response = await fetch('notification/mark_as_read.php', {
+    const response = await fetch(basePath + 'mark_as_read.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}`,
@@ -432,14 +425,12 @@ async function markAsRead(id) {
 let eventSource;
 function initSSE() {
   if (eventSource) eventSource.close();
-  eventSource = new EventSource('notification/notifications_stream.php');
-
+  eventSource = new EventSource(basePath + 'notifications_stream.php');
   eventSource.onmessage = function() {
-    isLiveUpdate = true;  // ✅ mark that new data came from SSE
+    isLiveUpdate = true;
     fetchUnreadCount();
     fetchNotifications();
   };
-
   eventSource.onerror = function() {
     console.log('SSE connection lost, reconnecting...');
     setTimeout(initSSE, 3000);
@@ -456,7 +447,7 @@ initializeNotifications();
 // 🟧 Mark all as read
 document.getElementById('markAllReadBtn').addEventListener('click', async () => {
   try {
-    const response = await fetch('notification/mark_as_read.php', { method: 'POST' });
+    const response = await fetch(basePath + 'mark_as_read.php', { method: 'POST' });
     const result = await response.json();
     if (result.status === 'success') {
       fetchNotifications();

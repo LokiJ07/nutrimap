@@ -5,7 +5,7 @@ header("Cache-Control: no-cache");
 header("Connection: keep-alive");
 header("Access-Control-Allow-Origin: *"); // If needed for cross-origin
 
-require '../db/config.php';
+require '../../db/config.php';
 
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
