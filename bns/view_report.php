@@ -173,7 +173,7 @@ table th:nth-child(2) {
     </h2>
     <div>
     <!-- ✅ Fixed Edit button link -->
-    <a href="report/edit_approved.php?id=<?= $row['reports_id'] ?>" 
+    <a href="edit_aproved_report.php?id=<?= $row['reports_id'] ?>" 
        style="background:#007bff;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;margin-right:8px;">
        <i class="fa fa-edit"></i> Edit
     </a>

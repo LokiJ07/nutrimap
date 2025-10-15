@@ -136,7 +136,7 @@ th { background:#009688; color:#fff; }
             <td><span class="status"><?= htmlspecialchars($r['status']) ?></span></td>
             <td class="actions">
               <button class="view" onclick="window.location.href='view_report.php?id=<?= $r['id'] ?>'"><i class="fa fa-eye"></i> View</button>
-              <button class="edit" onclick="window.location.href='edit_report.php?id=<?= $r['id'] ?>'"><i class="fa fa-edit"></i> Edit</button>
+              <button class="edit" onclick="window.location.href='edit_aproved_report.php?id=<?= $r['id'] ?>'"><i class="fa fa-edit"></i> Edit</button>
               <a href="?archive_id=<?= $r['id'] ?>" class="archive" onclick="return confirm('Archive this approved report?');"><i class="fa fa-archive"></i> Archive</a>
             </td>
           </tr>
