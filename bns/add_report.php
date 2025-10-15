@@ -43,7 +43,7 @@ if (session_status() === PHP_SESSION_NONE) {
           // 2️⃣ Prepare data for bns_reports
           $fields = [
               'report_id', 'barangay', 'year', 'title',
-              'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a',
+              'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7','ind7a',
               'ind7b1_no','ind7b1_pct','ind7b2_no','ind7b2_pct','ind7b3_no','ind7b3_pct',
               'ind7b4_no','ind7b4_pct','ind7b5_no','ind7b5_pct','ind7b6_no','ind7b6_pct',
               'ind7b7_no','ind7b7_pct','ind7b8_no','ind7b8_pct','ind7b9_no','ind7b9_pct',
@@ -100,26 +100,6 @@ if (session_status() === PHP_SESSION_NONE) {
             ':action' => 'Report Added',
             ':details' => "Report ID: $report_id, Created for Barangay: $barangay, Year: $year, Title: '$title'"
         ]);
-
-        // NOTIFICATION
-         $cnoStmt = $pdo->query("SELECT id FROM users WHERE user_type = 'CNO'");
-$cnoUsers = $cnoStmt->fetchAll(PDO::FETCH_COLUMN);
-
-$notifMessage = "A new report has been submitted by {$barangay}.";
-
-$notifStmt = $pdo->prepare("
-    INSERT INTO notifications (user_id, sender_id, message, date)
-    VALUES (:user_id, :sender_id, :message, NOW())
-");
-
-foreach ($cnoUsers as $cnoId) {
-    $notifStmt->execute([
-        ':user_id' => $cnoId,
-        ':sender_id' => $user_id,
-        ':message' => $notifMessage
-    ]);
-}
-
 
           // Commit transaction
           $pdo->commit();
@@ -244,7 +224,7 @@ foreach ($cnoUsers as $cnoId) {
 
               <tr><td>5. Total number of households with preschool children 0-59 months</td><td><input type="number" name="ind5"></td></tr>
               <tr><td>6. Actual population of preschool children 0-59 months</td><td><input type="number" name="ind6"></td></tr>
-              <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td></td></tr>
+              <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td><input type="number" name="ind7"></td></tr>
               <tr><td>7a. Percent (%) measured coverage (OPT Plus)</td><td><input type="number" step="0.01" name="ind7a"></td></tr>
   <tr>
     <td>7b. Number and percent (%) of preschool children according to Nutritional Status</td>
