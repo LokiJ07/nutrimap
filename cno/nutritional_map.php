@@ -207,7 +207,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 </style>
 <body >
 <?php include 'header.php'; ?>
-<?php include 'sidebar.php';?>
+<?php include 'sidebar.php'; ?>
 
     <!-- Main Content Section -->
   <main class="max-w-7xl mx-auto p-6 bg-white shadow mt-4 mb-28">

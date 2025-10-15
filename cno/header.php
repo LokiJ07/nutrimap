@@ -1,8 +1,5 @@
 <?php
-// cno_header.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// header.php
 ?>
 <style>
 /* Header bar */
@@ -94,6 +91,7 @@ if (session_status() === PHP_SESSION_NONE) {
   animation: bellPulse 0.8s ease;
 }
 
+
 /* Container for dynamic side menu */
 #sidemenu-container {
   position: fixed;
@@ -129,7 +127,7 @@ if (session_status() === PHP_SESSION_NONE) {
       <input type="text" placeholder="Search">
     </div>
     <!-- Notification Bell with badge -->
-    <div class="bell" id="bellBtn">
+    <div class="bell" id="bellBtn" style="position: relative;">
       <i class="fa fa-bell"></i>
       <span id="notificationBadge"></span>
     </div>
@@ -140,7 +138,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <!-- Notification Modal -->
 <div id="notificationModal" class="modal" style="display:none;">
-  <div class="modal-content" style="width: 80%; max-width: 700px; margin: 10% auto; background: #fff; padding: 20px; border-radius: 8px; position: relative;">
+  <div class="modal-content" style="width: 80%; max-width: 600px; margin: 10% auto; background: #fff; padding: 20px; border-radius: 8px; position: relative;">
     <span class="close" id="closeNotificationModal" style="position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer;">&times;</span>
     <h2>Notifications</h2>
     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
@@ -153,12 +151,14 @@ if (session_status() === PHP_SESSION_NONE) {
         <tr>
           <th style="border-bottom: 1px solid #ccc; padding: 8px;">Message</th>
           <th style="border-bottom: 1px solid #ccc; padding: 8px;">Date</th>
-          <th style="border-bottom: 1px solid #ccc; padding: 8px;">Barangay</th>
           <th style="border-bottom: 1px solid #ccc; padding: 8px;">Status</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- Notifications will be dynamically inserted here -->
+      </tbody>
     </table>
+    <!-- Pagination controls -->
     <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
       <button id="prevPage" style="padding: 6px 12px;">Previous</button>
       <button id="nextPage" style="padding: 6px 12px;">Next</button>
@@ -167,10 +167,13 @@ if (session_status() === PHP_SESSION_NONE) {
 </div>
 
 <script>
+  
+// Side menu logic (unchanged from previous)
 document.getElementById('menuBtn').addEventListener('click', async () => {
   const container = document.getElementById('sidemenu-container');
+
   if (!container.innerHTML.trim()) {
-    const response = await fetch('sidebar.php');
+    const response = await fetch('sidemenu.php');
     const html = await response.text();
     container.innerHTML = html;
 
@@ -205,11 +208,11 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
     const settingsBtn = menu.querySelector('#settingsBtn');
     const settingsMenu = menu.querySelector('#settingsMenu');
     if (settingsBtn && settingsMenu) {
-      settingsBtn.addEventListener('click', e => {
+      settingsBtn.addEventListener('click', (e) => {
         e.preventDefault();
         settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
       });
-      document.addEventListener('click', e => {
+      document.addEventListener('click', (e) => {
         if (!settingsBtn.contains(e.target) && !settingsMenu.contains(e.target)) {
           settingsMenu.style.display = 'none';
         }
@@ -224,11 +227,13 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
       });
     }
   }
+
   const menu = document.getElementById('sideMenu');
   if (menu) menu.classList.add('open');
 });
 
-// -------------------- Notification System --------------------
+
+// Notification System
 let currentPage = 1;
 const pageSize = 5;
 let totalNotifications = 0;
@@ -236,9 +241,8 @@ let totalUnread = 0;
 let showUnreadOnly = false;
 let lastAlertedId = 0;
 let initialized = false;
-let isLiveUpdate = false;
-
-const notificationSound = new Audio('notification.wav');
+const basePath = 'notification/'; // ✅ correct relative folder
+const notificationSound = new Audio(basePath + 'notification.wav');
 const badge = document.getElementById('notificationBadge');
 const modal = document.getElementById('notificationModal');
 const bell = document.getElementById('bellBtn');
@@ -246,6 +250,7 @@ const closeModal = document.getElementById('closeNotificationModal');
 const btnPrev = document.getElementById('prevPage');
 const btnNext = document.getElementById('nextPage');
 
+// 🟩 Create toast container
 let toastContainer = document.getElementById('toastContainer');
 if (!toastContainer) {
   toastContainer = document.createElement('div');
@@ -258,8 +263,13 @@ if (!toastContainer) {
   document.body.appendChild(toastContainer);
 }
 
+// 🟩 Unlock sound on first click
 document.addEventListener('click', () => {
-  notificationSound.play().then(() => notificationSound.pause());
+  notificationSound.muted = true;
+  notificationSound.play().then(() => {
+    notificationSound.pause();
+    notificationSound.muted = false;
+  }).catch(() => {});
 }, { once: true });
 
 function updateBadge(count) {
@@ -269,130 +279,198 @@ function updateBadge(count) {
 
 async function fetchUnreadCount() {
   try {
-    const response = await fetch('get_notifications_cno.php?count_unread=1');
+    const response = await fetch(basePath + 'get_notifications_cno.php?count_unread=1');
     const data = await response.json();
     updateBadge(data.totalUnread);
-  } catch (err) { console.error(err); }
+  } catch (err) {
+    console.error('Error fetching unread count:', err);
+  }
 }
 
 let lastToastMessage = "";
 
-function playNotificationEffect(message="New notification!") {
+function playNotificationEffect(message = "New notification received!") {
   if (message === lastToastMessage) return;
   lastToastMessage = message;
-  notificationSound.currentTime = 0;
-  notificationSound.play().catch(()=>{});
+
+  try {
+    notificationSound.currentTime = 0;
+    notificationSound.play().catch(e => console.warn('Sound blocked:', e));
+  } catch (e) {
+    console.warn('Sound failed:', e);
+  }
+
   bell.classList.add('pulse');
-  setTimeout(()=>bell.classList.remove('pulse'), 1000);
+  setTimeout(() => bell.classList.remove('pulse'), 1000);
+
   showToast(message);
-  setTimeout(()=>{ lastToastMessage=""; },8000);
+  setTimeout(() => { lastToastMessage = ""; }, 8000);
 }
 
 function showToast(message) {
   const toast = document.createElement('div');
   toast.innerText = `🔔 ${message}`;
-  toast.style.background='#333';
-  toast.style.color='#fff';
-  toast.style.padding='10px 16px';
-  toast.style.borderRadius='8px';
-  toast.style.marginTop='8px';
-  toast.style.boxShadow='0 2px 6px rgba(0,0,0,0.2)';
-  toast.style.opacity='0';
-  toast.style.transition='opacity 0.5s, transform 0.5s';
-  toast.style.transform='translateY(-20px)';
+  toast.style.background = '#333';
+  toast.style.color = '#fff';
+  toast.style.padding = '10px 16px';
+  toast.style.borderRadius = '8px';
+  toast.style.marginTop = '8px';
+  toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+  toast.style.opacity = '0';
+  toast.style.transition = 'opacity 0.5s, transform 0.5s';
+  toast.style.transform = 'translateY(-20px)';
   toastContainer.appendChild(toast);
-  setTimeout(()=>{ toast.style.opacity='1'; toast.style.transform='translateY(0)'; },100);
-  setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateY(-20px)'; setTimeout(()=>toast.remove(),500); },4000);
+
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  }, 100);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-20px)';
+    setTimeout(() => toast.remove(), 500);
+  }, 4000);
 }
+
+let isLiveUpdate = false;
 
 async function fetchNotifications() {
   try {
-    const response = await fetch(`get_notifications_cno.php?page=${currentPage}&size=${pageSize}${showUnreadOnly?'&unread_only=1':''}`);
+    const response = await fetch(
+      basePath + `get_notifications_cno.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`
+    );
     const data = await response.json();
     totalNotifications = data.totalCount;
     totalUnread = data.totalUnread;
+
     const tbody = document.querySelector('#notificationTable tbody');
-    tbody.innerHTML='';
-    data.notifications.forEach(notif=>{
+    tbody.innerHTML = '';
+
+    data.notifications.forEach(notif => {
       const tr = document.createElement('tr');
-      tr.style.cursor='pointer';
-      if(!notif.read) tr.style.fontWeight='bold';
-      tr.innerHTML = `<td>${notif.message}</td><td>${notif.date}</td><td>${notif.barangay}</td><td>${notif.read?'Read':'New'}</td>`;
-      tr.onclick=()=>markAsRead(notif.id);
+      tr.style.cursor = 'pointer';
+      if (!notif.read_status) tr.style.fontWeight = 'bold';
+      tr.innerHTML = `
+        <td>${notif.message}</td>
+        <td>${notif.date}</td>
+        <td>${notif.read_status ? 'Read' : 'New'}</td>
+      `;
+      tr.onclick = () => markAsRead(notif.id);
       tbody.appendChild(tr);
     });
-    const effectiveTotal = showUnreadOnly?totalUnread:totalNotifications;
-    btnPrev.disabled = currentPage <=1;
-    btnNext.disabled = (currentPage*pageSize)>=effectiveTotal;
 
-    if(data.notifications.length>0) {
+    const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
+    btnPrev.disabled = currentPage <= 1;
+    btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
+
+    if (data.notifications.length > 0) {
       const newest = data.notifications[0];
-      if(initialized && isLiveUpdate && newest.id>lastAlertedId) playNotificationEffect(newest.message);
-      lastAlertedId = Math.max(lastAlertedId,newest.id);
+      if (initialized && isLiveUpdate && newest.id > lastAlertedId) {
+        playNotificationEffect(newest.message);
+      }
+      lastAlertedId = Math.max(lastAlertedId, newest.id);
     }
-    if(!initialized) initialized=true;
-    isLiveUpdate=false;
-  } catch(err){ console.error(err); }
+
+    if (!initialized) initialized = true;
+    isLiveUpdate = false;
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+  }
 }
 
-btnPrev.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; fetchNotifications(); } });
-btnNext.addEventListener('click', ()=>{ if((currentPage*pageSize)<(showUnreadOnly?totalUnread:totalNotifications)){ currentPage++; fetchNotifications(); } });
+btnPrev.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    fetchNotifications();
+  }
+});
 
-bell.addEventListener('click', ()=>{
-  currentPage=1;
+btnNext.addEventListener('click', () => {
+  const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
+  if ((currentPage * pageSize) < effectiveTotal) {
+    currentPage++;
+    fetchNotifications();
+  }
+});
+
+bell.addEventListener('click', () => {
+  currentPage = 1;
   fetchNotifications();
-  modal.style.display='flex';
+  modal.style.display = 'flex';
   fetchUnreadCount();
 });
 
-closeModal.onclick=()=>modal.style.display='none';
-window.onclick=(e)=>{ if(e.target===modal) modal.style.display='none'; };
+closeModal.onclick = () => modal.style.display = 'none';
+window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-async function markAsRead(id){
-  try{
-    const response = await fetch('mark_as_read_cno.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`id=${id}`});
+async function markAsRead(id) {
+  try {
+    const response = await fetch(basePath + 'mark_as_read_cno.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}`,
+    });
     const result = await response.json();
-    if(result.status==='success'){ fetchNotifications(); fetchUnreadCount(); }
-  } catch(err){ console.error(err); }
+    if (result.status === 'success') {
+      fetchNotifications();
+      fetchUnreadCount();
+    }
+  } catch (err) {
+    console.error('Error marking as read:', err);
+  }
 }
 
-// SSE
+// 🟦 SSE live update
 let eventSource;
-function initSSE(){
-  if(eventSource) eventSource.close();
-  eventSource = new EventSource('notifications_stream_cno.php');
-  eventSource.onmessage=()=>{ isLiveUpdate=true; fetchUnreadCount(); fetchNotifications(); };
-  eventSource.onerror=()=>{ console.log('SSE connection lost, reconnecting...'); setTimeout(initSSE,3000); };
+function initSSE() {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource(basePath + 'notifications_stream_cno.php');
+  eventSource.onmessage = function() {
+    isLiveUpdate = true;
+    fetchUnreadCount();
+    fetchNotifications();
+  };
+  eventSource.onerror = function() {
+    console.log('SSE connection lost, reconnecting...');
+    setTimeout(initSSE, 3000);
+  };
 }
 
-function initializeNotifications(){
+function initializeNotifications() {
   fetchUnreadCount();
   fetchNotifications();
   initSSE();
 }
 initializeNotifications();
 
-document.getElementById('markAllReadBtn').addEventListener('click', async ()=>{
-  try{
-    const response = await fetch('mark_as_read_cno.php',{method:'POST'});
+// 🟧 Mark all as read
+document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+  try {
+    const response = await fetch(basePath + 'mark_as_read_cno.php', { method: 'POST' });
     const result = await response.json();
-    if(result.status==='success'){ fetchNotifications(); fetchUnreadCount(); }
-  } catch(err){ console.error(err); }
+    if (result.status === 'success') {
+      fetchNotifications();
+      fetchUnreadCount();
+    }
+  } catch (err) {
+    console.error('Error marking all as read:', err);
+  }
 });
 
-document.getElementById('filterUnreadBtn').addEventListener('click',()=>{
-  showUnreadOnly=true;
-  document.getElementById('showAllBtn').style.display='inline-block';
-  document.getElementById('filterUnreadBtn').style.display='none';
-  currentPage=1;
+document.getElementById('filterUnreadBtn').addEventListener('click', () => {
+  showUnreadOnly = true;
+  document.getElementById('showAllBtn').style.display = 'inline-block';
+  document.getElementById('filterUnreadBtn').style.display = 'none';
+  currentPage = 1;
   fetchNotifications();
 });
 
-document.getElementById('showAllBtn').addEventListener('click',()=>{
-  showUnreadOnly=false;
-  document.getElementById('showAllBtn').style.display='none';
-  document.getElementById('filterUnreadBtn').style.display='inline-block';
-  currentPage=1;
+document.getElementById('showAllBtn').addEventListener('click', () => {
+  showUnreadOnly = false;
+  document.getElementById('showAllBtn').style.display = 'none';
+  document.getElementById('filterUnreadBtn').style.display = 'inline-block';
+  currentPage = 1;
   fetchNotifications();
 });
 </script>

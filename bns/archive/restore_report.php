@@ -24,5 +24,5 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // 🔹 Redirect back to main reports page
-header("Location: ../archive.php?msg=restored");
+header("Location: ../archive_report.php?msg=restored");
 exit();

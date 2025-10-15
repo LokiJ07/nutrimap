@@ -56,7 +56,6 @@ h1 {margin-top:0;}
 <body>
 <?php include 'header.php'; ?>
 <?php include 'sidebar.php'; ?>
-
 <div class="container">
   <h1>Health and Nutrition Data</h1>
 

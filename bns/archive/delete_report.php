@@ -29,5 +29,5 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // 🔹 Redirect back to archive page
-header("Location: ../archive.php?msg=deleted");
+header("Location: ../archive_report.php?msg=deleted");
 exit();
