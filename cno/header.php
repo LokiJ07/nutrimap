@@ -173,7 +173,7 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
   const container = document.getElementById('sidemenu-container');
 
   if (!container.innerHTML.trim()) {
-    const response = await fetch('sidemenu.php');
+    const response = await fetch('sidebar.php');
     const html = await response.text();
     container.innerHTML = html;
 

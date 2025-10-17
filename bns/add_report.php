@@ -101,6 +101,24 @@ if (session_status() === PHP_SESSION_NONE) {
             ':details' => "Report ID: $report_id, Created for Barangay: $barangay, Year: $year, Title: '$title'"
         ]);
 
+           // NOTIFICATION
+         $cnoStmt = $pdo->query("SELECT id FROM users WHERE user_type = 'CNO'");
+$cnoUsers = $cnoStmt->fetchAll(PDO::FETCH_COLUMN);
+
+$notifMessage = "A new report has been submitted by {$barangay}.";
+
+$notifStmt = $pdo->prepare("
+    INSERT INTO notifications (user_id, sender_id, message, date)
+    VALUES (:user_id, :sender_id, :message, NOW())
+");
+
+foreach ($cnoUsers as $cnoId) {
+    $notifStmt->execute([
+        ':user_id' => $cnoId,
+        ':sender_id' => $user_id,
+        ':message' => $notifMessage
+    ]);
+}
           // Commit transaction
           $pdo->commit();
 
