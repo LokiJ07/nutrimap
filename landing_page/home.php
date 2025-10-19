@@ -318,7 +318,7 @@
                 </div>
             </div>
             <a href="landing_page/pages/contact_us/contact.php" class="nav-link">Contact Us</a>
-            <a href="../login.php" class="nav-link login-btn">Login</a>
+            <a href="./login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>
 
