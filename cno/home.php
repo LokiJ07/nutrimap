@@ -143,7 +143,7 @@ thead {background:#009688;color:#fff;}
           </div>
         </div>
         <div class="card card-barangays">
-          <div  onclick="window.location.href='users.php'" style="cursor:pointer; font-size:32px; color: #071d10ff;"><i class="fa fa-map-marker-alt"></i></div>
+          <div  onclick="window.location.href='nutritional_map.php'" style="cursor:pointer; font-size:32px; color: #071d10ff;"><i class="fa fa-map-marker-alt"></i></div>
           <div>
             <h3>Total Barangays: <?= $totalBarangays ?></h3>
           </div>
