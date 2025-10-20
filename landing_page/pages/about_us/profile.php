@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNO NutriMap Profile</title>
-    <!-- Use Tailwind CSS for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="../../css/image/CNO_Logo.png">
-    <!-- Font Awesome for icons -->
+    <title>CNO NutriMap - Organizational Chart</title>
+    <link rel="icon" type="image/jpg" href="img/CNO_Logo.jpg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        /* General Body and Font Styles */
+
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -21,7 +22,621 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        .header {
+
+
+
+        /* Main Chart Area - with the light green gradient background */
+
+        .org-chart {
+
+            background: linear-gradient(to bottom, #e0ffe0, #c0ffc0); /* Light green gradient */
+
+            border-radius: 10px;
+
+            padding: 40px;
+
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            min-width: 900px; /* Adjust as needed for the content width */
+
+            max-width: 1200px; /* Max width to keep it from getting too wide */
+
+        }
+
+
+
+        /* Header Logos */
+
+        .chart-header-logos {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            width: 100%;
+
+            margin-bottom: 20px;
+
+            padding: 0 50px; /* Push logos inward from edges */
+
+        }
+
+
+
+        .chart-header-logos img {
+
+            height: 60px; /* Adjust size as needed */
+
+            object-fit: contain; /* Ensures logo fits without cropping */
+
+        }
+
+
+
+        /* Chart Title and Subtitle */
+
+        .chart-title-text {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+
+        }
+
+
+
+        .chart-title-text h2 {
+
+            font-size: 2.2rem;
+
+            font-weight: bold;
+
+            color: #333;
+
+            margin: 0;
+
+            line-height: 1.2;
+
+        }
+
+
+
+        .chart-title-text h3 {
+
+            font-size: 1.3rem;
+
+            font-weight: normal;
+
+            color: #555;
+
+            margin: 5px 0 0 0;
+
+        }
+
+
+
+        /* Common Node Styling */
+
+        .node {
+
+            background-color: #fff;
+
+            border: 1px solid #00a0a0; /* Teal border */
+
+            border-radius: 8px;
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+            padding: 10px 15px;
+
+            margin: 10px;
+
+            text-align: center;
+
+            position: relative; /* For connectors */
+
+            min-width: 150px; /* Ensure nodes have a minimum width */
+
+        }
+
+
+
+        .node-img {
+
+            width: 80px;
+
+            height: 80px;
+
+            border-radius: 50%; /* Circular image */
+
+            object-fit: cover; /* Ensures image fills the circle */
+
+            border: 3px solid #00a0a0; /* Teal border for profile pics */
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .node-name {
+
+            font-weight: bold;
+
+            font-size: 1rem;
+
+            color: #333;
+
+            margin-bottom: 2px;
+
+        }
+
+
+
+        .node-position {
+
+            font-size: 0.85rem;
+
+            color: #666;
+
+            line-height: 1.2;
+
+        }
+
+
+
+        /* Specific styles for the top (City Nutrition Action Officer) node */
+
+        .top-node .node-position {
+
+            background-color: #fffacd; /* Light yellow background */
+
+            border: 1px solid #e0c240; /* Slightly darker border */
+
+            border-radius: 5px;
+
+            padding: 5px 10px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            margin-top: 5px;
+
+        }
+
+
+
+        /* Connector Lines */
+
+        .connector-line {
+
+            background-color: #666; /* Gray line color */
+
+            position: absolute;
+
+        }
+
+
+
+        .vertical-line {
+
+            width: 2px;
+
+            height: 30px; /* Length of vertical line */
+
+            margin: 0 auto;
+
+            background-color: #666;
+
+        }
+
+
+
+        /* Division Boxes (Technical, Administrative) */
+
+        .division-line-container {
+
+            display: flex;
+
+            justify-content: center;
+
+            width: 100%;
+
+            position: relative;
+
+            margin-top: 10px;
+
+        }
+
+        
+
+        .division-line-container::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 0;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 70%; /* Horizontal line span */
+
+            height: 2px;
+
+            background-color: #666;
+
+        }
+
+
+
+        .division-box {
+
+            background-color: #fff;
+
+            border: 1px solid #666;
+
+            border-top: none; /* No top border */
+
+            border-radius: 0 0 8px 8px;
+
+            padding: 8px 30px;
+
+            margin: 0 30px; /* Spacing between division boxes */
+
+            font-weight: bold;
+
+            color: #333;
+
+            position: relative;
+
+            z-index: 1; /* Ensure box is above the horizontal line */
+
+            top: -1px; /* Overlap with the horizontal line */
+
+        }
+
+
+
+        /* Member Grouping */
+
+        .division-group {
+
+            display: flex;
+
+            justify-content: center;
+
+            margin-top: 20px;
+
+            width: 100%;
+
+        }
+
+
+
+        .technical-division, .administrative-division {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            flex: 1; /* Takes equal space */
+
+            padding: 0 10px; /* Padding for inner spacing */
+
+        }
+
+
+
+        .technical-members, .administrative-members {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 20px; /* Space between member nodes */
+
+            margin-top: 20px; /* Space from division box */
+
+            position: relative;
+
+        }
+
+
+
+        /* Horizontal line above members */
+
+        .technical-members::before,
+
+        .administrative-members::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: -10px; /* Position above nodes */
+
+            left: 0;
+
+            right: 0;
+
+            height: 2px;
+
+            background-color: #666;
+
+        }
+
+
+
+        /* Vertical lines connecting to individual members */
+
+        .member-container {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            position: relative;
+
+            padding-top: 15px; /* Space for the vertical line */
+
+        }
+
+        
+
+        .member-container::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 0; /* Starts at the horizontal line */
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 2px;
+
+            height: 15px; /* Length of individual vertical line */
+
+            background-color: #666;
+
+        }
+
+        
+
+        /* Footer (from your previous code, integrated) */
+
+        .footer {
+
+            background-color: #1f2937; /* gray-800 */
+
+            color: #d1d5db; /* gray-300 */
+
+            padding: 2.5rem 0;
+
+            margin-top: auto;
+
+            position: relative;
+
+            z-index: 10;
+
+        }
+
+
+
+        .footer-container {
+
+            max-width: 72rem;
+
+            margin: 0 auto;
+
+            padding: 0 1rem;
+
+        }
+
+
+
+        .footer-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr;
+
+            gap: 2rem;
+
+        }
+
+
+
+        @media (min-width: 768px) {
+
+            .footer-grid {
+
+                grid-template-columns: repeat(5, 1fr);
+
+            }
+
+            .footer-logo-col { /* Adjusting based on your previous footer grid */
+
+                grid-column: span 2 / span 2;
+
+            }
+
+        }
+
+
+
+        .footer-logo-container { /* Renamed from .footer-logo to avoid conflict and be more specific */
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: flex-start;
+
+        }
+
+        
+
+        /* Specific styling for the logo within the footer-logo-container */
+
+        .footer-logo-content { /* New wrapper for img and logo-text */
+
+            display: flex;
+
+            align-items: center;
+
+            margin-bottom: 1rem;
+
+        }
+
+
+
+        .footer-logo-img { /* Applied to the actual <img> in footer */
+
+            height: 2.5rem;
+
+            width: 2.5rem;
+
+            margin-right: 0.5rem;
+
+            border-radius: 0.5rem;
+
+        }
+
+
+
+        .logo-text-footer { /* New class for footer text to avoid header conflicts */
+
+            display: flex;
+
+            align-items: center;
+
+            font-size: 1.5rem;
+
+            font-weight: bold;
+
+        }
+
+
+
+        .logo-primary-footer {
+
+            color: #00a0a0;
+
+        }
+
+
+
+        .logo-secondary-footer {
+
+            color: #fff;
+
+            margin-left: 0.25rem;
+
+        }
+
+
+
+        .footer-desc {
+
+            font-size: 0.875rem;
+
+        }
+
+
+
+        .footer-title {
+
+            font-size: 1.125rem;
+
+            font-weight: 600;
+
+            color: #fff;
+
+            margin-bottom: 1rem;
+
+        }
+
+
+
+        .footer-links {
+
+            list-style: none;
+
+            padding: 0;
+
+            margin: 0;
+
+        }
+
+
+
+        .footer-links li {
+
+            margin-bottom: 0.5rem;
+
+        }
+
+
+
+        .footer-links a {
+
+            color: #d1d5db;
+
+            text-decoration: none;
+
+            transition: color 0.2s;
+
+        }
+
+
+
+        .footer-links a:hover {
+
+            color: #00a0a0;
+
+        }
+
+
+
+        .footer-bottom {
+
+            margin-top: 2rem;
+
+            border-top: 1px solid #374151; /* gray-700 */
+
+            padding-top: 2rem;
+
+            text-align: center;
+
+        }
+
+
+
+        .footer-bottom p {
+
+            color: #9ca3af; /* gray-400 */
+
+            font-size: 0.875rem;
+
+        }
+               .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -128,119 +743,14 @@
             color: #008c8c;
             font-weight: 700;
         }
-        .main-content {
-            padding: 40px;
-        }
-        .profile-card {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 30px;
-            text-align: center;
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        .profile-card img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #00a0a0;
-            margin-bottom: 20px;
-        }
-        .profile-card h2 {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #00a0a0;
-            margin-bottom: 5px;
-        }
-        .profile-card p {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 40px;
-            padding: 40px;
-        }
-        .team-section {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 40px;
-        }
-        .team-member {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 20px;
-            text-align: center;
-            width: 200px;
-        }
-        .team-member img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #00a0a0;
-            margin-bottom: 10px;
-        }
-        .team-member h4 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #333;
-            margin: 5px 0;
-        }
-        .team-member span {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        .footer-links {
-            width: 100%;
-            padding: 10px 0;
-            background-color: #ffffff;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            font-weight: bold;
-        }
-        .footer-links a {
-            color: #000;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .footer-links a:hover {
-            color: #00a0a0;
-        }
-        footer {
-            width: 100%;
-            padding: 10px 0;
-            margin-top: auto;
-            background-color: #00a0a0;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .footer-copyright {
-            line-height: 1.5;
-        }
-        .footer-copyright span {
-            display: block;
-        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
-    <!-- Header -->
-    <header class="header">
+    
+ <header class="header">
         <div class="logo">
-             <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo"> 
+              <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo">  
             <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
         <nav class="nav">
@@ -259,67 +769,227 @@
             <a href="../../../login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>
+            <div class="chart-header-logos">
 
-    <!-- Main Content -->
-    <main class="main-content flex-grow flex flex-col items-center p-5 lg:p-10 text-justify">
-        <h1 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-800 text-center">Our Profile</h1>
-        <div class="profile-container">
-            <!-- Head of Office Profile -->
-            <div class="profile-card">
-                <img src="https://placehold.co/150x150/00a0a0/ffffff?text=CNO" alt="Head of Office">
-                <h2 class="text-2xl font-bold">Mr. Juan Dela Cruz</h2>
-                <p class="text-gray-600">Head of Office</p>
-                <p class="text-gray-700 leading-relaxed text-center">
-                    Mr. Juan Dela Cruz leads the City Nutrition Office with a strong commitment to public health and community welfare. With over 15 years of experience in nutrition and public service, he is dedicated to implementing impactful programs that improve the lives of our citizens.
-                </p>
+                <img src="../../../img/Ellipse_04.png" alt="Bagong Pilipinas Logo">
+
+                <img src="../../../img/Ellipse_02.png" alt="El Salvador City Logo">
+
             </div>
 
-            <!-- Team Members Section -->
-            <h3 class="text-2xl lg:text-3xl font-bold mb-4 mt-8 text-gray-800 text-center">Our Dedicated Team</h3>
-            <div class="team-section">
-                <!-- Team Member 1 -->
-                <div class="team-member">
-                    <img src="https://placehold.co/100x100/00a0a0/ffffff?text=Team" alt="Team Member">
-                    <h4>Ms. Maria Santos</h4>
-                    <span>Public Health Nutritionist</span>
+
+
+            <div class="chart-title-text">
+
+                <h2>ORGANIZATIONAL CHART</h2>
+
+                <h2>CITY NUTRITION OFFICE</h2>
+
+                <h3>El Salvador City, Misamis Oriental</h3>
+
+            </div>
+
+
+
+            <div class="node top-node">
+
+                <img src="../../../img/CNAO.png" alt="Elma M. Clapano, RN" class="node-img">
+
+                <div class="node-name">Elma M. Clapano, RN</div>
+
+                <div class="node-position">City Nutrition Action Officer</div>
+
+            </div>
+
+
+
+            <div class="vertical-line"></div>
+
+
+
+            <div class="division-line-container">
+
+                <div class="division-box">Technical Division</div>
+
+                <div class="division-box">Administrative Division</div>
+
+            </div>
+
+
+
+            <div class="division-group">
+
+                <div class="technical-division">
+                    <div class="technical-members">
+                        <div class="member-container">
+                            <div class="node">
+                                <img src="../../../img/CNPC.png" alt="Edgar B. Napiñas" class="node-img">
+                                <div class="node-position">City Nutrition Program Coordinator</div>
+                                <div class="node-name">Edgar B. Napiñas</div>
+                            </div>
+
+                        </div>
+
+                        <div class="member-container">
+
+                            <div class="node">
+
+                                <img src="../../../img/CND.png" alt="Arlie Joy O. Damiles, RND" class="node-img">
+
+                                <div class="node-position">Nutritionist-Dietitian</div>
+
+                                <div class="node-name">Arlie Joy O. Damiles, RND</div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="member-container">
+
+                            <div class="node">
+
+                                <img src="../../../img/ND.png" alt="Karen Jay B. Langala, RND" class="node-img">
+
+                                <div class="node-position">Nutritionist-Dietitian</div>
+
+                                <div class="node-name">Karen Jay B. Langala, RND</div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="member-container">
+
+                            <div class="node">
+
+                                <img src="../../../img/PC.png" alt="Jay S. Boctot, LPT" class="node-img">
+
+                                <div class="node-position">City Nutrition Program Coordinator</div>
+
+                                <div class="node-name">Jay S. Boctot, LPT</div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
-                <!-- Team Member 2 -->
-                <div class="team-member">
-                    <img src="https://placehold.co/100x100/00a0a0/ffffff?text=Team" alt="Team Member">
-                    <h4>Mr. Jose Lim</h4>
-                    <span>Community Nutrition Coordinator</span>
-                </div>
-                <!-- Team Member 3 -->
-                <div class="team-member">
-                    <img src="https://placehold.co/100x100/00a0a0/ffffff?text=Team" alt="Team Member">
-                    <h4>Ms. Ana Reyes</h4>
-                    <span>Data Analyst</span>
-                </div>
-                <!-- Team Member 4 -->
-                <div class="team-member">
-                    <img src="https://placehold.co/100x100/00a0a0/ffffff?text=Team" alt="Team Member">
-                    <h4>Mr. Carlos Gomez</h4>
-                    <span>Program Assistant</span>
+
+
+
+                <div class="administrative-division">
+
+                    <div class="administrative-members">
+
+                        <div class="member-container">
+
+                            <div class="node">
+
+                                <img src="../../../img/OC.png" alt="Honey Grace S. Magriña" class="node-img">
+
+                                <div class="node-position">Office Clerk</div>
+
+                                <div class="node-name">Honey Grace S. Magriña</div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="member-container">
+                            <div class="node">
+                                <img src="../../../img/AA.png" alt="Antonette E. Villbar" class="node-img">
+                                <div class="node-position">Administrative Aide III</div>
+                                <div class="node-name">Antonette E. Villbar</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
-
-    <!-- Footer -->
-    <div class="bg-gray-100 text-center p-4">
-        <div class="flex justify-center space-x-6 text-sm font-semibold mb-2">
-            <a href="privacy_act/terms.php" class="hover:underline text-gray-600">Terms</a>
-            <a href="privacy_act/privacy.php" class="hover:underline text-gray-600">Privacy Policy</a>
-            <a href="privacy_act/cookies.php" class="hover:underline text-gray-600">Cookies</a>
-            <a href="privacy_act/help.php" class="hover:underline text-gray-600">Help</a>
-            <a href="privacy_act/faqs.php" class="hover:underline text-gray-600">FAQs</a>
-        </div>
-        <p class="text-gray-500 text-xs">
-            <span>Copyright © 2025 CNO NutriMap Website, All Rights Reserved.</span>
-            <br>
-            <span>Developed By NBSC ICS 4th Year Student</span>
-        </p>
     </div>
 
+    
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-logo-col footer-logo-container">
+                    <div class="footer-logo-content">
+                        <img src="../../../img/CNO_Logo.jpg" alt="CNO NutriMap Logo" class="footer-logo-img">
+                        <div class="logo-text-footer">
+                            <span class="logo-primary-footer">CNO</span>
+                            <span class="logo-secondary-footer">NutriMap</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">
+                        A tool to visualize health and nutrition data for children in El Salvador City.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="footer-title">About Us</h3>
+
+                    <ul class="footer-links">
+
+                        <li><a href="mission.php">Our Mission</a></li>
+
+                        <li><a href="vision.php">Our Vision</a></li>
+
+                        <li><a href="history.php">History</a></li>
+
+                    </ul>
+
+                </div>
+
+                <div>
+
+                    <h3 class="footer-title">Quick Links</h3>
+
+                    <ul class="footer-links">
+
+                        <li><a href="pages/map_us/map.php">Map</a></li>
+
+                        <li><a href="pages/contact_us/get_in_touch.php">Contact Us</a></li>
+
+                        <li><a href="pages/contact_us/downloadable_form.php">Downloadable Forms</a></li>
+
+                    </ul>
+
+                </div>
+
+                <div>
+
+                    <h3 class="footer-title">Legal & Support</h3>
+
+                    <ul class="footer-links">
+
+                        <li><a href="pages/legal_and_support/terms_of_use.php">Terms of Use</a></li>
+
+                        <li><a href="pages/legal_and_support/privacy_policy.php">Privacy Policy</a></li>
+
+                        <li><a href="pages/legal_and_support/cookies.php">Cookies</a></li>
+
+                        <li><a href="pages/help_and_support/help.php">Help</a></li>
+
+                        <li><a href="pages/help_and_support/faqs.php">FAQs</a></li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+
+                <p>Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
 </body>
+
 </html>
