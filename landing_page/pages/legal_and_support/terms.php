@@ -27,7 +27,7 @@
     <!-- Header Section -->
     <header class="flex justify-between items-center p-6 lg:px-10 bg-white shadow-md z-20">
         <div class="flex items-center">
-            <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+            <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
             <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1">NutriMap</span>
         </div>
         <nav class="flex items-center space-x-6">

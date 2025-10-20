@@ -148,11 +148,12 @@
     <!-- Header Section -->
            <header class="header">
         <div class="logo">
+            <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo">
             <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
         <nav class="nav">
             <a href="../../../index.php" class="nav-link home-btn">Home</a>
-            <a href="landing_page/map.php" class="nav-link">Map</a>
+            <a href="../../../landing_page/pages/map_us/map.php" class="nav-link">Map</a>
             <div class="dropdown">
                 <a href="../about_us/about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
                 <div class="dropdown-content">

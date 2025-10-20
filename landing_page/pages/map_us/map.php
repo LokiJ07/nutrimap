@@ -51,11 +51,11 @@
     <!-- Header Section -->
     <header class="flex justify-between items-center p-6 lg:px-10 bg-white shadow-md z-20">
         <div class="flex items-center">
-            <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+            <img src="../../../img/CNO_Logo.jpg" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
             <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1">NutriMap</span>
         </div>
         <nav class="flex items-center space-x-6">
-            <a href="../../index.php" class="text-gray-600 hover:text-gray-900 font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out">Home</a>
+            <a href="../../../index.php" class="text-gray-600 hover:text-gray-900 font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out">Home</a>
             <a href="../../pages/map_us/map.php" class="bg-[#00a0a0] text-white font-semibold px-4 py-2 rounded-md transition duration-300 ease-in-out shadow-md">Map</a>
             
             <!-- About Dropdown with rotating arrow -->
@@ -215,7 +215,7 @@
                 <!-- Logo and Description -->
                 <div class="flex flex-col items-start md:col-span-2">
                     <div class="flex items-center mb-4">
-                        <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+                        <img src="../../../img/CNO_Logo.jpg" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
                         <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1 text-white">NutriMap</span>
                     </div>
                     <p class="text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>

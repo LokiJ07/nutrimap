@@ -277,6 +277,7 @@
   <!-- HEADER -->
     <header class="header">
         <div class="logo">
+          <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo">
             <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
         <nav class="nav">
@@ -379,9 +380,9 @@
         <div class="footer-grid">
             <!-- Logo and Description -->
             <div class="footer-logo">
+              <img src="../img/CNO_Logo.jpg" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
                 <div class="logo-text">
-                    <span class="logo-primary">CNO</span>
-                    <span class="logo-secondary">NutriMap</span>
+                    <span class="logo-primary">CNO</span><span class="logo-secondary">NutriMap</span>
                 </div>
                 <p class="footer-desc">
                     A tool to visualize health and nutrition data for children in El Salvador City.
