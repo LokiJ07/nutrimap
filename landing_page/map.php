@@ -599,26 +599,30 @@ function drawLayer(selectedYear) {
 // Style polygons
 function styleFeature(feature){
   const props = feature.properties;
-  if(props.NO_DATA) return { color:'#999', weight:1, fillOpacity:0.3, fillColor:'#e0e0e0' };
-  
-if(activeField && activeColor){
-    const val = props[activeField.toUpperCase()] ?? 0;
-    return { color:'#333', weight:2, fillOpacity:0.7, fillColor:getGradientColor(activeColor, val) };
-}
 
-// Default mixed coloring when activeField=null (All)
-let r=0,g=0,b=0,total=0;
-legendItems.forEach(li => {
-    if(li.dataset.field === 'all') return; // skip the 'All' virtual item
-    const val = props[li.dataset.field.toUpperCase()] ?? 0;
-    const rgb = hexToRgb(li.dataset.color);
-    r += rgb.r*val;
-    g += rgb.g*val;
-    b += rgb.b*val;
-    total += val;
-});
-if(total===0) return { color:'#333', weight:1, fillOpacity:0.2, fillColor:'#ccc' };
-return { color:'#333', weight:1, fillOpacity:0.7, fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})` };
+  if(props.NO_DATA) {
+    // Only outline, transparent fill
+    return { color:'#333', weight:1, fillOpacity:0, fillColor:'transparent' };
+  }
+
+  if(activeField && activeColor){
+    const val = props[activeField.toUpperCase()] ?? 0;
+    return { color:'#333', weight:1, fillOpacity:0.8, fillColor:getGradientColor(activeColor, val) };
+  }
+
+  // Default mixed coloring when activeField=null (All)
+  let r=0,g=0,b=0,total=0;
+  legendItems.forEach(li => {
+      if(li.dataset.field === 'all') return; 
+      const val = props[li.dataset.field.toUpperCase()] ?? 0;
+      const rgb = hexToRgb(li.dataset.color);
+      r += rgb.r*val;
+      g += rgb.g*val;
+      b += rgb.b*val;
+      total += val;
+  });
+  if(total===0) return { color:'#333', weight:1, fillOpacity:0, fillColor:'transparent' };
+  return { color:'#333', weight:1, fillOpacity:0.8, fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})` };
 }
 
 // Hover tooltip + mini-chart
@@ -745,8 +749,39 @@ document.getElementById('barangayFilter').addEventListener('change', function(){
 // Helper functions
 function hexToRgb(hex){ const c=parseInt(hex.slice(1),16); return {r:(c>>16)&255,g:(c>>8)&255,b:c&255}; }
 function lighten(hex,amount){ const num=parseInt(hex.slice(1),16); let r=(num>>16)&0xff, g=(num>>8)&0xff, b=num&0xff; r=Math.round(r+(255-r)*amount); g=Math.round(g+(255-g)*amount); b=Math.round(b+(255-b)*amount); return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase(); }
-function getGradientColor(baseColor,value){ if(value==null) return '#ccc'; const ratio=Math.min(1,value/100); return lighten(baseColor,0.8*(1-ratio)); }
+// Stronger gradient: higher values = deeper color
+function getGradientColor(baseColor, value){
+  if(value==null) return '#999';
+  const ratio = Math.min(1, value/100);
+  const rgb = hexToRgb(baseColor);
+  // Use dark gray as start for stronger contrast
+  const start = {r:190, g:190, b:180}; // you can adjust this
+  const r = Math.round(start.r + (rgb.r - start.r) * ratio);
+  const g = Math.round(start.g + (rgb.g - start.g) * ratio);
+  const b = Math.round(start.b + (rgb.b - start.b) * ratio);
+  return `rgb(${r},${g},${b})`;
+}
+// Filter map by hovered gradient
+function filterMapByGradient(){
+  if(!geoLayer) return;
+  geoLayer.eachLayer(layer => {
+    if(!activeField) return layer.setStyle(styleFeature(layer.feature));
 
+    const val = Number(layer.feature.properties[activeField.toUpperCase()] ?? 0);
+    const isNoData = layer.feature.properties.NO_DATA;
+
+    if(!activeGradientRange){
+      layer.setStyle(styleFeature(layer.feature));
+    } else {
+      const inRange = val >= activeGradientRange.min && val <= activeGradientRange.max;
+      layer.setStyle({
+        ...styleFeature(layer.feature),
+        fillOpacity: isNoData ? 0 : (inRange ? 0.8 : 0.1),
+        opacity: 1
+      });
+    }
+  });
+}
 // Update gradient scale
 let activeGradientRange = null; // store clicked range
 let activeGradientCell = null;  // store clicked cell element
@@ -756,34 +791,37 @@ function updateGradientScale(baseColor){
   if(!grid) return; 
   grid.innerHTML='';
 
+  // Normal 10-range gradient
   for(let i=0;i<10;i++){
-    const minVal = i*10;      // 0,10,20...
-    const maxVal = (i+1)*10;  // 10,20,30...
+    const minVal = i*10;      
+    const maxVal = (i+1)*10;  
     const val=(i+1)*10;
     const cell=document.createElement('div');
     cell.className='gradient-cell';
     cell.style.background = getGradientColor(baseColor,val);
-    cell.title = `${minVal}% - ${maxVal}%`; // show range on hover
+    cell.title = `${minVal}% - ${maxVal}%`; 
 
-    // Click to filter map
-    cell.addEventListener('click', () => {
-      // Remove highlight from previously active cell
-      if(activeGradientCell) activeGradientCell.classList.remove('active-gradient-cell');
-
-      // toggle active
-      if(activeGradientRange && activeGradientRange.min===minVal && activeGradientRange.max===maxVal){
-        activeGradientRange = null; // deselect
-        activeGradientCell = null;
-      } else {
-        activeGradientRange = {min:minVal, max:maxVal};
-        activeGradientCell = cell;
-        cell.classList.add('active-gradient-cell'); // highlight clicked cell
-      }
+    cell.addEventListener('mouseover', () => {
+      cell.classList.add('active-gradient-cell');
+      activeGradientRange = {min:minVal, max:maxVal};
+      filterMapByGradient();
+    });
+    cell.addEventListener('mouseout', () => {
+      cell.classList.remove('active-gradient-cell');
+      activeGradientRange = null;
       filterMapByGradient();
     });
 
     grid.appendChild(cell);
   }
+
+  // Add a separate "No Data" cell
+  const noDataCell = document.createElement('div');
+  noDataCell.className='gradient-cell';
+  noDataCell.style.background = 'transparent';
+  noDataCell.style.border = '1px dashed #333';
+  noDataCell.title = 'No Data';
+  grid.appendChild(noDataCell);
 }
 
 // Filter map by gradient range
