@@ -26,8 +26,6 @@ $stmt = $pdo->prepare("
         -- Normalized barangay name
         CASE 
             WHEN b.barangay = 'Bolobolo'   THEN 'Pedro sa Baculio'
-            WHEN b.barangay = 'Kibonbon'   THEN 'Quibonbon'
-            WHEN b.barangay = 'Calongonan' THEN 'San Francisco de Asis'
             ELSE b.barangay
         END AS normalized_barangay
     FROM reports r
@@ -56,11 +54,11 @@ function getBarangayLogo($barangay) {
         'Hinigdaan' => 'Hinigdaan.png',
         'Kalabaylabay' => 'Kalabaylabay.png',
         'Molugan' => 'Molugan.png',
-        'Pedro sa Baculio' => 'Pedro sa Baculio.png',
+        'Pedro sa Baculio' => 'Bolobolo.png',
         'Poblacion' => 'Poblacion.png',
-        'Quibonbon' => 'Quibonbon.png',
+        'Kibonbon' => 'Kibonbon.png',
         'Sambulawan' => 'Sambulawan.png',
-        'San Francisco de Asis' => 'San Francisco de Asis.png',
+        'Calongonan' => 'Calongonan.png',
         'Sinaloc' => 'Sinaloc.png',
         'Taytay' => 'Taytay.png',
         'Ulaliman' => 'Ulaliman.png'

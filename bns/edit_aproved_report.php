@@ -54,7 +54,7 @@ function getBarangayLogo($barangay) {
         'poblacion' => 'Poblacion.png',
         'quibonbon' => 'Quibonbon.png',
         'sambulawan' => 'Sambulawan.png',
-        'san francisco de asis' => 'San_Francisco_de_Asis.png',
+        'calongonan' => 'Calongonan.png',
         'sinaloc' => 'Sinaloc.png',
         'taytay' => 'Taytay.png',
         'ulaliman' => 'Ulaliman.png'
@@ -64,7 +64,7 @@ function getBarangayLogo($barangay) {
     $file = $map[$key] ?? 'default.png';
 
     // Check if file exists
-    $path = __DIR__ . '/../../logos/barangays/' . $file;
+    $path = __DIR__ . '/../logos/barangays/' . $file;
     if (!file_exists($path)) {
         $file = 'default.png';
     }
@@ -167,10 +167,10 @@ function copyTitle() {
         <tr>
             <td class="header-left">BNS Form No. IC<br>Barangay Nutrition Profile</td>
             <td class="header-logos">
-                <img src="../../logos/barangays/<?= urlencode($barangay_logo) ?>" alt="Barangay Logo">
-                <img src="../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png">
-                <img src="../../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png">
-                <img src="../../logos/fixed/Bagong-Pilipinas-logo.png">
+                <img src="../logos/barangays/<?= urlencode($barangay_logo) ?>" alt="Barangay Logo">
+                <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png">
+                <img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png">
+                <img src="../logos/fixed/Bagong-Pilipinas-logo.png">
             </td>
         </tr>
         </table>

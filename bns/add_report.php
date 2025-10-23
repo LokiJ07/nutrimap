@@ -1,10 +1,12 @@
   <?php
-  session_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
   require '../db/config.php';
+  error_reporting(E_ALL);
+ini_set('display_errors', 1);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
   // ✅ Require login
   if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     header("Location: ../login.php");
@@ -191,8 +193,7 @@ foreach ($cnoUsers as $cnoId) {
 
   <form method="post" onsubmit="copyTitle()">
     <input type="hidden" id="hidden-title" name="title">
-
-    <form method="post"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 
       <!-- Left: Titles -->
       <div style="text-align:left;">
@@ -524,59 +525,6 @@ function copyTitle() {
         document.getElementById('report-title').value;
 }
   </script>
-
-<script>
-document.getElementById('csvFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const text = event.target.result;
-        const rows = text.split(/\r?\n/).filter(r => r.trim() !== '');
-
-        // Map to store indicator -> values
-        const csvMap = {};
-
-        rows.forEach(row => {
-            const cols = row.split(/\t|,/).map(c => c.trim());
-            if (cols.length < 2) return; // skip rows without values
-            const indicator = cols[0];
-            // take all numeric columns after first
-            const nums = cols.slice(1).filter(c => c !== '' && !isNaN(c));
-            if (nums.length > 0) {
-                csvMap[indicator] = nums;
-            }
-        });
-
-        // Normalize function for matching
-        function normalize(str) {
-            return str.replace(/\s+/g,' ').trim().toLowerCase();
-        }
-
-        // Fill form inputs by matching label text
-        const inputs = document.querySelectorAll('#add_report_form input[type="number"]');
-        inputs.forEach(input => {
-            // Get the label text
-            let label = '';
-            if (input.closest('td')) {
-                const td = input.closest('td').previousElementSibling || input.closest('td');
-                label = td.textContent || '';
-            }
-
-            // Search CSV map for match
-            for (let key in csvMap) {
-                if (normalize(label).includes(normalize(key))) {
-                    // Take first available numeric value for this indicator
-                    input.value = csvMap[key].shift();
-                    break;
-                }
-            }
-        });
-    };
-    reader.readAsText(file);
-});
-</script>
 
 <script>
 document.getElementById('csvFile').addEventListener('change', function(e) {
