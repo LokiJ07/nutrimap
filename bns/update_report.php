@@ -1,7 +1,7 @@
 <?php
 session_start();
-require '../../db/config.php';
-require_once '../../otp/mailer.php'; // ✅ include mailer
+require '../db/config.php';
+require_once '../otp/mailer.php'; // ✅ include mailer
 
 // ✅ Require login
 if (!isset($_SESSION['user_id'])) {
