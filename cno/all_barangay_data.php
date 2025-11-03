@@ -2,87 +2,65 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require '../db/config.php';
 
-// ✅ Only CNO
+// Only CNO
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     header("Location: ../login.php");
     exit();
 }
 
-// ✅ Fetch available years dynamically
+// Fetch available years
 $yearsStmt = $pdo->query("SELECT DISTINCT CAST(year AS UNSIGNED) AS yr FROM bns_reports ORDER BY yr DESC");
 $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// ✅ Determine default year (latest in DB or current)
+// Determine selected year
 $currentYear = (int)date('Y');
 $latestYear = !empty($years) ? max($years) : $currentYear;
-$defaultYear = max($latestYear, $currentYear);
+$selectedYear = isset($_GET['year']) && in_array((int)$_GET['year'], $years) ? (int)$_GET['year'] : $latestYear;
 
-// ✅ Use selected year or fallback to default
-$selectedYear = (isset($_GET['year']) && in_array((int)$_GET['year'], $years))
-    ? (int)$_GET['year']
-    : $defaultYear;
+// Fetch barangays for selected year
+$barangayStmt = $pdo->prepare("SELECT DISTINCT barangay FROM bns_reports WHERE year = ? ORDER BY barangay ASC");
+$barangayStmt->execute([$selectedYear]);
+$barangayOptions = $barangayStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// ✅ Selected barangays (multiselect)
-$selectedBarangays = isset($_GET['barangays']) ? $_GET['barangays'] : [];
+// Determine selected barangays for consolidated report only (no auto-select)
+$selectedBarangays = isset($_GET['barangays']) && is_array($_GET['barangays']) ? $_GET['barangays'] : [];
 
-// ✅ Consolidated report (latest report for the selected year only)
+// Prepare placeholders for IN clause
+$placeholders = !empty($selectedBarangays) ? implode(',', array_fill(0, count($selectedBarangays), '?')) : 'NULL';
+
+// Consolidated report (latest across selected barangays)
+$consolidatedSql = "
+    SELECT r.id, r.report_date
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE b.year = ? AND b.barangay IN ($placeholders)
+    ORDER BY r.report_date DESC
+    LIMIT 1
+";
+$consolidatedStmt = $pdo->prepare($consolidatedSql);
 if (!empty($selectedBarangays)) {
-    // With barangay filter
-    $inClause = implode(',', array_fill(0, count($selectedBarangays), '?'));
-    $consolidatedStmt = $pdo->prepare("
-        SELECT r.id, r.report_date
-        FROM reports r
-        JOIN bns_reports b ON r.id = b.report_id
-        WHERE b.year = ? AND b.barangay IN ($inClause)
-        ORDER BY r.report_date DESC
-        LIMIT 1
-    ");
     $consolidatedStmt->execute(array_merge([$selectedYear], $selectedBarangays));
 } else {
-    // No barangay filter — strictly by year only
-    $consolidatedStmt = $pdo->prepare("
-        SELECT r.id, r.report_date
-        FROM reports r
-        JOIN bns_reports b ON r.id = b.report_id
-        WHERE b.year = ?
-        ORDER BY r.report_date DESC
-        LIMIT 1
-    ");
     $consolidatedStmt->execute([$selectedYear]);
 }
 $consolidated = $consolidatedStmt->fetch(PDO::FETCH_ASSOC);
 
-// ✅ Barangay list (latest per barangay for selected year)
-if (!empty($selectedBarangays)) {
-    $inClause = implode(',', array_fill(0, count($selectedBarangays), '?'));
-    $barangayStmt = $pdo->prepare("
-        SELECT MAX(r.id) AS report_id, b.barangay, MAX(r.report_date) AS latest_date
+// Barangay reports (latest per barangay for selected year) - always show all barangays
+$barangayReports = [];
+foreach ($barangayOptions as $barangay) {
+    $stmt = $pdo->prepare("
+        SELECT r.id AS report_id, b.barangay, r.report_date AS latest_date
         FROM reports r
         JOIN bns_reports b ON r.id = b.report_id
-        WHERE b.year = ? AND b.barangay IN ($inClause)
-        GROUP BY b.barangay
-        ORDER BY b.barangay ASC
+        WHERE b.year = ? AND b.barangay = ?
+        ORDER BY r.report_date DESC
+        LIMIT 1
     ");
-    $barangayStmt->execute(array_merge([$selectedYear], $selectedBarangays));
-} else {
-    $barangayStmt = $pdo->prepare("
-        SELECT MAX(r.id) AS report_id, b.barangay, MAX(r.report_date) AS latest_date
-        FROM reports r
-        JOIN bns_reports b ON r.id = b.report_id
-        WHERE b.year = ?
-        GROUP BY b.barangay
-        ORDER BY b.barangay ASC
-    ");
-    $barangayStmt->execute([$selectedYear]);
+    $stmt->execute([$selectedYear, $barangay]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) $barangayReports[] = $row;
 }
-$barangayReports = $barangayStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// ✅ Barangay options for dropdown (distinct)
-$barangayDropdownStmt = $pdo->prepare("SELECT DISTINCT barangay FROM bns_reports WHERE year = ? ORDER BY barangay ASC");
-$barangayDropdownStmt->execute([$selectedYear]);
-$barangayOptions = $barangayDropdownStmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,7 +72,7 @@ $barangayOptions = $barangayDropdownStmt->fetchAll(PDO::FETCH_COLUMN);
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <style>
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; color: #333; }
-.container { max-width: 1200px; margin: 40px auto; background: #fff; padding: 30px 35px; border-radius: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+.container { max-width: 1130px; margin: 20px auto; background: #fff; padding: 30px 35px; border-radius: 9px; }
 h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 25px; }
 form { margin-bottom: 25px; }
 select, button, input { font-family: inherit; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; padding: 8px 12px; }
@@ -117,36 +95,63 @@ button:hover { background: #0056b3; transform: scale(1.03); }
 <?php include 'sidebar.php'; ?>
 
 <div class="container">
-  <h1>Health and Nutrition Data</h1>
+  <h1>All Barangay Data</h1>
 
-  <!-- ✅ Filter form -->
-  <form method="get" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+  <!-- Filter form (checkboxes only affect consolidated report) -->
+  <form method="get" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
     <label><strong>Year:</strong></label>
     <select name="year" onchange="this.form.submit()">
-      <?php foreach ($years as $y): ?>
-        <option value="<?= $y ?>" <?= $y == $selectedYear ? 'selected' : '' ?>><?= $y ?></option>
-      <?php endforeach; ?>
+        <?php foreach ($years as $y): ?>
+            <option value="<?= $y ?>" <?= $y == $selectedYear ? 'selected' : '' ?>><?= $y ?></option>
+        <?php endforeach; ?>
     </select>
 
     <label><strong>Barangays:</strong></label>
-    <select id="barangays" name="barangays[]" multiple>
-      <?php foreach ($barangayOptions as $b): ?>
-        <option value="<?= htmlspecialchars($b) ?>" <?= in_array($b, $selectedBarangays) ? 'selected' : '' ?>><?= htmlspecialchars($b) ?></option>
-      <?php endforeach; ?>
-    </select>
-
+    <div style="display:flex; align-items:center; gap:10px;">
+        <input type="checkbox" id="selectAll"> Select All
+        <select id="barangays" name="barangays[]" multiple>
+            <?php foreach ($barangayOptions as $b): ?>
+                <option value="<?= htmlspecialchars($b) ?>" <?= in_array($b, $selectedBarangays) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($b) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
     <button type="submit">View</button>
   </form>
 
   <script>
-  new Choices('#barangays', {
-      removeItemButton: true,
-      searchEnabled: true,
-      placeholderValue: 'Select barangays',
+  document.addEventListener('DOMContentLoaded', function() {
+      const selectEl = document.getElementById('barangays');
+      const selectAll = document.getElementById('selectAll');
+
+      const choices = new Choices('#barangays', {
+          removeItemButton: true,
+          searchEnabled: true,
+          placeholderValue: 'Select barangays',
+          shouldSort: false
+      });
+
+      function updateSelectAllCheckbox() {
+          const selectedCount = choices.getValue(true).length;
+          selectAll.checked = selectedCount === selectEl.options.length && selectedCount > 0;
+      }
+
+      // Select All toggle
+      selectAll.addEventListener('change', function() {
+          if (this.checked) {
+              choices.setChoiceByValue(Array.from(selectEl.options).map(o => o.value));
+          } else {
+              choices.removeActiveItems();
+          }
+      });
+
+      selectEl.addEventListener('change', updateSelectAllCheckbox);
+      updateSelectAllCheckbox();
   });
   </script>
 
-  <!-- ✅ Consolidated Report -->
+  <!-- Consolidated Report -->
   <div id="consolidated-section">
     <a href="view_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>" class="list-item">
       <strong>Consolidated Health and Nutrition Data (<?= htmlspecialchars($selectedYear) ?>)</strong>
@@ -159,7 +164,7 @@ button:hover { background: #0056b3; transform: scale(1.03); }
     </a>
   </div>
 
-  <!-- ✅ Filters (Search, Sort, Barangay dropdown) -->
+  <!-- Filters -->
   <div class="filters">
     <input type="text" id="search" placeholder="Search barangay...">
     <select id="barangayFilter">
@@ -174,7 +179,7 @@ button:hover { background: #0056b3; transform: scale(1.03); }
     </select>
   </div>
 
-  <!-- ✅ Barangay Reports -->
+  <!-- Barangay Reports -->
   <div id="reportList">
     <?php if (empty($barangayReports)): ?>
       <p>No records found for this year.</p>

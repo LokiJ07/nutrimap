@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     header("Location: ../login.php");
     exit();
 }
+$selectedYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 
 /* Helper for clean display */
 function val($a,$k,$fmt='int'){
@@ -78,37 +79,72 @@ $totals = $stmt->fetch(PDO::FETCH_ASSOC);
 <head>
 <meta charset="UTF-8">
 <title>Consolidated Barangay Situation Analysis – Grand Totals</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body{background:#fafafa;font-family:"Times New Roman",serif;font-size:14px;margin:0}
-.container{max-width:900px;margin:0 auto;padding:20px}
-h2{text-align:center;margin:0 0 20px}
-table{width:100%;border-collapse:collapse;margin-bottom:20px;table-layout:fixed}
-td{border:1px solid #000;padding:6px 8px;text-align:center;word-wrap:break-word}
- .ind{border:1px solid #000;padding:6px 8px;text-align:left;word-wrap:break-word}
-th{background:#ddd; border:1px solid #000;padding:6px 8px;text-align:left;word-wrap:break-word} 
-.indent td:first-child{padding-left:20px}
-.number-cell{display:flex;justify-content:space-between}
-.number-cell div{flex:1;text-align:center;border-left:1px solid #000}
-.number-cell div:first-child{border-left:none}
-@media print{.page-break{page-break-after:always}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f0f0;font-family:"Times New Roman",serif;font-size:12px;line-height:1.4}
+.body-layout{display:flex;justify-content:center;padding:20px 0;}
+.container{max-width:1000px;width:100%;margin:0 auto;}
+.document{background:#fff;width:21cm;min-height:33cm;margin:0 auto 30px auto;padding:2.5cm;box-shadow:0 0 8px rgba(0,0,0,0.15);position:relative;page-break-after:always;}
+@media print{body{background:#fff;}.document{box-shadow:none;margin:0;width:100%;min-height:auto;padding:2cm;}}
+.header-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.header-table td{border:none;padding:4px 6px;vertical-align:middle}
+.header-left{font-weight:bold;font-size:14px}
+.header-logos{text-align:right}
+.header-logos img{height:60px;margin-left:6px}
+.report-info{text-align:center;margin-bottom:20px;font-size:12px}
+table{width:100%;border-collapse:collapse;margin-bottom:15px;table-layout:fixed}
+th,td{border:1px solid #000;padding:6px 8px;text-align:left;font-size:12px;vertical-align:top}
+th{background:#ddd}
+.indent{padding-left:20px}
+.number-cell {display:flex;justify-content:space-between;text-align:center;}
+.number-cell div {flex:1;padding:4px;border-left:1px solid #000;}
+.number-cell div:first-child {border-left:none;}
+.page-number{text-align:right;font-size:12px;color:#555;margin-top:10px}
+table td:nth-child(2) {text-align: center;}
 </style>
 </head>
 <body>
-
+<div class="body-layout">
 <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+    <h2 style="font-size:18px;">
+      <span style="font-weight:normal;">Consolidated Barangay Situation Analysis</span>
+    </h2>
     <div>
-    <!-- ✅ Fixed Edit button link -->
       <a href="javascript:history.back()" 
          style="background:#6c757d;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;">
          <i class="fa fa-arrow-left"></i> Back
-         <a href="export_consolidated.php?<?= http_build_query(['barangays' => $_GET['barangays'] ?? []]) ?>" target="_blank">Export PDF</a>
+      </a>
+      <a href="export_consolidated.php?<?= http_build_query(['barangays' => $_GET['barangays'] ?? []]) ?>" target="_blank" 
+         style="background:#198754;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;margin-left:5px;">
+         Export PDF
       </a>
     </div>
 </div>
-<h2>Consolidated Barangay Situation Analysis<br>Grand Total of Latest Approved Reports</h2>
+
+<!-- SINGLE CONSOLIDATED REPORT DOCUMENT -->
+<div class="document">
+  <table class="header-table">
+    <tr>
+      <td class="header-left">BNS Form No. IC<br>Barangay Nutrition Profile</td>
+      <td class="header-logos">
+        <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png">
+        <img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png">
+        <img src="../logos/fixed/Bagong-Pilipinas-logo.png">
+      </td>
+    </tr>
+  </table>
+
+  <div class="report-info">
+      <h3>CONSOLIDATED BARANGAY SITUATIONAL ANALYSIS (BSA)</h3>
+      <strong>Calendar Year:</strong> <?= htmlspecialchars($selectedYear) ?> &nbsp;
+      <strong>City:</strong> EL SALVADOR CITY &nbsp;
+      <strong>Province:</strong> MISAMIS ORIENTAL
+  </div>
+
 
 <!-- ================= PAGE 1 ================= -->
 <table>

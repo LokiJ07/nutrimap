@@ -16,7 +16,9 @@ function val(array $a, string $k, string $fmt = 'int'): string {
     if ($fmt === 'pct')  return number_format((float)$a[$k], 2) . '%';
     if ($fmt === 'dec2') return number_format((float)$a[$k], 2);
     return htmlspecialchars((string)$a[$k]);
+    
 }
+$selectedYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 
 // ---------- Query Totals ----------
 $base = [
@@ -50,7 +52,6 @@ $sel[]="SUM(bns.ind35b) AS ind35b";
 
 $barangayFilter = '';
 $params = [];
-
 if (!empty($_GET['barangays'])) {
     $barangays = $_GET['barangays'];
     $placeholders = implode(',', array_fill(0, count($barangays), '?'));
@@ -75,12 +76,49 @@ $stmt->execute($params);
 $totals = $stmt->fetch(PDO::FETCH_ASSOC);
 if(!$totals) die('No data to export');
 
-// ---------- PDF Setup ----------
-$pdf = new TCPDF('P','mm','A4',true,'UTF-8',false);
+// ---------- TCPDF Setup ----------
+class MYPDF extends TCPDF {
+    public $reportYear = null;
+
+    // This overrides TCPDF's header
+    public function Header() {
+        // Left text
+        $this->SetFont('times','B',12);
+        $this->SetXY(12, 10);
+        $this->MultiCell(60, 5, "BNS Form No. IC\nBarangay Nutrition Profile", 0, 'L', 0, 0);
+
+        // Logos
+        $this->Image(__DIR__.'/../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.jpg', 130, 8.5, 17);
+        $this->Image(__DIR__.'/../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.jpg', 150, 8.5, 17);
+        $this->Image(__DIR__.'/../logos/fixed/Bagong-Pilipinas-logo.jpg', 170, 8.5, 17);
+
+        // Centered title
+        $this->SetY(35);
+        $this->SetFont('times','B',14);
+        $this->Cell(0, 0, 'CONSOLIDATED BARANGAY SITUATIONAL ANALYSIS (BSA)', 0, 1, 'C');
+
+        $this->Ln(2);
+        $this->SetFont('times','',11);
+        $year = $this->reportYear ?? date('Y');
+        $this->Cell(0, 0, "Calendar Year: $year | City: EL SALVADOR CITY | Province: MISAMIS ORIENTAL", 0, 1, 'C');
+
+        $this->Ln(8);
+    }
+
+    public function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('times','I',10);
+        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
+    }
+}
+
+
+$pdf = new MYPDF('P','mm','A4',true,'UTF-8',false);
+$pdf->reportYear = $selectedYear;
 $pdf->SetCreator('Nutrimap');
 $pdf->SetAuthor('CNO');
 $pdf->SetTitle('Consolidated Barangay Situation Analysis');
-$pdf->SetMargins(10,15,10);
+$pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
 
@@ -88,12 +126,12 @@ $pdf->SetFont('times','',11);
 function makeTable(array $rows): string {
     $html  = '<table cellpadding="4" cellspacing="0" width="100%" style="border-collapse:collapse;">';
     $html .= '<thead><tr>'
-          .  '<th width="33.4%" style="border:1px solid #000;background:#dcdcdc;font-weight:bold;text-align:left;">Indicator</th>'
-          .  '<th width="33.3%" style="border:1px solid #000;background:#dcdcdc;font-weight:bold;text-align:center;">No.</th>'
-          .  '<th width="33.3%" style="border:1px solid #000;background:#dcdcdc;font-weight:bold;text-align:center;">%</th>'
+          .  '<th width="33.4%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:left;">Indicator</th>'
+          .  '<th width="33.3%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:center;">No.</th>'
+          .  '<th width="33.3%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:center;">%</th>'
           .  '</tr></thead><tbody>';
     foreach ($rows as $r) {
-        $indicator = $r[0];
+        $indicator = htmlspecialchars($r[0]);
         $no        = $r[1] ?? '—';
         $pct       = $r[2] ?? '';
         $html .= '<tr>';
@@ -112,11 +150,6 @@ function makeTable(array $rows): string {
 
 // ---------- Page 1 ----------
 $pdf->AddPage();
-$pdf->SetFont('times','B',14);
-$pdf->Cell(0,0,'Consolidated Barangay Situation Analysis',0,1,'C');
-$pdf->Ln(6);
-$pdf->SetFont('times','',11);
-
 $p1 = [
     ['Total Population', val($totals,'ind1')],
     ['Number of households', val($totals,'ind2')],
@@ -152,45 +185,33 @@ $pdf->writeHTML(makeTable($p1), true, false, false, false, '');
 
 // ---------- Page 2 ----------
 $pdf->AddPage();
-
 $p2 = [];
 
-// Day Care Centers – combined Public / Private
 $p2[] = [
-    'Day Care Centers – Public / Private', 
-    val($totals,'ind15a_public'),
-    val($totals,'ind15a_private','no')
+    'Number of Day Care Centers – Public / Private',
+    val($totals,'ind15a_public'), // No. for Public
+    val($totals,'ind15a_private') // No. for Private (shown in second column)
 ];
 
-// Elementary Schools – combined Public / Private
 $p2[] = [
-    'Elementary Schools – Public / Private', 
-    val($totals,'ind15b_public'),
-    val($totals,'ind15b_private','no')
+    'Number of Elementary Schools – Public / Private',
+    val($totals,'ind15b_public'), // No. for Public
+    val($totals,'ind15b_private') // No. for Private
 ];
-
-// Other school indicators
 $p2[] = ['Children enrolled in Kindergarten', val($totals,'ind16')];
 $p2[] = ['School children (Grades 1–6)', val($totals,'ind17')];
 $p2[] = ['School children weighed (K–Gr.6)', val($totals,'ind18')];
 $p2[] = ['Percentage coverage of school children measured', val($totals,'ind19','pct')];
-
-// Nutrition status of school children
 foreach(['a'=>'Severely Wasted','b'=>'Wasted','c'=>'Normal','d'=>'Overweight','e'=>'Obese'] as $c=>$lbl){
     $p2[] = [$lbl, val($totals,"ind20{$c}_no"), val($totals,"ind20{$c}_pct",'pct')];
 }
-
-// Other indicators
 $p2[] = ['0–5 months old children exclusively breastfed', val($totals,'ind21')];
 $p2[] = ['Households with severely wasted and wasted school children', val($totals,'ind22')];
 $p2[] = ['School children dewormed at start of school year', val($totals,'ind23')];
 $p2[] = ['Fully immunized children', val($totals,'ind24')];
-
-// Sanitation – separate types with No. and %
 foreach(['a'=>'Water-sealed toilet','b'=>'Antipolo (Unsanitary Toilet)','c'=>'Open Pit/Shared','d'=>'No Toilet'] as $c=>$lbl){
     $p2[] = [$lbl, val($totals,"ind26{$c}_no"), val($totals,"ind26{$c}_pct",'pct')];
 }
-
 $pdf->writeHTML(makeTable($p2), true, false, false, false, '');
 
 // ---------- Page 3 ----------
@@ -199,25 +220,13 @@ $p3 = [];
 foreach(['a'=>'Barangay/City garbage collection','b'=>'Own compost pit','c'=>'Burning','d'=>'Dumping'] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
 }
-foreach([
-    'a'=>'Pipe water system','b'=>'Well – Level II',
-    'c'=>'Deep well with communal source (Level II)',
-    'd'=>'Mineral water / water dispensing stores',
-    'e'=>'Open shallow dug well (Level I)'
-] as $c=>$lbl){
+foreach(['a'=>'Pipe water system','b'=>'Well – Level II','c'=>'Deep well with communal source (Level II)','d'=>'Mineral water / water dispensing stores','e'=>'Open shallow dug well (Level I)'] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind28{$c}_no"), val($totals,"ind28{$c}_pct",'pct')];
 }
-foreach([
-    'a'=>'Vegetable garden','b'=>'Livestock/poultry',
-    'c'=>'Combination vegetable garden & livestock/poultry',
-    'd'=>'Fishponds','e'=>'No garden'
-] as $c=>$lbl){
+foreach(['a'=>'Vegetable garden','b'=>'Livestock/poultry','c'=>'Combination vegetable garden & livestock/poultry','d'=>'Fishponds','e'=>'No garden'] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind29{$c}_no"), val($totals,"ind29{$c}_pct",'pct')];
 }
-foreach([
-    'a'=>'Concrete','b'=>'Semi concrete','c'=>'Wooden house',
-    'd'=>'Nipa bamboo house','e'=>'Barong-barong makeshift'
-] as $c=>$lbl){
+foreach(['a'=>'Concrete','b'=>'Semi concrete','c'=>'Wooden house','d'=>'Nipa bamboo house','e'=>'Barong-barong makeshift'] as $c=>$lbl){
     $p3[] = [$lbl, val($totals,"ind30{$c}_no"), val($totals,"ind30{$c}_pct",'pct')];
 }
 $p3 = array_merge($p3, [
