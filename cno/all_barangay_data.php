@@ -117,7 +117,7 @@ button:hover { background: #0056b3; transform: scale(1.03); }
             <?php endforeach; ?>
         </select>
     </div>
-    <button type="submit">View</button>
+    <button type="submit">Confirm</button>
   </form>
 
   <script>

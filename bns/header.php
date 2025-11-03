@@ -122,10 +122,6 @@
     <span class="cno">CNO</span><span class="nutrimap">NutriMap</span>
   </div>
   <div class="topbar-right">
-    <div class="searchbox">
-      <i class="fa fa-search"></i>
-      <input type="text" placeholder="Search">
-    </div>
     <!-- Notification Bell with badge -->
     <div class="bell" id="bellBtn" style="position: relative;">
       <i class="fa fa-bell"></i>
