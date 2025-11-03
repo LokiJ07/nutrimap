@@ -48,7 +48,17 @@ $sel[]="SUM(bns.ind15b_private) AS ind15b_private";
 $sel[]="SUM(bns.ind35a) AS ind35a";
 $sel[]="SUM(bns.ind35b) AS ind35b";
 
-$sql="
+$barangayFilter = '';
+$params = [];
+
+if (!empty($_GET['barangays'])) {
+    $barangays = $_GET['barangays'];
+    $placeholders = implode(',', array_fill(0, count($barangays), '?'));
+    $barangayFilter = "AND br2.barangay IN ($placeholders)";
+    $params = $barangays;
+}
+
+$sql = "
 SELECT ".implode(',', $sel)."
 FROM bns_reports bns
 JOIN reports r ON bns.report_id = r.id
@@ -57,10 +67,12 @@ AND bns.id IN (
     SELECT MAX(br2.id)
     FROM bns_reports br2
     JOIN reports r2 ON r2.id = br2.report_id
-    WHERE r2.status='approved'
+    WHERE r2.status='approved' $barangayFilter
     GROUP BY br2.barangay
 )";
-$totals = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$totals = $stmt->fetch(PDO::FETCH_ASSOC);
 if(!$totals) die('No data to export');
 
 // ---------- PDF Setup ----------

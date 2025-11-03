@@ -46,11 +46,22 @@ $sel[]="SUM(bns.ind15b_private) AS ind15b_private";
 $sel[]="SUM(bns.ind35a) AS ind35a";
 $sel[]="SUM(bns.ind35b) AS ind35b";
 
-$sql="
+$barangayFilter = '';
+$params = [];
+
+if (!empty($_GET['barangays'])) {
+    $barangays = $_GET['barangays'];
+    $placeholders = implode(',', array_fill(0, count($barangays), '?'));
+    $barangayFilter = "AND bns.barangay IN ($placeholders)";
+    $params = $barangays;
+}
+
+$sql = "
 SELECT ".implode(',', $sel)."
 FROM bns_reports bns
 JOIN reports r ON bns.report_id = r.id
 WHERE r.status='approved'
+$barangayFilter
 AND bns.id IN (
     SELECT MAX(br2.id)
     FROM bns_reports br2
@@ -58,7 +69,9 @@ AND bns.id IN (
     WHERE r2.status='approved'
     GROUP BY br2.barangay
 )";
-$totals = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$totals = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,6 +104,7 @@ th{background:#ddd; border:1px solid #000;padding:6px 8px;text-align:left;word-w
       <a href="javascript:history.back()" 
          style="background:#6c757d;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;">
          <i class="fa fa-arrow-left"></i> Back
+         <a href="export_consolidated.php?<?= http_build_query(['barangays' => $_GET['barangays'] ?? []]) ?>" target="_blank">Export PDF</a>
       </a>
     </div>
 </div>

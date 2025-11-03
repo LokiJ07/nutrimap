@@ -331,7 +331,6 @@ foreach ($cnoUsers as $cnoId) {
       'd) Overweight',
       'e) Obese'
   ];
-
   foreach($school as $i => $name) {
       $n = chr(97 + $i); 
       echo "<tr>
@@ -343,8 +342,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
-
               <tr><td>21. 0-5 months old children exclusively breastfed</td><td><input type="number" name="ind21"></td></tr>
               <tr><td>22. Infants given complementary foods (6 months+)</td><td><input type="number" name="ind22"></td></tr>
               <tr><td>23. Households with wasted school children</td><td><input type="number" name="ind23"></td></tr>
