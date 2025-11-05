@@ -332,9 +332,6 @@
         <p>El Salvador, Misamis Oriental</p>
         <a href="landing_page/pages/kmau.php" class="button">Know More About Us!</a>
       </div>
-      <div class="right-panel">
-        <img src="img/nutritional.png" alt="Nutrition Illustration">
-      </div>
     </div>
   </main>
   <!-- Footer -->
