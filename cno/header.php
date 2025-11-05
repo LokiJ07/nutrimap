@@ -13,7 +13,26 @@
   z-index: 1000;
   position: relative;
 }
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+}
 
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo .cno-color {
+    color: #00a0a0;
+}
+
+.logo-space {
+    margin-right: 8px;
+}
 .brand {
   display: flex;
   align-items: center;
@@ -119,7 +138,10 @@
 <header class="topbar">
   <div class="brand" id="menuBtn">
     <i class="fa fa-bars"></i>
-    <span class="cno">CNO</span><span class="nutrimap">NutriMap</span>
+     <div class="logo">
+          <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo">
+            <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
+        </div>
   </div>
   <div class="topbar-right">
     <!-- Notification Bell with badge -->

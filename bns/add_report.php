@@ -3,9 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
   require '../db/config.php';
-  error_reporting(E_ALL);
-ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 
   // ✅ Require login
   if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
