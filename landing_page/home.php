@@ -6,6 +6,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <title>CNO NutriMap | Home</title>
   <style>
     body {
@@ -341,6 +343,7 @@
             <!-- Logo and Description -->
             <div class="footer-logo">
                 <div class="logo-text">
+                   <img src="./img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
                     <span class="logo-primary">CNO</span>
                     <span class="logo-secondary">NutriMap</span>
                 </div>
@@ -352,29 +355,28 @@
             <div>
                 <h3 class="footer-title">About Us</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="pages/about_us/history.php">History</a></li>
+                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
+                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
+                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
                 </ul>
             </div>
             <!-- Links Column 2 -->
             <div>
                 <h3 class="footer-title">Quick Links</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/map_us/map.php">Map</a></li>
-                    <li><a href="pages/contact_us/get_in_touch.php">Contact Us</a></li>
-                    <li><a href="pages/contact_us/downloadable_form.php">Downloadable Forms</a></li>
+                    <li><a href="landing_page/map.php">Map</a></li>
+                    <li><a href="landing_page/pages/contact_us/contact.php">Contact Us</a></li>
                 </ul>
             </div>
             <!-- Legal & Support Column -->
             <div>
                 <h3 class="footer-title">Legal & Support</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/legal_and_support/terms_of_use.php">Terms of Use</a></li>
-                    <li><a href="pages/legal_and_support/privacy_policy.php">Privacy Policy</a></li>
-                    <li><a href="pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="pages/help_and_support/faqs.php">FAQs</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
+                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
+                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
                 </ul>
             </div>
         </div>

@@ -240,40 +240,39 @@
                 <!-- Logo and Description -->
                 <div class="flex flex-col items-start md:col-span-2">
                     <div class="flex items-center mb-4">
-                        <img src="../../css/image/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+                        <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
                         <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1 text-white">NutriMap</span>
                     </div>
                     <p class="text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
                 </div>
-                <!-- Links Column 1 -->
-                <div>
-                    <h3 class="text-lg font-semibold text-white mb-4">About Us</h3>
-                    <ul class="space-y-2">
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Our Mission</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Our Vision</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">History</a></li>
-                    </ul>
-                </div>
-                <!-- Links Column 2 -->
-                <div>
-                    <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Map</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Data</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Contact Us</a></li>
-                    </ul>
-                </div>
-                <!-- Legal & Support Column -->
-                <div>
-                    <h3 class="text-lg font-semibold text-white mb-4">Legal & Support</h3>
-                    <ul class="space-y-2">
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Terms</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Privacy Policy</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Cookies</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">Help</a></li>
-                        <li><a href="javascript:void(0)" class="hover:text-[#00a0a0] transition-colors duration-200">FAQs</a></li>
-                    </ul>
-                </div>
+                          <!-- Links Column 1 -->
+            <div>
+                <h3 class="footer-title" style="font-weight: bolder; color: white;">About Us</h3>
+                <ul class="footer-links">
+                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
+                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
+                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
+                </ul>
+            </div>
+            <!-- Links Column 2 -->
+            <div>
+                <h3 class="footer-title" style="font-weight: bolder; color: white;">Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="../../map.php">Map</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
+                </ul>
+            </div>
+            <!-- Legal & Support Column -->
+            <div>
+                <h3 class="footer-title" style="font-weight: bolder; color: white;">Legal & Support</h3>
+                <ul class="footer-links">
+                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
+                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
+                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
+                </ul>
+            </div>
             </div>
             <div class="mt-8 border-t border-gray-700 pt-8 text-center">
                 <p class="text-gray-400">Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>

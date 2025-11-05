@@ -406,15 +406,14 @@
 </head>
 
 <body>
-
     <header class="header">
         <div class="logo">
-            <img src="../../img/CNO_Logo.jpg" alt="CNO NutriMap Logo">
+            <img src="../../img/CNO_Logo.png" alt="CNO NutriMap Logo">
             <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
         </div>
         <nav class="nav">
-            <a href="../index.php" class="nav-link">Home</a>
-            <a href="../pages/map_us/map.php" class="nav-link">Map</a>
+            <a href="../../index.php" class="nav-link">Home</a>
+            <a href="../map.php" class="nav-link">Map</a>
             <div class="dropdown">
                 <a href="../pages/about_us/about.php" class="nav-link dropdown-link active-page-btn">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
                 <div class="dropdown-content">
@@ -428,7 +427,6 @@
             <a href="../Frontend/login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>
-
     <div class="about-container">
         <div class="about-content">
             <h1 class="highlight-title">Our Journey and Commitment</h1>
@@ -458,8 +456,7 @@
                 </ul>
             </div>
         </div>
-    </div>
-    
+    </div>   
     <div class="footer-links">
         <a href="../privacy_act/terms.php">Terms</a>
         <a href="../privacy_act/privacy.php">Privacy Policy</a>
@@ -467,13 +464,11 @@
         <a href="../privacy_act/help.php">Help</a>
         <a href="../privacy_act/faqs.php">FAQs</a>
     </div>
-
     <footer>
         <div class="footer-copyright">
             <span>Copyright © 2025 CNO NutriMap Website, All Rights Reserved.</span>
             <span>Developed By NBSC ICS 4th Year Student</span>
         </div>
     </footer>
-
 </body>
 </html>
