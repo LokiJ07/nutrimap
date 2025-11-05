@@ -156,7 +156,7 @@ button:hover { background: #0056b3; transform: scale(1.03); }
     <a href="view_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>" class="list-item">
       <strong>Consolidated Health and Nutrition Data (<?= htmlspecialchars($selectedYear) ?>)</strong>
       <div class="actions">
-        <span><?= $consolidated ? htmlspecialchars($consolidated['report_date']) : 'No data yet' ?></span>
+        <span><?= $consolidated ? htmlspecialchars($consolidated['report_date']) : 'Current Year Consolidated' ?></span>
         <?php if ($consolidated): ?>
           <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>" target="_blank" class="export-link" onclick="event.stopPropagation()">Export PDF</a>
         <?php endif; ?>

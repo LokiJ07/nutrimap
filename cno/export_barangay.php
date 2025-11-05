@@ -9,6 +9,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     exit();
 }
 
+$selectedYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+
 // ---------- Helper ----------
 function val(array $a, string $k, string $fmt = 'int'): string {
     if (!isset($a[$k]) || $a[$k] === '' || $a[$k] === null) return '—';
@@ -89,18 +91,54 @@ $totals = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$totals) die("Report not found or not approved!");
 
 // ---------- PDF Setup ----------
-$pdf = new TCPDF('P','mm','A4',true,'UTF-8',false);
+class MYPDF extends TCPDF {
+    public $reportYear = null;
+
+    // This overrides TCPDF's header
+    public function Header() {
+        // Left text
+        $this->SetFont('times','B',12);
+        $this->SetXY(12, 10);
+        $this->MultiCell(60, 5, "BNS Form No. IC\nBarangay Nutrition Profile", 0, 'L', 0, 0);
+
+        // Logos
+        $this->Image(__DIR__.'/../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.jpg', 130, 8.5, 17);
+        $this->Image(__DIR__.'/../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.jpg', 150, 8.5, 17);
+        $this->Image(__DIR__.'/../logos/fixed/Bagong-Pilipinas-logo.jpg', 170, 8.5, 17);
+
+        // Centered title
+        $this->SetY(35);
+        $this->SetFont('times','B',14);
+        $this->Cell(0, 0, 'BARANGAY SITUATIONAL ANALYSIS (BSA)', 0, 1, 'C');
+
+        $this->Ln(2);
+        $this->SetFont('times','',11);
+        $year = $this->reportYear ?? date('Y');
+        $this->Cell(0, 0, "Calendar Year: $year | City: EL SALVADOR CITY | Province: MISAMIS ORIENTAL", 0, 1, 'C');
+
+        $this->Ln(8);
+    }
+
+    public function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('times','I',10);
+        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
+    }
+}
+
+$pdf = new MYPDF('P','mm','A4',true,'UTF-8',false);
+$pdf->reportYear = $selectedYear;
 $pdf->SetCreator('Nutrimap');
 $pdf->SetAuthor('CNO');
 $pdf->SetTitle('Barangay Situation Analysis');
-$pdf->SetMargins(10,15,10);
+$pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
+
 
 // ---------- Page 1 ----------
 $pdf->AddPage();
 $pdf->SetFont('times','B',14);
-$pdf->Cell(0,0,"Barangay Report",0,1,'C');
 $pdf->Ln(6);
 $pdf->SetFont('times','',11);
 
