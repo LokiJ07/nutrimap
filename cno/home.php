@@ -17,6 +17,7 @@ $totalBNS = $pdo->query("SELECT COUNT(*) FROM users WHERE user_type='BNS'")->fet
 $totalReports = $pdo->query("SELECT COUNT(*) FROM reports")->fetchColumn();
 $approvedReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Approved'")->fetchColumn();
 $pendingReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Pending'")->fetchColumn();
+$rejectedReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Rejected'")->fetchColumn();
 
 // ✅ Barangay stats
 $totalBarangaysStmt = $pdo->query("SELECT COUNT(DISTINCT barangay) FROM users WHERE barangay NOT IN ('CNO') AND barangay != ''");
@@ -92,7 +93,25 @@ body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
     border:none;padding:6px 10px;border-radius:4px;cursor:pointer;
 }
 /* Table */
-.table-container {background:#fff;padding:3px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+/* === SAME CLEAN FIXES AS BNS DASHBOARD === */
+.content {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* allow scroll for table + pagination */
+}
+
+/* The table area adapts naturally to screen height */
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
 table {width:100%;border-collapse:collapse;font-size:14px;}
 th,td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
 thead {background:#009688;color:#fff;}
@@ -103,7 +122,14 @@ thead {background:#009688;color:#fff;}
 .user-avatar {width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle;object-fit:cover;}
 .btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
 .btn-view {background:#3498db;}
-.pagination {margin-top:15px;display:flex;justify-content:center;gap:5px;}
+.pagination {
+  margin-top: 12px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  position: relative; /* prevents overlap */
+}
 .pagination a {padding:6px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;}
 .pagination a.active {background:#009688;color:#fff;}
 </style>
@@ -139,7 +165,7 @@ thead {background:#009688;color:#fff;}
           <div  onclick="window.location.href='cno_reports.php'" style="cursor:pointer; font-size:32px; color: #e0e0e0ff;"><i class="fa fa-file-alt"></i></div>
           <div>
             <h3>Total Reports: <?= $totalReports ?></h3>
-            <p>Approved: <?= $approvedReports ?> | Pending: <?= $pendingReports ?></p>
+           <p>Approved: <?= $approvedReports ?> | Pending: <?= $pendingReports ?> | <span >Rejected: <?= $rejectedReports ?></span></p>
           </div>
         </div>
         <div class="card card-barangays">
