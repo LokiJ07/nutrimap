@@ -41,6 +41,16 @@ $pendingStmt = $pdo->prepare("
 $pendingStmt->execute([$userId]);
 $pendingReports = $pendingStmt->fetchColumn();
 
+// ✅ Rejected reports
+$rejectedStmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE r.user_id = ? AND r.status = 'Rejected'
+");
+$rejectedStmt->execute([$userId]);
+$rejectedReports = $rejectedStmt->fetchColumn();
+
 // ✅ Pagination
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -78,44 +88,172 @@ $myReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
-.user-avatar {width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle;object-fit:cover;}
-.layout {display:flex;height:100vh;flex-direction:column;}
-.body-layout {display:flex;flex:1;}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* ❌ Prevent body scroll */
+}
+
+/* Overall Layout */
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.body-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* ✅ Prevent internal scroll */
+}
+
+/* Sidebar */
 .sidebar {
-    width:230px;background:#f9f9f9;border-right:1px solid #ccc;padding:15px;display:flex;flex-direction:column;
+  width: 230px;
+  background: #f9f9f9;
+  border-right: 1px solid #ccc;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
 }
-.myreports-header {font-weight:bold;margin-bottom:10px;}
-.searchbox {margin-bottom:10px;}
-.searchbox input {width:100%;box-sizing:border-box;padding:6px 10px;font-size:14px;border:1px solid #ccc;border-radius:4px;}
-.content {flex:1;padding:10px;overflow-y:auto;}
+.myreports-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.searchbox {
+  margin-bottom: 10px;
+}
+.searchbox input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
-/* Cards */
-.dashboard-cards {display:flex;gap:20px;margin-bottom:10px;}
+/* Main content */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  overflow: hidden; /* ✅ Prevent main scroll */
+}
+
+/* Cards Section */
+.dashboard-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 15px;
+}
 .card {
-    flex:1;display:flex;align-items:center;gap:15px;
-    padding:20px;border-radius:8px;color:#fff;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 8px;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
-.card .icon {font-size:30px;}
-.card-total {background:#003d3c;}
-.card-approved {background:#006d6a;}
-.card-pending {background:#009688;}
+.card .icon {
+  font-size: 30px;
+}
+.card-total { background: #003d3c; }
+.card-approved { background: #006d6a; }
+.card-pending { background: #009688; }
+.card-rejected { background: #f44336; }
 
-/* Table */
-.table-container {background:#fff;padding:3px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-table {width:100%;border-collapse:collapse;font-size:14px;}
-th,td {padding:5px;text-align:left;border-bottom:1px solid #ddd;}
-thead {background:#009688;color:#fff;}
-.status-badge {padding:2px 8px;border-radius:12px;color:#fff;font-size:12px;}
-.status-Pending {background:#00bcd4;}
-.status-Approved {background:#4caf50;}
-.status-Rejected {background:#f44336;}
-.btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
-.btn-view {background:#3498db;}
-.pagination {margin-top:15px;display:flex;justify-content:center;gap:5px;}
-.pagination a {padding:6px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;}
-.pagination a.active {background:#009688;color:#fff;}
+/* Table Section */
+.table-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden; /* ✅ Keeps clean edge */
+}
+.table-container h3 {
+  padding: 10px 15px;
+  background: #009688;
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+  margin: 0;
+  font-size: 16px;
+}
+.table-wrapper {
+  flex: 1;
+  overflow-y: auto; /* ✅ Only the table scrolls if too long */
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th, td {
+  padding: 6px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+thead {
+  background: #009688;
+  color: #fff;
+}
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 12px;
+}
+.status-Pending { background: #00bcd4; }
+.status-Approved { background: #4caf50; }
+.status-Rejected { background: #f44336; }
+
+.btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+  text-decoration: none;
+}
+.btn-view { background: #3498db; }
+
+.pagination {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+}
+.pagination a {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+}
+.pagination a.active {
+  background: #009688;
+  color: #fff;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  object-fit: cover;
+}
+
 </style>
 </head>
 <body>
@@ -134,30 +272,34 @@ thead {background:#009688;color:#fff;}
     <!-- ✅ Main Content -->
     <main class="content">
       <h2>Dashboard</h2>
-      <div class="dashboard-cards">
-        <div class="card card-total">
-          <div class="icon"><i class="fa fa-file-alt"></i></div>
-          <div>
-            <h3>Total Reports: <?= $totalReports ?></h3>
-          </div>
-        </div>
-        <div class="card card-approved">
-          <div class="icon"><i class="fa fa-check-circle"></i></div>
-          <div>
-            <h3>Approved: <?= $approvedReports ?></h3>
-          </div>
-        </div>
-        <div class="card card-pending">
-          <div class="icon"><i class="fa fa-clock"></i></div>
-          <div>
-            <h3>Pending: <?= $pendingReports ?></h3>
-          </div>
-        </div>
-      </div>
+<div class="dashboard-cards">
+  <div class="card card-total">
+    <div class="icon"><i class="fa fa-file-alt"></i></div>
+    <div><h3>Total Reports: <?= $totalReports ?></h3></div>
+  </div>
+
+  <div class="card card-approved">
+    <div class="icon"><i class="fa fa-check-circle"></i></div>
+    <div><h3>Approved: <?= $approvedReports ?></h3></div>
+  </div>
+
+  <div class="card card-pending">
+    <div class="icon"><i class="fa fa-clock"></i></div>
+    <div><h3>Pending: <?= $pendingReports ?></h3></div>
+  </div>
+
+  <!-- ✅ NEW Rejected Card -->
+  <div class="card card-rejected">
+    <div class="icon"><i class="fa fa-times-circle"></i></div>
+    <div><h3>Rejected: <?= $rejectedReports ?></h3></div>
+  </div>
+</div>
+
 
       <!-- ✅ Reports Table -->
       <div class="table-container">
         <h3>My Reports</h3>
+           <div class="table-wrapper">
         <table id="reportsTable">
           <thead>
             <tr>
@@ -205,6 +347,7 @@ thead {background:#009688;color:#fff;}
             <a href="?page=<?= $page+1 ?>">Next</a>
           <?php endif; ?>
         </div>
+      </div>
       </div>
     </main>
   </div>
