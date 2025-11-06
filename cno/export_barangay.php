@@ -51,18 +51,38 @@ if ($report_id <= 0) {
 }
 
 // ---------- Prepare fields ----------
-$base = ['ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a','ind8','ind9',
-         'ind10','ind11','ind12','ind13','ind14','ind16','ind17','ind18','ind19',
-         'ind21','ind22','ind23','ind24','ind25','ind31','ind32','ind33','ind34','ind36'];
-$groups = [
-    '7b'=>['ind7b1','ind7b2','ind7b3','ind7b4','ind7b5','ind7b6','ind7b7','ind7b8','ind7b9'],
-    '20'=>['ind20a','ind20b','ind20c','ind20d','ind20e'],
-    '26'=>['ind26a','ind26b','ind26c','ind26d'],
-    '27'=>['ind27a','ind27b','ind27c','ind27d'],
-    '28'=>['ind28a','ind28b','ind28c','ind28d','ind28e'],
-    '29'=>['ind29a','ind29b','ind29c','ind29d','ind29e'],
-    '30'=>['ind30a','ind30b','ind30c','ind30d','ind30e']
+$base = [
+    'ind1','ind_male','ind_female','ind2','ind3','ind4','ind5',
+    'ind6a','ind6b','ind7','ind8','ind9','ind9a','ind10','ind11',
+    'ind12','ind13','ind14','ind15','ind16','ind18','ind19',
+    'ind20','ind21','ind23','ind24','ind25','ind26',
+    'ind37a','ind37b','ind38'
 ];
+
+$groups = [
+    '9b'  => ['ind9b1','ind9b2','ind9b3','ind9b4','ind9b5','ind9b6','ind9b7','ind9b8','ind9b9'],
+
+    '17a' => ['ind17a_public','ind17a_private'],
+    '17b' => ['ind17b_public','ind17b_private'],
+
+    '22'  => ['ind22a','ind22b','ind22c','ind22d','ind22e','ind22f','ind22g'],
+
+    '27'  => ['ind27a','ind27b','ind27c','ind27d','ind27e'],
+
+    '28'  => ['ind28a','ind28b','ind28c','ind28d'],
+    '29'  => ['ind29a','ind29b','ind29c','ind29d','ind29e','ind29f','ind29g'],
+
+    '30'  => ['ind30a','ind30b','ind30c','ind30d'],
+
+    '31'  => ['ind31a','ind31b','ind31c','ind31d','ind31e','ind31f'],
+
+    '32'  => ['ind32'],
+    '33'  => ['ind33'],
+    '34'  => ['ind34'],
+    '35'  => ['ind35'],
+    '36'  => ['ind36']
+];
+
 $sel = [];
 foreach($base as $f) $sel[] = "SUM(bns.$f) AS $f";
 foreach($groups as $arr){
@@ -71,12 +91,12 @@ foreach($groups as $arr){
         $sel[] = "SUM(bns.{$f}_pct) AS {$f}_pct";
     }
 }
-$sel[]="SUM(bns.ind15a_public)  AS ind15a_public";
-$sel[]="SUM(bns.ind15a_private) AS ind15a_private";
-$sel[]="SUM(bns.ind15b_public)  AS ind15b_public";
-$sel[]="SUM(bns.ind15b_private) AS ind15b_private";
-$sel[]="SUM(bns.ind35a) AS ind35a";
-$sel[]="SUM(bns.ind35b) AS ind35b";
+$sel[]="SUM(bns.ind17a_public)  AS ind17a_public";
+$sel[]="SUM(bns.ind17a_private) AS ind17a_private";
+$sel[]="SUM(bns.ind17b_public)  AS ind17b_public";
+$sel[]="SUM(bns.ind17b_private) AS ind17b_private";
+$sel[]="SUM(bns.ind37a) AS ind37a";
+$sel[]="SUM(bns.ind37b) AS ind37b";
 
 
 // ---------- Fetch the report ----------
@@ -143,103 +163,147 @@ $pdf->Ln(6);
 $pdf->SetFont('times','',11);
 
 // ---------- Build tables ----------
+// ---------- PAGE 1 ----------
 $p1 = [
     ['Total Population', val($totals,'ind1')],
-    ['Number of households', val($totals,'ind2')],
-    ['Total number of families', val($totals,'ind3')],
-    ['Women – Pregnant', val($totals,'ind4a')],
-    ['Women – Lactating', val($totals,'ind4b')],
-    ['Households with preschool children (0–59 mos.)', val($totals,'ind5')],
-    ['Actual population of preschool children (0–59 mos.)', val($totals,'ind6')],
-    ['Preschool children measured during OPT Plus', val($totals,'ind7a','dec2')],
-    ['Percent measured coverage (OPT Plus)', val($totals,'ind7a','pct')]
+    ['Male', val($totals,'ind_male')],
+    ['Female', val($totals,'ind_female')],
+    ['Total Number of Households', val($totals,'ind2')],
+    ['Total Number of Family', val($totals,'ind3')],
+    ['Total Number of HHs More Than 5 Below Members', val($totals,'ind4')],
+    ['Total Number of HHs More Than 5 Above Members', val($totals,'ind5')],
+    ['Total Number of Women Who Are Pregnant', val($totals,'ind6a')],
+    ['Total Number of Women Who Are Lactating', val($totals,'ind6b')],
+    ['Total Number of Households with Preschool Children (0–59 mos.)', val($totals,'ind7')],
+    ['Actual Population of Preschool Children (0–59 mos.)', val($totals,'ind8')],
+    ['Total Number of Preschool Children 0–59 mos. Measured During OPT Plus', val($totals,'ind9')],
+    ['Percent Measured Coverage (OPT Plus)', val($totals,'ind9a','pct')]
 ];
-$nutri = ['Severely underweight','Underweight','Normal weight','Severely wasted',
-          'Wasted','Overweight','Obese','Severely stunted','Stunted'];
+
+
+$nutri = [
+    'Severely Underweight','Underweight','Normal Weight','Severely Wasted',
+    'Wasted','Overweight','Obese','Severely Stunted','Stunted'
+];
 for($i=1;$i<=9;$i++){
-    $p1[] = [$nutri[$i-1], val($totals,"ind7b{$i}_no"), val($totals,"ind7b{$i}_pct",'pct')];
+    $p1[] = [$nutri[$i-1], val($totals,"ind9b{$i}_no"), val($totals,"ind9b{$i}_pct",'pct')];
 }
+
 $p1 = array_merge($p1, [
-    ['Infants 0–5 months old', val($totals,'ind8')],
-    ['Infants 6–11 months old', val($totals,'ind9')],
-    ['Preschool children 0–23 months', val($totals,'ind10')],
-    ['Preschool children 12–59 months', val($totals,'ind11')],
-    ['Preschool children 24–59 months', val($totals,'ind12')],
-    ['Families with wasted/severely wasted preschool children', val($totals,'ind13')],
-    ['Families with stunted/severely stunted preschool children', val($totals,'ind14')]
+    ['Total Number of Infants 0–5 Months Old', val($totals,'ind10')],
+    ['Total Number of Infants 6–11 Months Old', val($totals,'ind11')],
+    ['Total Number of Preschool Children 0–23 Months Old', val($totals,'ind12')],
+    ['Total Number of Preschool Children 12–59 Months Old', val($totals,'ind13')],
+    ['Total Number of Preschool Children 24–59 Months Old', val($totals,'ind14')],
+    ['Total Number of Families with Wasted and Severely Wasted Preschool Children', val($totals,'ind15')],
+    ['Total Number of Families with Stunted and Severely Stunted Preschool Children', val($totals,'ind16')]
 ]);
+
 $pdf->writeHTML(makeTable($p1), true, false, false, false, '');
 
-// ---------- Page 2 ----------
+// ---------- PAGE 2 ----------
 $pdf->AddPage();
-
 $p2 = [];
 
-// Day Care Centers – combined Public / Private
-$p2[] = [
-    'Day Care Centers – Public / Private', 
-    val($totals,'ind15a_public'),
-    val($totals,'ind15a_private','no')
+
+$p2[] = ['Number of Day Care Centers', val($totals,'ind17a_public'), val($totals,'ind17a_private','no')];
+$p2[] = ['Number of Elementary Schools', val($totals,'ind17b_public'), val($totals,'ind17b_private','no')];
+
+$p2[] = ['Total Number of Children Enrolled in Kindergarten', val($totals,'ind18')];
+$p2[] = ['Total Number of School Children (Grades 1–6)', val($totals,'ind19')];
+$p2[] = ['Total Number of School Children Weighed at Start of School Year', val($totals,'ind20')];
+$p2[] = ['Percentage Coverage of School Children Measured', val($totals,'ind21','pct')];
+
+
+$school = [
+    'Severely Wasted','Wasted','Severely Stunted','Stunted','Normal','Overweight','Obese'
 ];
-
-// Elementary Schools – combined Public / Private
-$p2[] = [
-    'Elementary Schools – Public / Private', 
-    val($totals,'ind15b_public'),
-    val($totals,'ind15b_private','no')
-];
-
-// Other school indicators
-$p2[] = ['Children enrolled in Kindergarten', val($totals,'ind16')];
-$p2[] = ['School children (Grades 1–6)', val($totals,'ind17')];
-$p2[] = ['School children weighed (K–Gr.6)', val($totals,'ind18')];
-$p2[] = ['Percentage coverage of school children measured', val($totals,'ind19','pct')];
-
-// Nutrition status of school children
-foreach(['a'=>'Severely Wasted','b'=>'Wasted','c'=>'Normal','d'=>'Overweight','e'=>'Obese'] as $c=>$lbl){
-    $p2[] = [$lbl, val($totals,"ind20{$c}_no"), val($totals,"ind20{$c}_pct",'pct')];
+for($i=0;$i<count($school);$i++){
+    $c = chr(97 + $i);
+    $p2[] = [$school[$i], val($totals,"ind22{$c}_no"), val($totals,"ind22{$c}_pct",'pct')];
 }
 
-// Other indicators
-$p2[] = ['0–5 months old children exclusively breastfed', val($totals,'ind21')];
-$p2[] = ['Households with severely wasted and wasted school children', val($totals,'ind22')];
-$p2[] = ['School children dewormed at start of school year', val($totals,'ind23')];
-$p2[] = ['Fully immunized children', val($totals,'ind24')];
 
-// Sanitation – separate types with No. and %
-foreach(['a'=>'Water-sealed toilet','b'=>'Antipolo (Unsanitary Toilet)','c'=>'Open Pit/Shared','d'=>'No Toilet'] as $c=>$lbl){
-    $p2[] = [$lbl, val($totals,"ind26{$c}_no"), val($totals,"ind26{$c}_pct",'pct')];
+$p2[] = ['0–5 Months Old Children Exclusively Breastfed', val($totals,'ind23')];
+$p2[] = ['Households with Severely Wasted School Children', val($totals,'ind24')];
+$p2[] = ['School Children Dewormed at Start of School Year', val($totals,'ind25')];
+$p2[] = ['Fully Immunized Children (FIC)', val($totals,'ind26')];
+
+
+$toilet = [
+    'Water-sealed toilet','Antipolo (Unsanitary Toilet)','Open Pit','Shared','No Toilet'
+];
+for($i=0;$i<count($toilet);$i++){
+    $c = chr(97 + $i);
+    $p2[] = [$toilet[$i], val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
 }
 
 $pdf->writeHTML(makeTable($p2), true, false, false, false, '');
 
-// ---------- Page 3 ----------
+
+
+// ---------- PAGE 3 ----------
 $pdf->AddPage();
 $p3 = [];
-foreach(['a'=>'Barangay/City garbage collection','b'=>'Own compost pit','c'=>'Burning','d'=>'Dumping'] as $c=>$lbl){
-    $p3[] = [$lbl, val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
+
+
+$garbage = [
+    'Barangay/City Garbage Collection','Own Compost Pit','Burning','Dumping'
+];
+for($i=0;$i<count($garbage);$i++){
+    $c = chr(97 + $i);
+    $p3[] = [$garbage[$i], val($totals,"ind28{$c}_no"), val($totals,"ind28{$c}_pct",'pct')];
 }
-foreach(['a'=>'Pipe water system','b'=>'Well – Level II','c'=>'Deep well with communal source (Level II)',
-         'd'=>'Mineral water / water dispensing stores','e'=>'Open shallow dug well (Level I)'] as $c=>$lbl){
-    $p3[] = [$lbl, val($totals,"ind28{$c}_no"), val($totals,"ind28{$c}_pct",'pct')];
+
+
+$water = [
+    'Pipe Water System (Level III)',
+    'Spring (Level II)',
+    'Deep Well with Communal Source (Level II)',
+    'Deep Well with Individual Faucet (Level III)',
+    'Purified Station (Level III)',
+    'Open Shallow Dug Well (Level I)',
+    'Artesian Well'
+];
+for($i=0;$i<count($water);$i++){
+    $c = chr(97 + $i);
+    $p3[] = [$water[$i], val($totals,"ind29{$c}_no"), val($totals,"ind29{$c}_pct",'pct')];
 }
-foreach(['a'=>'Vegetable garden','b'=>'Livestock/poultry','c'=>'Combination vegetable garden & livestock/poultry',
-         'd'=>'Fishponds','e'=>'No garden'] as $c=>$lbl){
-    $p3[] = [$lbl, val($totals,"ind29{$c}_no"), val($totals,"ind29{$c}_pct",'pct')];
+
+
+$home = [
+    'Vegetable Garden','Livestock/Poultry','Fishponds','Other Specify: No Garden'
+];
+for($i=0;$i<count($home);$i++){
+    $c = chr(97 + $i);
+    $p3[] = [$home[$i], val($totals,"ind30{$c}_no"), val($totals,"ind30{$c}_pct",'pct')];
 }
-foreach(['a'=>'Concrete','b'=>'Semi concrete','c'=>'Wooden house','d'=>'Nipa bamboo house','e'=>'Barong-barong makeshift'] as $c=>$lbl){
-    $p3[] = [$lbl, val($totals,"ind30{$c}_no"), val($totals,"ind30{$c}_pct",'pct')];
+
+
+$dwelling = [
+    'Concrete','Semi Concrete','Wooden House','Nipa Bamboo House','Barong-Barong Makeshift','Makeshift'
+];
+for($i=0;$i<count($dwelling);$i++){
+    $c = chr(97 + $i);
+    $p3[] = [$dwelling[$i], val($totals,"ind31{$c}_no"), val($totals,"ind31{$c}_pct",'pct')];
 }
-$p3 = array_merge($p3, [
-    ['Households using iodized salt', val($totals,'ind31')],
-    ['Total number of eateries/carinderia', val($totals,'ind32')],
-    ['Total number of bakeries', val($totals,'ind33')],
-    ['Total number of sari-sari stores', val($totals,'ind34')],
-    ['Barangay Nutrition Scholar', val($totals,'ind35a')],
-    ['Barangay Health Worker', val($totals,'ind35b')],
-    ['Households beneficiaries of Pantawid Pamilyang Pilipino', val($totals,'ind36')]
-]);
+
+
+$p3[] = ['Total Number of Households Using Iodized Salt', val($totals,'ind32_no'), val($totals,'ind32_pct','pct')];
+$p3[] = ['Total Number of Eateries/Carinderia', val($totals,'ind33_no'), val($totals,'ind33_pct','pct')];
+$p3[] = ['Total Number of Sari-Sari Stores Related to Iodized Salt', val($totals,'ind34_no'), val($totals,'ind34_pct','pct')];
+$p3[] = ['Total Number of Sari-Sari Stores Related to Cooking Oil', val($totals,'ind35_no'), val($totals,'ind35_pct','pct')];
+$p3[] = ['Total Number of Bakeries with Fortified Flour', val($totals,'ind36_no'), val($totals,'ind36_pct','pct')];
+
+
+$p3[] = ['Barangay Nutrition Scholar', val($totals,'ind37a')];
+$p3[] = ['Barangay Health Worker', val($totals,'ind37b')];
+
+
+$p3[] = ['Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program', val($totals,'ind38')];
+
 $pdf->writeHTML(makeTable($p3), true, false, false, false, '');
 
-// ---------- Output ----------
+// ---------- OUTPUT ----------
 $pdf->Output('Barangay_Situation_Analysis.pdf','I');
+    
