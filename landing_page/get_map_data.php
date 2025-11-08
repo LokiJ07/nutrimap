@@ -15,9 +15,9 @@ $geojson = json_decode(file_get_contents($geojsonPath), true);
 $sql = "SELECT 
             b.barangay,
             b.year,
-            b.ind7b1_pct, b.ind7b2_pct, b.ind7b3_pct,
-            b.ind7b4_pct, b.ind7b5_pct, b.ind7b6_pct,
-            b.ind7b7_pct, b.ind7b8_pct, b.ind7b9_pct
+            b.ind9b1_pct, b.ind9b2_pct, b.ind9b3_pct,
+            b.ind9b4_pct, b.ind9b5_pct, b.ind9b6_pct,
+            b.ind9b7_pct, b.ind9b8_pct, b.ind9b9_pct
         FROM bns_reports b
         JOIN reports r ON b.report_id = r.id
         WHERE r.status = 'approved'";
