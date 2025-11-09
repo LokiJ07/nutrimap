@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CNO NutriMap Vision</title>
+    <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
     <!-- Use Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="../../css/image/CNO_Logo.png">

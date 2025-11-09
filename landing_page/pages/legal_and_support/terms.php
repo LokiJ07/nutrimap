@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Use - CNO NutriMap</title>
-    <link rel="icon" type="image/png" href="../../css/image/CNO_Logo.png">
+    <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome CDN for icons -->

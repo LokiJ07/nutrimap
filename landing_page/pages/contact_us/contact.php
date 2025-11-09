@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNO NutriMap Contact Us</title>
-    <link rel="icon" type="image/png" href="../../css/image/CNO_Logo.png">
+      <title>CNO NutriMap | Contact Us</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome CDN for icons -->
@@ -141,6 +142,259 @@
 .dropdown:hover .dropdown-content {
     display: block;
 }
+  .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* Contact Card */
+    .contact-card {
+      display: flex;
+      flex-wrap: wrap;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .contact-info {
+      flex: 1 1 350px;
+      padding: 30px;
+    }
+
+    .contact-info h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #000;
+    }
+
+    .info-item {
+      margin-bottom: 20px;
+    }
+
+    .info-item i {
+      color: #00bfff;
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .info-item h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .info-item p {
+      font-size: 15px;
+      color: #555;
+      margin-top: 3px;
+    }
+
+    .map {
+      flex: 1 1 350px;
+      min-height: 300px;
+    }
+
+    .map iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Bottom Contact Boxes */
+    .bottom-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .contact-box {
+      flex: 1 1 350px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+    }
+
+    .contact-box i {
+      color: #00bfff;
+      font-size: 20px;
+    }
+
+    .contact-box p {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .contact-box span {
+      display: block;
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Message Card */
+    .message-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      padding: 30px;
+    }
+
+    .message-card h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #000;
+    }
+
+    .message-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message-card input,
+    .message-card textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .message-card input:focus,
+    .message-card textarea:focus {
+      border-color: #00bfff;
+      box-shadow: 0 0 4px rgba(0, 191, 255, 0.3);
+    }
+
+    .message-card textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .message-card button {
+      align-self: flex-start;
+      background: #00bfff;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .message-card button:hover {
+      background: #0099cc;
+    }
+
+    .success-msg {
+      color: green;
+      margin-bottom: 10px;
+      transition: opacity 0.5s ease;
+    }
+
+    .error-msg {
+      color: red;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #013241;
+      color: #f9f9f9;
+      padding: 80px 80px 20px;
+      text-align: left;
+      position: relative;
+      z-index: 1;
+      margin-top: 60px;
+    }
+
+    .footer-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-logo h2 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .footer-logo span {
+      color: #00b3b3;
+    }
+
+    .footer-about {
+      max-width: 400px;
+    }
+
+    .footer-about p {
+      margin-top: 10px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #ddd;
+    }
+
+    .footer-contact h3,
+    .footer-social h3 {
+      color: #00e0d1;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .footer-contact p {
+      font-size: 15px;
+      margin-bottom: 5px;
+      color: #ccc;
+    }
+
+    .footer-social a {
+      color: #00b3b3;
+      font-size: 20px;
+      margin-right: 15px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .footer-social a:hover {
+      color: #00e0d1;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #333;
+      text-align: center;
+      padding-top: 15px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .contact-card {
+        flex-direction: column;
+      }
+      .map {
+        height: 250px;
+      }
+      footer {
+        padding: 40px 20px 15px;
+      }
+    }
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
@@ -164,121 +418,166 @@
                 </div>
             </div>
             <a href="landing_page/pages/contact_us/contact.php" class="nav-link home-btn">Contact Us</a>
-            <a href="../login.php" class="nav-link login-btn">Login</a>
+            <a href="../../../login.php" class="nav-link login-btn">Login</a>
         </nav>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center px-4 py-10 lg:px-20 text-center">
-        <section class="w-full max-w-5xl mb-10">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">Contact Us</h1>
-            <p class="text-xl text-gray-600">We're here to help and answer any questions you might have.</p>
-        </section>
+ <?php
+  $successMsg = "";
+  $errorMsg = "";
 
-        <section class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-8 flex flex-col lg:flex-row gap-8">
-            <!-- Left Column: Location & Contact Info -->
-            <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Our Office</h2>
-                
-                <div class="w-full aspect-w-16 aspect-h-9 overflow-hidden rounded-lg shadow-md mb-6">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.719717156947!2d124.7709545!3d8.5991845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32ff881d331cf113%3A0x6b8408f972b9a767!2sCity%20Nutrition%20Office!5e0!3m2!1sen!2sph!4v1716383610471!5m2!1sen!2sph" 
-                        width="100%" 
-                        height="400" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade"
-                        class="w-full h-full">
-                    </iframe>
-                </div>
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
+      $name = trim($_POST['name']);
+      $email = trim($_POST['email']);
+      $message = trim($_POST['message']);
 
-                <div class="w-full max-w-sm lg:max-w-none space-y-4">
-                    <div class="flex items-center space-x-4">
-                        <i class="fas fa-map-marker-alt text-xl text-[#00a0a0]"></i>
-                        <p class="text-gray-700">City Nutrition Office, LGU Building, El Salvador City, Misamis Oriental, Philippines</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <i class="fas fa-envelope text-xl text-[#00a0a0]"></i>
-                        <a href="mailto:cnonutrimap@elsalvadorcity.gov.ph" class="text-gray-700 hover:text-[#00a0a0] transition-colors duration-200">cnonutrimap@elsalvadorcity.gov.ph</a>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <i class="fas fa-phone-alt text-xl text-[#00a0a0]"></i>
-                        <a href="tel:+639123456789" class="text-gray-700 hover:text-[#00a0a0] transition-colors duration-200">+63 912 345 6789</a>
-                    </div>
-                </div>
-            </div>
+      if (!empty($name) && !empty($email) && !empty($message)) {
+          $to = "danmarkpetalcurin@gmail.com"; // Admin/CNO email
+          $subject = "New Message from Guest User - $name";
 
-            <!-- Right Column: Contact Form -->
-            <div class="flex-1 w-full lg:w-auto mt-8 lg:mt-0">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Send Us a Message</h2>
-                <form action="#" method="POST" class="w-full">
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="name" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a0a0] transition-colors">
-                    </div>
-                    <div class="mb-4">
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                        <input type="email" id="email" name="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a0a0] transition-colors">
-                    </div>
-                    <div class="mb-4">
-                        <label for="message" class="block text-sm font-semibold text-gray-700 mb-1">Your Message</label>
-                        <textarea id="message" name="message" rows="5" required class="w-full p-3 border border-gray-300 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[#00a0a0] transition-colors"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-[#00a0a0] text-white font-semibold py-3 rounded-lg shadow-md hover:bg-[#008c8c] transition-colors duration-200">
-                        Send Message
-                    </button>
-                </form>
-            </div>
-        </section>
-    </main>
+          $body = "
+              <h3>Message form the guest user of CNO nutrimap</h3>
+              <p><strong>Name:</strong> " . htmlspecialchars($name) . "</p>
+              <p><strong>Email:</strong> " . htmlspecialchars($email) . "</p>
+              <p><strong>Message:</strong><br>" . nl2br(htmlspecialchars($message)) . "</p>
+              <hr>
+              <p>This message was sent via the CNO NutriMap Contact Form.</p>
+          ";
 
-    <!-- Footer Section -->
-    <footer class="bg-gray-800 text-gray-300 py-4 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
-                <!-- Logo and Description -->
-                <div class="flex flex-col items-start md:col-span-2">
-                    <div class="flex items-center mb-4">
-                        <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
-                        <span class="text-2xl font-bold text-[#00a0a0]">CNO</span><span class="text-2xl font-bold ml-1 text-white">NutriMap</span>
-                    </div>
-                    <p class="text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
-                </div>
-                          <!-- Links Column 1 -->
-            <div>
-                <h3 class="footer-title" style="font-weight: bolder; color: white;">About Us</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
-                </ul>
-            </div>
-            <!-- Links Column 2 -->
-            <div>
-                <h3 class="footer-title" style="font-weight: bolder; color: white;">Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="../../map.php">Map</a></li>
-                    <li><a href="contact.php">Contact Us</a></li>
-                </ul>
-            </div>
-            <!-- Legal & Support Column -->
-            <div>
-                <h3 class="footer-title" style="font-weight: bolder; color: white;">Legal & Support</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
-                </ul>
-            </div>
-            </div>
-            <div class="mt-8 border-t border-gray-700 pt-8 text-center">
-                <p class="text-gray-400">Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
-            </div>
+          if (sendEmailNotification($to, $subject, $body)) {
+              $successMsg = "Message sent successfully!";
+          } else {
+              $errorMsg = "Failed to send message. Please try again later.";
+          }
+      } else {
+          $errorMsg = "All fields are required.";
+      }
+  }
+  ?>
+
+  <div class="container">
+    <!-- Contact Information Card -->
+    <div class="contact-card">
+      <div class="contact-info">
+        <h2>Contact Information</h2>
+
+        <div class="info-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <h4>Address</h4>
+          <p>Poblacion, El Salvador, Philippines, 9017</p>
         </div>
-    </footer>
+
+        <div class="info-item">
+          <i class="fa-solid fa-map-location"></i>
+          <h4>Service area</h4>
+          <p>El Salvador, Philippines</p>
+        </div>
+
+        <div class="info-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <h4>Open Days</h4>
+          <p>Monday to Friday</p>
+        </div>
+
+        <div class="info-item">
+          <i class="fa-regular fa-clock"></i>
+          <h4>Open/Closing Hours</h4>
+          <p>08:00 am - 17:00 pm</p>
+        </div>
+      </div>
+
+      <!-- Map Section -->
+      <div class="map">
+        <iframe
+          src="https://www.google.com/maps?q=El%20Salvador%20Misamis%20Oriental&output=embed"
+          allowfullscreen=""
+          loading="lazy">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Contact Details Boxes -->
+    <div class="bottom-contact">
+      <div class="contact-box">
+        <i class="fa-solid fa-phone"></i>
+        <div>
+          <p>0917 713 2398</p>
+          <span>Mobile</span>
+        </div>
+      </div>
+
+      <div class="contact-box">
+        <i class="fa-solid fa-envelope"></i>
+        <div>
+          <p>citynutritionoffice@elsalvadorcity.gov.ph</p>
+          <span>Email</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Card -->
+    <div class="message-card">
+      <h2>Send Us a Message</h2>
+
+      <?php if (!empty($successMsg)) echo "<p class='success-msg' id='successMsg'>$successMsg</p>"; ?>
+      <?php if (!empty($errorMsg)) echo "<p class='error-msg'>$errorMsg</p>"; ?>
+
+      <form method="POST" action="">
+        <input type="text" name="name" placeholder="Your Name" required>
+        <input type="email" name="email" placeholder="Your Email" required>
+        <textarea name="message" placeholder="Write your message here..." required></textarea>
+        <button type="submit" name="send_message">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <h2><span>CNO</span> NutriMap</h2>
+        <div class="footer-about">
+          <p>
+            Dedicated to improving the nutritional health of our community through
+            data-driven insights, collaboration, and sustainable nutrition programs.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-contact">
+        <h3>Contact Us</h3>
+        <p><i class="fa-solid fa-location-dot"></i> El Salvador, Misamis Oriental</p>
+        <p><i class="fa-solid fa-envelope"></i> danmarkpetalcurin@gmail.com</p>
+        <p><i class="fa-solid fa-phone"></i> +63 912 345 6789</p>
+      </div>
+
+      <div class="footer-social">
+        <h3>Follow Us</h3>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 City Nutrition Office | All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ✅ Added JavaScript -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const msg = document.getElementById("successMsg");
+      if (msg) {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          setTimeout(() => msg.remove(), 500);
+        }, 10000); // 10 seconds
+      }
+    });
+  </script>
+
 
     <!-- JavaScript for interactivity -->
     <script>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CNO NutriMap - Organizational Chart</title>
+    <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
     <link rel="icon" type="image/jpg" href="img/CNO_Logo.jpg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
