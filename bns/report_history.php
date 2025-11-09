@@ -166,7 +166,7 @@ $totalPages = ceil($totalReports / $limit);
       <main class="content">
         <div class="toolbar">
           <div class="toolbar-left">
-            <input type="text" placeholder="Search">
+            <input type="text" id="reportSearch" placeholder="Search">
           </div>
           <div class="toolbar-right">
             <label for="sort">Sort by:</label>
@@ -190,7 +190,7 @@ $totalPages = ceil($totalReports / $limit);
             </div>
           </div>
 
-          <table>
+          <table id="reportsTable">
             <thead>
               <tr>
                 <th>User</th>
@@ -226,5 +226,18 @@ $totalPages = ceil($totalReports / $limit);
       </main>
     </div>
   </div>
+
+  <script>
+document.getElementById('reportSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#reportsTable tbody tr');
+    rows.forEach(row => {
+        // Check all cells in the row
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+
 </body>
 </html>

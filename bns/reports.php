@@ -282,7 +282,7 @@ function toggleSubmit(reportId, action) {
 <div class="toolbar">
   <div class="toolbar-left">
 <form method="get" style="display:inline;">
-  <input type="text" name="search" placeholder="Search Title" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+  <input type="text" id="reportSearch" name="search" placeholder="Search Title">
   <input type="hidden" name="page" value="1">
 </form>
 
@@ -329,7 +329,7 @@ function toggleSubmit(reportId, action) {
 </div>
 </div>
 
-<table>
+<table id="reportsTable">
 <thead>
 <tr>
   <th>User</th>
@@ -374,5 +374,17 @@ function toggleSubmit(reportId, action) {
 </main>
 </div>
 </div>
+
+  <script>
+document.getElementById('reportSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#reportsTable tbody tr');
+    rows.forEach(row => {
+        // Check all cells in the row
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
 </body>
 </html>
