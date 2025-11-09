@@ -130,6 +130,10 @@ thead {background:#009688;color:#fff;}
   gap: 6px;
   position: relative; /* prevents overlap */
 }
+.pagination span {
+  padding: 6px 10px;
+  color: #888;
+}
 .pagination a {padding:6px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;}
 .pagination a.active {background:#009688;color:#fff;}
 </style>
@@ -218,17 +222,50 @@ thead {background:#009688;color:#fff;}
         </table>
 
         <!-- ✅ Pagination -->
-        <div class="pagination">
-          <?php if ($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>">Prev</a>
-          <?php endif; ?>
-          <?php for ($i=1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-          <?php endfor; ?>
-          <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page+1 ?>">Next</a>
-          <?php endif; ?>
-        </div>
+       <div class="pagination">
+<?php
+  $maxLinks = 5;
+  $start = max(1, $page - floor($maxLinks / 2));
+  $end = min($totalPages, $start + $maxLinks - 1);
+
+  // Adjust start if near the end
+  if ($end - $start < $maxLinks - 1) {
+      $start = max(1, $end - $maxLinks + 1);
+  }
+?>
+
+<!-- Prev -->
+<?php if ($page > 1): ?>
+  <a href="?page=<?= $page-1 ?>">Prev</a>
+<?php else: ?>
+  <a class="disabled">Prev</a>
+<?php endif; ?>
+
+<!-- First page + ellipsis -->
+<?php if ($start > 1): ?>
+  <a href="?page=1">1</a>
+  <?php if ($start > 2): ?><span>...</span><?php endif; ?>
+<?php endif; ?>
+
+<!-- Page numbers -->
+<?php for ($i = $start; $i <= $end; $i++): ?>
+  <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+<?php endfor; ?>
+
+<!-- Last page + ellipsis -->
+<?php if ($end < $totalPages): ?>
+  <?php if ($end < $totalPages - 1): ?><span>...</span><?php endif; ?>
+  <a href="?page=<?= $totalPages ?>"><?= $totalPages ?></a>
+<?php endif; ?>
+
+<!-- Next -->
+<?php if ($page < $totalPages): ?>
+  <a href="?page=<?= $page+1 ?>">Next</a>
+<?php else: ?>
+  <a class="disabled">Next</a>
+<?php endif; ?>
+</div>
+
       </div>
     </main>
   </div>
