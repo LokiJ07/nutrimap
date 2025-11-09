@@ -159,7 +159,7 @@ unset($report);
 
     <!-- Toolbar -->
     <form method="get" class="toolbar">
-      <input type="text" name="search" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+      <input type="text" id="reportSearch" name="search" placeholder="Search">
       <select name="barangay" onchange="this.form.submit()">
         <option value="">All Barangays</option>
         <?php
@@ -229,5 +229,23 @@ unset($report);
       <p>No approved reports found.</p>
     <?php endif; ?>
   </div>
+
+<script>
+document.getElementById('reportSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.card'); // select all cards
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(filter) ? '' : 'none';
+    });
+
+    // Hide barangay sections if no cards visible
+    document.querySelectorAll('.barangay-section').forEach(section => {
+        const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
+        section.style.display = visibleCards.length ? '' : 'none';
+    });
+});
+</script>
+
 </body>
 </html>
