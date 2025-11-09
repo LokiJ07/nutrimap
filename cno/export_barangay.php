@@ -45,12 +45,11 @@ function makeTable(array $rows): string {
     return $html;
 }
 
+// ---------- Get Report ----------
 $report_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($report_id <= 0) {
-    die("Report not found!");
-}
+if ($report_id <= 0) die("Report not found!");
 
-// ---------- Prepare fields ----------
+// ---------- Fields ----------
 $base = [
     'ind1','ind_male','ind_female','ind2','ind3','ind4','ind5',
     'ind6a','ind6b','ind7','ind8','ind9','ind9a','ind10','ind11',
@@ -61,21 +60,12 @@ $base = [
 
 $groups = [
     '9b'  => ['ind9b1','ind9b2','ind9b3','ind9b4','ind9b5','ind9b6','ind9b7','ind9b8','ind9b9'],
-
-    '17a' => ['ind17a_public','ind17a_private'],
-    '17b' => ['ind17b_public','ind17b_private'],
-
     '22'  => ['ind22a','ind22b','ind22c','ind22d','ind22e','ind22f','ind22g'],
-
     '27'  => ['ind27a','ind27b','ind27c','ind27d','ind27e'],
-
     '28'  => ['ind28a','ind28b','ind28c','ind28d'],
     '29'  => ['ind29a','ind29b','ind29c','ind29d','ind29e','ind29f','ind29g'],
-
     '30'  => ['ind30a','ind30b','ind30c','ind30d'],
-
     '31'  => ['ind31a','ind31b','ind31c','ind31d','ind31e','ind31f'],
-
     '32'  => ['ind32'],
     '33'  => ['ind33'],
     '34'  => ['ind34'],
@@ -83,6 +73,7 @@ $groups = [
     '36'  => ['ind36']
 ];
 
+// SELECT fields
 $sel = [];
 foreach($base as $f) $sel[] = "SUM(bns.$f) AS $f";
 foreach($groups as $arr){
@@ -91,6 +82,7 @@ foreach($groups as $arr){
         $sel[] = "SUM(bns.{$f}_pct) AS {$f}_pct";
     }
 }
+// keep only numeric ones for 17a, 17b
 $sel[]="SUM(bns.ind17a_public)  AS ind17a_public";
 $sel[]="SUM(bns.ind17a_private) AS ind17a_private";
 $sel[]="SUM(bns.ind17b_public)  AS ind17b_public";
@@ -109,24 +101,56 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute(['report_id'=>$report_id]);
 $totals = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$totals) die("Report not found or not approved!");
+// ---------- Get Report Details ----------
+$stmt = $pdo->prepare("
+    SELECT r.id, r.report_date, r.report_time, r.status, b.barangay,
+    CASE WHEN b.barangay='Bolobolo' THEN 'Pedro sa Baculio' ELSE b.barangay END AS normalized_barangay
+    FROM bns_reports b
+    JOIN reports r ON b.report_id = r.id
+    WHERE b.report_id = :report_id
+    LIMIT 1
+");
+$stmt->execute(['report_id' => $report_id]);
+$report = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$report) die("Report not found!");
 
-// ---------- PDF Setup ----------
+// ---------- Barangay logo ----------
+function getBarangayLogo($barangay) {
+    $logos = [
+        'CNO'=>'CNO.png','Amoros'=>'Amoros.jpg','Bolisong'=>'Bolisong.jpg',
+        'Cogon'=>'Cogon.jpg','Himaya'=>'Himaya.jpg','Hinigdaan'=>'Hinigdaan.jpg',
+        'Kalabaylabay'=>'Kalabaylabay.jpg','Molugan'=>'Molugan.jpg',
+        'Pedro sa Baculio'=>'Bolobolo.jpg','Poblacion'=>'Poblacion.jpg',
+        'Kibonbon'=>'Kibonbon.jpg','Sambulawan'=>'Sambulawan.jpg',
+        'Calongonan'=>'Calongonan.jpg','Sinaloc'=>'Sinaloc.jpg',
+        'Taytay'=>'Taytay.jpg','Ulaliman'=>'Ulaliman.jpg'
+    ];
+    return $logos[$barangay] ?? 'default.png';
+}
+$barangay_logo = getBarangayLogo($report['normalized_barangay'] ?? '');
+$barangay_name = $report['normalized_barangay'] ?? '—';
+
+// ---------- PDF Header ----------
 class MYPDF extends TCPDF {
     public $reportYear = null;
+    public $barangayName = '';
+    public $barangayLogo = '';
 
-    // This overrides TCPDF's header
     public function Header() {
-        // Left text
         $this->SetFont('times','B',12);
         $this->SetXY(12, 10);
         $this->MultiCell(60, 5, "BNS Form No. IC\nBarangay Nutrition Profile", 0, 'L', 0, 0);
 
-        // Logos
+        // Barangay Logo
+        if($this->barangayLogo){
+            $this->Image(__DIR__ . '/../logos/barangays/' . $this->barangayLogo, 110, 8, 20);
+        }
+
+        // Other Logos
         $this->Image(__DIR__.'/../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.jpg', 130, 8.5, 17);
         $this->Image(__DIR__.'/../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.jpg', 150, 8.5, 17);
         $this->Image(__DIR__.'/../logos/fixed/Bagong-Pilipinas-logo.jpg', 170, 8.5, 17);
 
-        // Centered title
         $this->SetY(35);
         $this->SetFont('times','B',14);
         $this->Cell(0, 0, 'BARANGAY SITUATIONAL ANALYSIS (BSA)', 0, 1, 'C');
@@ -134,7 +158,7 @@ class MYPDF extends TCPDF {
         $this->Ln(2);
         $this->SetFont('times','',11);
         $year = $this->reportYear ?? date('Y');
-        $this->Cell(0, 0, "Calendar Year: $year | City: EL SALVADOR CITY | Province: MISAMIS ORIENTAL", 0, 1, 'C');
+        $this->Cell(0, 0, "Calendar Year: $year | Barangay: {$this->barangayName} | City: EL SALVADOR CITY | Province: MISAMIS ORIENTAL", 0, 1, 'C');
 
         $this->Ln(8);
     }
@@ -146,15 +170,14 @@ class MYPDF extends TCPDF {
     }
 }
 
+// ---------- PDF Init ----------
 $pdf = new MYPDF('P','mm','A4',true,'UTF-8',false);
 $pdf->reportYear = $selectedYear;
-$pdf->SetCreator('Nutrimap');
-$pdf->SetAuthor('CNO');
-$pdf->SetTitle('Barangay Situation Analysis');
+$pdf->barangayName = $barangay_name;
+$pdf->barangayLogo = $barangay_logo;
 $pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
-
 
 // ---------- Page 1 ----------
 $pdf->AddPage();

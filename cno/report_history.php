@@ -213,7 +213,7 @@ unset($report);
                     <div class="card-title"><?= htmlspecialchars($row['title']) ?></div>
                     <div class="card-right">
                       <div><?= $datetime ?></div>
-                      <a href="view_barangay.php?id=<?= $row['id'] ?>" class="export-link">View</a>
+                      <a href="view_report.php?id=<?= $row['id'] ?>" class="export-link">View</a>
                       <a href="export_bns.php?id=<?= $row['id'] ?>" class="export-link"><i class="fa fa-file-export"></i> Export</a>
                       <a href="barangay_data.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
                         <i class="fa fa-archive"></i> Archive

@@ -1,82 +1,117 @@
 <?php
-// view_report.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require '../db/config.php'; // PDO connection
+// ✅ view_report.php
+session_start();
+require '../../db/config.php'; // PDO connection
 
-// ✅ Require login & check CNO role
-  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
-    header("Location: ../login.php");
-    exit();
-}
+// ✅ Initialize defaults
+$error = null;
+$row   = null;
+$meta  = null;
 
+// ✅ Validate report ID
 $report_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($report_id <= 0) {
-    die("Report not found!");
+    $error = "Report not found!";
 }
 
-$stmt = $pdo->prepare("
-    SELECT 
-        r.id AS reports_id,
-        r.report_date,
-        r.report_time,
-        r.status,
-        b.*,
-        -- Normalized barangay name
-        CASE 
-            WHEN b.barangay = 'Bolobolo'   THEN 'Pedro sa Baculio'
-            ELSE b.barangay
-        END AS normalized_barangay
-    FROM reports r
-    LEFT JOIN bns_reports b ON b.report_id = r.id
-    WHERE r.id = :id
-    LIMIT 1
-");
+// ✅ Get title & year of selected report first
+if (!$error) {
+    $stmt = $pdo->prepare("
+        SELECT b.title, b.year
+        FROM reports r
+        JOIN bns_reports b ON b.report_id = r.id
+        WHERE r.id = :id AND r.status = 'Approved'
+        LIMIT 1
+    ");
+    $stmt->execute(['id' => $report_id]);
+    $meta = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
-$stmt->execute(['id' => $report_id]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$row) {
-    die("Report not found!");
+    if (!$meta) {
+        $error = "Report not found or not approved!";
+    }
 }
 
-$has_bns = !is_null($row['report_id']);
+// ✅ Fetch the latest approved report with same title + year
+if (!$error) {
+    $stmt = $pdo->prepare("
+        SELECT r.id AS reports_id, r.report_date, r.report_time, r.status, b.*
+        FROM reports r
+        LEFT JOIN bns_reports b ON b.report_id = r.id
+        WHERE r.status = 'Approved'
+          AND b.title = :title
+          AND b.year  = :year
+        ORDER BY r.report_date DESC, r.report_time DESC
+        LIMIT 1
+    ");
+    $stmt->execute([
+        'title' => $meta['title'],
+        'year'  => $meta['year']
+    ]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    if (!$row) {
+        $error = "No updated report found!";
+    }
+}
+
+// ✅ Safe flag for checking if BNS data exists
+$has_bns = !empty($row) && !empty($row['report_id']);
+
+// ✅ Barangay logo fetcher (normalized keys)
 function getBarangayLogo($barangay) {
-    $logos = [
-        'CNO' => 'CNO.png',
-        'Amoros' => 'Amoros.png',
-        'Bolisong' => 'Bolisong.png',
-        'Cogon' => 'Cogon.png',
-        'Himaya' => 'Himaya.png',
-        'Hinigdaan' => 'Hinigdaan.png',
-        'Kalabaylabay' => 'Kalabaylabay.png',
-        'Molugan' => 'Molugan.png',
-        'Pedro sa Baculio' => 'Bolobolo.png',
-        'Poblacion' => 'Poblacion.png',
-        'Kibonbon' => 'Kibonbon.png',
-        'Sambulawan' => 'Sambulawan.png',
-        'Calongonan' => 'Calongonan.png',
-        'Sinaloc' => 'Sinaloc.png',
-        'Taytay' => 'Taytay.png',
-        'Ulaliman' => 'Ulaliman.png'
+    $map = [
+        'cno' => 'CNO.png',
+        'amoros' => 'Amoros.png',
+        'bolisong' => 'Bolisong.png',
+        'cogon' => 'Cogon.png',
+        'himaya' => 'Himaya.png',
+        'hinigdaan' => 'Hinigdaan.png',
+        'kalabaylabay' => 'Kalabaylabay.png',
+        'molugan' => 'Molugan.png',
+        'pedro s. baculio' => 'Pedro_sa_Baculio.png',
+        'pedro sa baculio' => 'Pedro_sa_Baculio.png',
+        'poblacion' => 'Poblacion.png',
+        'quibonbon' => 'Quibonbon.png',
+        'sambulawan' => 'Sambulawan.png',
+        'san francisco de asis' => 'San_Francisco_de_Asis.png',
+        'sinaloc' => 'Sinaloc.png',
+        'taytay' => 'Taytay.png',
+        'ulaliman' => 'Ulaliman.png'
     ];
-    return isset($logos[$barangay]) ? $logos[$barangay] : 'default.png';
+
+    $key = strtolower(trim($barangay ?? ''));
+    return $map[$key] ?? 'default.png';
 }
 
+// ✅ Determine barangay logo
+$barangay_name = $has_bns ? $row['barangay'] : '';
+$barangay_logo = getBarangayLogo($barangay_name);
+
+// ✅ Safe value formatter (centralized handling)
 function val($arr, $k, $fmt = null) {
-    if (!isset($arr[$k]) || $arr[$k] === null || $arr[$k] === '') return '—';
+    if (!is_array($arr) || !isset($arr[$k]) || $arr[$k] === null || $arr[$k] === '') {
+        return '—';
+    }
+
     $v = $arr[$k];
-    if ($fmt === 'int') return (int)$v;
-    if ($fmt === 'pct') return number_format((float)$v, 2) . '%';
-    if ($fmt === 'dec2') return number_format((float)$v, 2);
-    return htmlspecialchars($v);
+
+    switch ($fmt) {
+        case 'int': 
+            return (int)$v;
+        case 'pct': 
+            return number_format((float)$v, 2) . '%';
+        case 'dec2': 
+            return number_format((float)$v, 2);
+        default: 
+            return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+    }
 }
 
-$barangay_logo = getBarangayLogo($row['normalized_barangay'] ?? '');
+
+// ✅ Barangay logo fallback
+$barangay_logo = $has_bns ? getBarangayLogo($row['barangay'] ?? '') : 'default.png';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,20 +146,13 @@ body{
 .header-table{width:100%;border-collapse:collapse;margin-bottom:20px}
 .header-table td{border:none;padding:4px 6px;vertical-align:middle}
 .header-left{font-weight:bold;font-size:14px}
-
-/* ✅ FIXED LOGOS: single row, right-aligned, fully visible */
 .header-logos{
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px; /* space between logos */
+  display:flex;
+  justify-content:flex-start;
+  align-items:right;
+  gap:8px;
 }
-.header-logos img{
-    max-height: 60px;
-    width: auto;
-    display: inline-block;
-}
-
+.header-logos img{height: 75px;object-fit:contain}
 .report-info{text-align:center;margin-bottom:20px;font-size:12px}
 table{width:100%;border-collapse:collapse;margin-bottom:15px;table-layout:fixed}
 th,td{border:1px solid #000;padding:6px 8px;text-align:left;font-size:12px;vertical-align:top}
@@ -134,7 +162,7 @@ th{background:#ddd}
 /* ✅ FIX: second column uniform size */
 table td:nth-child(2),
 table th:nth-child(2) {
-  width: 180px; /* adjust width as needed */
+  width: 180px; 
   text-align: center;
 }
 
@@ -159,22 +187,18 @@ table th:nth-child(2) {
 </head>
 <body>
 <div class="layout">
-<?php include 'header.php'; ?>
+<?php include '../header.php'; ?>
 <div class="body-layout">
 <div class="container">
 
-<!-- ✅ Added: Report Title and Buttons -->
+<div class="body-layout">
+  <main class="content">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
     <h2 style="font-size:18px;">
       <span style="font-weight:normal;">Title:</span>
       <?= $has_bns ? htmlspecialchars($row['title']) : 'Barangay Nutrition Report' ?>
     </h2>
     <div>
-    <!-- ✅ Fixed Edit button link -->
-    <a href="edit_aproved_report.php?id=<?= $row['reports_id'] ?>" 
-       style="background:#007bff;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;margin-right:8px;">
-       <i class="fa fa-edit"></i> Edit
-    </a>
       <a href="javascript:history.back()" 
          style="background:#6c757d;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;">
          <i class="fa fa-arrow-left"></i> Back
@@ -184,7 +208,7 @@ table th:nth-child(2) {
 
 <?php if (!$has_bns): ?>
 <div class="notice">
-<strong>Note:</strong> Report exists (ID: <?= htmlspecialchars($row['reports_id']) ?>) but no BNS data was found.
+<strong>Note:</strong> Report exists (ID: <?= htmlspecialchars($row['reports_id'] ?? $report_id) ?>) but no BNS data was found.
 </div>
 <?php endif; ?>
 
@@ -193,31 +217,31 @@ table th:nth-child(2) {
 <tr>
 <td class="header-left">BNS Form No. IC<br>Barangay Nutrition Profile</td>
 <td class="header-logos">
-<img src="../logos/barangays/<?= htmlspecialchars($barangay_logo) ?>" alt="Barangay Logo">
-<img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="City Logo">
-<img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png" alt="NNC Logo">
-<img src="../logos/fixed/Bagong-Pilipinas-logo.png" alt="Bagong Pilipinas Logo">
+<img src="../../logos/barangays/<?= urlencode($barangay_logo) ?>" alt="Barangay Logo">
+  <img src="../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="El Salvador Seal">
+  <img src="../../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png" alt="NNC Logo">
+  <img src="../../logos/fixed/Bagong-Pilipinas-logo.png" alt="Bagong Pilipinas">
 </td>
 </tr>
 </table>
 
 
-<div class="report-info">
-  <strong>Calendar Year:</strong> <?= $has_bns ? val($row,'year') : '—' ?> &nbsp;
-  <!-- ✅ use normalized name -->
-  <strong>Barangay:</strong> <?= htmlspecialchars($row['normalized_barangay']) ?> &nbsp;
-  <strong>City:</strong> EL SALVADOR CITY &nbsp;
-  <strong>Province:</strong> MISAMIS ORIENTAL
-</div>
+    <div class="report-info">
+        <h3>BARANGAY SITUATIONAL ANALYSIS (BSA)</h3>				
+    <strong>Calendar Year:</strong> <?= $has_bns ? val($row,'year') : '—' ?> &nbsp;
+    <strong>Barangay:</strong> <?= val($row,'barangay') ?> &nbsp;
+    <strong>City:</strong> EL SALVADOR CITY &nbsp;
+    <strong>Province:</strong> MISAMIS ORIENTAL
+    </div>
 
-
-  <table>
-  <thead>
-  <tr>
-      <th>Indicator</th>
-      <th>Number / %</th>
-  </tr>
-  </thead>
+    <table>
+    <thead>
+    <tr>
+        <th>Indicator</th>
+        <th>Number / %</th>
+    </tr>
+    </thead>
+    <tbody>
   <tbody>
   <tr><td>1. Total Population</td><td><?= $has_bns ? val($row,'ind1','int') : '—' ?></td></tr>
     <tr class="indent"><td>Male</td><td><?= $has_bns ? val($row,'ind_male','int') : '—' ?></td></tr>
@@ -265,15 +289,12 @@ table th:nth-child(2) {
   <tr><td>15. Total Number of Families With Wasted and Severely Wasted Preschool Children</td><td><?= $has_bns ? val($row,'ind15','int') : '—' ?></td></tr>
   <tr><td>16. Total Number of Families With Stunted and Severely Stunted Preschool Children</td><td><?= $has_bns ? val($row,'ind16','int') : '—' ?></td></tr>
   </table>
-
-  <div class="page-number">Page 1</div>
-  </div>
-
+    <div class="page-number">Page 1</div>
+    </div>
 
 
-
-  <!-- PAGE 2 -->
-  <div class="document">
+    <!-- PAGE 2 -->
+    <div class="document">
   <table>
       <colgroup>
     <col style="width: auto;">
@@ -403,22 +424,17 @@ table th:nth-child(2) {
   </tr>
   <?php $i++; endforeach; ?>
   </table>
-  
-  <div class="page-number">Page 2</div>
-  </div>
-
-
-
+    <div class="page-number">Page 2</div>
+    </div>
 
     <!-- PAGE 3 -->
-  <div class="document">
-  <table>
-  <colgroup>
-    <col style="width: auto;">
-    <col style="width: 180px;"> 
-  </colgroup>
-  <tbody>
-
+    <div class="document">
+    <table>
+    <colgroup>
+      <col style="width: auto;">
+      <col style="width: 180px;"> 
+    </colgroup>
+    <tbody>
   <tr>
     <td>29. Household, by Type of Water Source</td>
     <td class="number-cell">
@@ -539,9 +555,9 @@ table th:nth-child(2) {
     <td><?= $has_bns ? val($row,'ind38','int') : '—' ?></td>
   </tr>
   </table>
+    <div class="page-number">Page 3</div>
+    </div>
 
-  <div class="page-number">Page 3</div>
-  </div>
 
-  </body>
-  </html>
+    </body>
+    </html>
