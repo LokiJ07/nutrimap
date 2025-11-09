@@ -81,26 +81,27 @@ if ($search !== '') {
 
 /* ✅ Fetch reports */
 if ($userType === 'BNS') {
-    $stmt = $pdo->prepare("
-        SELECT r.id, r.report_time, r.report_date, r.status, r.is_submitted,
-               u.username,
-               b.title AS report_title,
-               b.barangay
-        FROM reports r
-        JOIN users u ON r.user_id = u.id
-        LEFT JOIN bns_reports b ON b.report_id = r.id
-        LEFT JOIN report_archives a 
-          ON a.report_id = r.id 
-          AND a.user_id = :user_id 
-          AND a.user_type = :user_type
-        WHERE r.user_id = :user_id2
-          AND (r.status = 'Pending' OR r.status = 'Rejected')
-          AND (a.is_deleted = 0 OR a.is_deleted IS NULL)
-          AND (a.is_archived = 0 OR a.is_archived IS NULL)
-          $searchSQL
-        ORDER BY r.report_date DESC, r.report_time DESC
-        LIMIT :limit OFFSET :offset
-    ");
+ $stmt = $pdo->prepare("
+    SELECT DISTINCT r.id, r.report_time, r.report_date, r.status, r.is_submitted,
+           u.username,
+           COALESCE(b.title, '') AS report_title,
+           COALESCE(b.barangay, '') AS barangay
+    FROM reports r
+    INNER JOIN users u ON r.user_id = u.id
+    LEFT JOIN bns_reports b ON b.report_id = r.id
+    LEFT JOIN report_archives a 
+      ON a.report_id = r.id 
+      AND a.user_id = :user_id 
+      AND a.user_type = :user_type
+    WHERE r.user_id = :user_id2
+      AND (r.status = 'Pending' OR r.status = 'Rejected')
+      AND (a.is_deleted = 0 OR a.is_deleted IS NULL)
+      AND (a.is_archived = 0 OR a.is_archived IS NULL)
+      AND b.report_id IS NOT NULL     -- ✅ Only show reports with BNS data
+      $searchSQL
+    ORDER BY r.report_date DESC, r.report_time DESC
+    LIMIT :limit OFFSET :offset
+");
 } else {
     $stmt = $pdo->prepare("
         SELECT r.id, r.report_time, r.report_date, r.status, r.is_submitted,
@@ -353,7 +354,7 @@ function toggleSubmit(reportId, action) {
       <td class="actions">
         <a href="view_report.php?id=<?= $r['id'] ?>" class="view"><i class="fa fa-eye"></i> View</a>
         <?php if ($userType === 'BNS'): ?>
-          <?php if ($r['is_submitted'] == 1): ?>
+          <?php if ($r['is_submitted'] == 0): ?>
             <a href="#" class="delete" onclick="toggleSubmit(<?= $r['id'] ?>,'unsubmit')"><i class="fa fa-undo"></i> Unsubmit</a>
           <?php else: ?>
             <a href="report/edit_report.php?id=<?= $r['id'] ?>" class="edit"><i class="fa fa-edit"></i> Edit</a>

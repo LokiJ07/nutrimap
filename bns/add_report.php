@@ -29,9 +29,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
           // 1️⃣ Insert into reports table
           $stmt = $pdo->prepare("
-              INSERT INTO reports (user_id, report_time, report_date)
-              VALUES (:user_id, :report_time, :report_date)
-          ");
+    INSERT INTO reports (user_id, report_time, report_date, is_submitted)
+    VALUES (:user_id, :report_time, :report_date, 1)
+");
+$stmt->execute([
+    ':user_id' => $user_id,
+    ':report_time' => date('H:i:s'),
+    ':report_date' => date('Y-m-d')
+]);
+
           $stmt->execute([
               ':user_id' => $user_id,
               ':report_time' => date('H:i:s'),

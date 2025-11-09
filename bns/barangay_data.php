@@ -178,7 +178,7 @@ $fixedTitle = "Barangay Situational Analysis";
                 </div>
                 <div class="file-actions">
                   <a class="file-link" href="report/barangay_data.php?id=<?= $f['latest_report_id'] ?>">View</a>
-                  <a class="file-link" href="export_file.php?id=<?= $f['latest_report_id'] ?>">Export</a>
+                  <a class="file-link" href="./export_report.php?id=<?= $f['latest_report_id'] ?>">Export</a>
                 </div>
               </div>
             <?php endforeach; ?>

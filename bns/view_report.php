@@ -159,7 +159,6 @@ table th:nth-child(2) {
 </head>
 <body>
 <div class="layout">
-<?php include 'header.php'; ?>
 <div class="body-layout">
 <div class="container">
 

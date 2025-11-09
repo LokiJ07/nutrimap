@@ -9,36 +9,39 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 }
 
 // Fetch Pending Reports
+// Fetch Pending Reports (only submitted)
 $pendingStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Pending'
+    WHERE r.status='Pending' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $pendingStmt->execute();
 $pendingReports = $pendingStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Approved Reports
+// Fetch Approved Reports (only submitted)
 $approvedStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Approved'
+    WHERE r.status='Approved' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $approvedStmt->execute();
 $approvedReports = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Rejected Reports
+// Fetch Rejected Reports (only submitted)
 $rejectedStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Rejected'
+    WHERE r.status='Rejected' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $rejectedStmt->execute();
