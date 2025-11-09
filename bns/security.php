@@ -2,9 +2,8 @@
 session_start();
 require '../db/config.php';
 
-// ✅ Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -31,10 +30,9 @@ foreach ($allLogins as $login) {
 }
 
 // ✅ Get user info
-$stmt = $pdo->prepare("SELECT password_changed, current_session, password_hash FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT current_session, password_hash FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-$password_changed = $user['password_changed'] ?? 0;
 $current_session = $user['current_session'] ?? '';
 $current_password_hash = $user['password_hash'] ?? '';
 
@@ -46,44 +44,42 @@ $show_change_password = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password'])) {
     $show_change_password = true;
-    if ($password_changed) {
-        $password_message = "You have already changed your password. This action is allowed only once.";
+
+    $current_password = $_POST['current_password'];
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    if (!password_verify($current_password, $current_password_hash)) {
+        $password_message = "Current password is incorrect!";
+        $password_error = true;
+    } elseif ($new_password !== $confirm_password) {
+        $password_message = "New password and confirm password do not match!";
+        $password_error = true;
+    } elseif (
+        strlen($new_password) < 6 || 
+        !preg_match('/[0-9]/', $new_password) || 
+        !preg_match('/[A-Za-z]/', $new_password) || 
+        !preg_match('/[.,!@$%]/', $new_password)
+    ) {
+        $password_message = "Password must include letters, numbers, and special characters (.,!@$%).";
         $password_error = true;
     } else {
-        $current_password = $_POST['current_password'];
-        $new_password = $_POST['new_password'];
-        $confirm_password = $_POST['confirm_password'];
+        $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
+        $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        if ($updateStmt->execute([$new_hash, $user_id])) {
+            $password_message = "Password successfully changed!";
+            $password_error = false;
 
-        if (!password_verify($current_password, $current_password_hash)) {
-            $password_message = "Current password is incorrect!";
-            $password_error = true;
-        } elseif ($new_password !== $confirm_password) {
-            $password_message = "New password and confirm password do not match!";
-            $password_error = true;
-        } elseif (
-            strlen($new_password) < 6 || 
-            !preg_match('/[0-9]/', $new_password) || 
-            !preg_match('/[A-Za-z]/', $new_password)
-        ) {
-            $password_message = "Password must include letters and numbers.";
-            $password_error = true;
+            // 🔹 Log activity for password change
+            $logStmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
+            $logStmt->execute([$user_id, "Changed password"]);
         } else {
-            $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
-            $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ?, password_changed = 1 WHERE id = ?");
-            if ($updateStmt->execute([$new_hash, $user_id])) {
-                $password_changed = 1;
-                $password_message = "Password successfully changed!";
-                $password_error = false;
-            } else {
-                $password_message = "Failed to update password. Please try again.";
-                $password_error = true;
-            }
+            $password_message = "Failed to update password. Please try again.";
+            $password_error = true;
         }
     }
 }
 ?>
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -123,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     .card.active { display:block; }
     .card h2 { margin:0 0 10px; font-size:18px; }
 
-    /* Login Buttons */
+    /* Device Buttons */
     .device-btn {
       display:flex; justify-content:space-between; align-items:center;
       background:#f9f9f9; border:1px solid #ccc; border-radius:5px;
@@ -134,80 +130,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     .device-name { font-weight:bold; font-size:15px; }
     .device-time { font-size:13px; color:#555; }
 
-    /* Modal */
-    .modal {
-      display:none; position:fixed; top:0; left:0;
+    /* Modal (renamed to avoid conflict) */
+    .security-modal {
+      display:none;
+      position:fixed; top:0; left:0;
       width:100%; height:100%;
       background:rgba(0,0,0,0.5);
       justify-content:center; align-items:center;
+      z-index:9999;
     }
-    .modal-content {
+    .security-modal-content {
       background:#fff; border-radius:8px;
       width:350px; padding:20px; text-align:center;
       box-shadow:0 4px 10px rgba(0,0,0,0.3);
     }
-    .modal-content h3 { margin-bottom:10px; }
-    .modal-content p { margin:8px 0; font-size:14px; }
-    .modal-content button {
+    .security-modal-content h3 { margin-bottom:10px; }
+    .security-modal-content p { margin:8px 0; font-size:14px; }
+    .security-modal-content button {
       margin-top:12px;
       background:#dc3545; color:#fff; border:none;
       padding:8px 12px; border-radius:4px;
       cursor:pointer;
     }
-    .close-btn {
+    .security-close-btn {
       margin-top:10px; background:#6c757d;
       color:#fff; padding:8px 12px; border:none;
       border-radius:4px; cursor:pointer;
     }
 
-    /* ===== Change Password Card Styling ===== */
-    .password-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 10px;
+    /* Password Form */
+    .password-form { display:flex; flex-direction:column; gap:15px; margin-top:10px; }
+    .password-form input {
+      width:97%; padding:12px 15px; font-size:15px;
+      border:1px solid #ccc; border-radius:8px; outline:none;
     }
-
-    .password-form .form-group input {
-      width: 100%;
-      padding: 12px 15px;
-      font-size: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      transition: all 0.2s;
-      outline: none;
+    .password-form input:focus {
+      border-color:#00AEEF; box-shadow:0 0 5px rgba(0,174,239,0.4);
     }
-
-    .password-form .form-group input:focus {
-      border-color: #0195a0ff;
-      box-shadow: 0 0 5px rgba(0, 174, 239, 0.4);
+    .btn-submit {
+      padding:12px; background:#00AEEF; color:#fff;
+      font-weight:bold; border:none; border-radius:8px;
+      cursor:pointer; transition:background 0.2s, transform 0.1s;
     }
-
-    .password-form .btn-submit {
-      padding: 12px;
-      background: #0195a0ff;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .password-form .btn-submit:hover {
-      background: #00AEEF;
-      transform: translateY(-1px);
-    }
-
-    .password-message {
-      margin-top: 10px;
-      font-size: 14px;
-      color: green;
-    }
-
-    .password-message.error {
-      color: red;
-    }
+    .btn-submit:hover { background:#0195a0; transform:translateY(-1px); }
+    .password-message { margin-top:10px; font-size:14px; color:green; }
+    .password-message.error { color:red; }
   </style>
 </head>
 <body>
@@ -234,7 +201,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
               $deviceName = strtok($login['browser'], '/'); 
               $isCurrent = $login['session_id'] === $current_session;
             ?>
-              <div class="device-btn" data-id="<?= $login['id'] ?>" data-current="<?= $isCurrent ? '1':'0' ?>" data-login="<?= htmlspecialchars($login['login_time']) ?>" data-ip="<?= htmlspecialchars($login['ip_address']) ?>">
+              <div class="device-btn" 
+                   data-id="<?= $login['id'] ?>" 
+                   data-current="<?= $isCurrent ? '1':'0' ?>" 
+                   data-login="<?= htmlspecialchars($login['login_time']) ?>" 
+                   data-ip="<?= htmlspecialchars($login['ip_address']) ?>">
                 <span class="device-name"><?= htmlspecialchars($deviceName) ?><?= $isCurrent ? " (This device)" : "" ?></span>
                 <span class="device-time"><?= date('M j, g:i a', strtotime($login['login_time'])) ?></span>
               </div>
@@ -247,99 +218,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
         <!-- Change Password Card -->
         <div class="card" id="change-password">
           <h2>Change Password</h2>
-          <p class="form-text">
-            You can change your password once. Your password must be at least 6 characters and should include a combination of Numbers & Letters
-          </p>
+          <p>Your password must be at least 6 characters and include numbers, letters, and special characters (.,!@$%).</p>
 
           <form method="post" class="password-form">
-            <?php if ($password_changed): ?>
-              <div class="password-message error">You have already changed your password. This action is allowed only once.</div>
-            <?php endif; ?>
-            
             <?php if ($password_message): ?>
-<div class="password-message <?= $password_error ? 'error' : '' ?>">
-    <?= htmlspecialchars($password_message) ?>
-</div>
+              <div class="password-message <?= $password_error ? 'error' : '' ?>">
+                  <?= htmlspecialchars($password_message) ?>
+              </div>
             <?php endif; ?>
 
-            <?php if (!$password_changed): ?>
-              <div class="form-group">
-                <input type="password" name="current_password" placeholder="Enter your current password" required>
-              </div>
-              <div class="form-group">
-                <input type="password" name="new_password" placeholder="Enter new password" required>
-              </div>
-              <div class="form-group">
-                <input type="password" name="confirm_password" placeholder="Confirm new password" required>
-              </div>
-              <button type="submit" class="btn-submit">Change Password</button>
-            <?php endif; ?>
+            <input type="password" name="current_password" placeholder="Enter your current password" required>
+            <input type="password" name="new_password" placeholder="Enter new password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+            <button type="submit" class="btn-submit">Change Password</button>
           </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal -->
-  <div class="modal" id="logModal">
-    <div class="modal-content">
+  <!-- 🔒 Security Modal (renamed) -->
+  <div class="security-modal" id="securityLogModal">
+    <div class="security-modal-content">
       <h3>Log Info</h3>
-      <p id="logDate"></p>
-      <p id="logIp"></p>
-      <button id="logoutBtn">Logout</button>
-      <button class="close-btn" onclick="closeModal()">Close</button>
+      <p id="securityLogDate"></p>
+      <p id="securityLogIp"></p>
+      <button id="securityLogoutBtn">Logout</button>
+      <button class="security-close-btn" onclick="closeSecurityModal()">Close</button>
     </div>
   </div>
 
- <script>
-  const modal = document.getElementById("logModal");
-  const logDate = document.getElementById("logDate");
-  const logIp = document.getElementById("logIp");
-  const logoutBtn = document.getElementById("logoutBtn");
-  let selectedId = null;
-  let isCurrentDevice = false;
+  <!-- ✅ Clean JS (renamed to avoid conflicts) -->
+  <script>
+  (() => {
+    const modal = document.getElementById("securityLogModal");
+    const dateField = document.getElementById("securityLogDate");
+    const ipField = document.getElementById("securityLogIp");
+    const logoutBtn = document.getElementById("securityLogoutBtn");
+    let selectedId = null;
+    let isCurrentDevice = false;
 
-  document.querySelectorAll(".device-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedId = btn.dataset.id;
-      isCurrentDevice = btn.dataset.current === "1";
-
-      logDate.textContent = "Login Date: " + btn.dataset.login;
-      logIp.textContent = "IP Address: " + btn.dataset.ip;
-
-      logoutBtn.style.display = isCurrentDevice ? "none" : "inline-block";
-
-      modal.style.display = "flex";
+    // Show modal when device is clicked
+    document.querySelectorAll(".device-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedId = btn.dataset.id;
+        isCurrentDevice = btn.dataset.current === "1";
+        dateField.textContent = "Login Date: " + btn.dataset.login;
+        ipField.textContent = "IP Address: " + btn.dataset.ip;
+        logoutBtn.style.display = isCurrentDevice ? "none" : "inline-block";
+        modal.style.display = "flex";
+      });
     });
-  });
 
-  function closeModal() { modal.style.display = "none"; }
+    // Close modal
+    function closeSecurityModal() { modal.style.display = "none"; }
+    window.closeSecurityModal = closeSecurityModal;
 
-  logoutBtn.addEventListener("click", () => {
-    if(confirm("Are you sure you want to log out this device?")) {
-      window.location.href = "force_logout.php?id=" + selectedId;
-    }
-  });
+    // Logout another device
+    logoutBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you want to log out this device?")) {
+        window.location.href = "force_logout.php?id=" + selectedId;
+      }
+    });
 
-  // ✅ Switch between cards when clicking menu links
-  document.querySelectorAll('.menu-link').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
+    // Switch between cards
+    document.querySelectorAll('.menu-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        link.classList.add('active');
+        document.getElementById(link.dataset.target).classList.add('active');
+      });
+    });
+
+    // Keep "Change Password" open after submission
+    <?php if (!empty($show_change_password) && $show_change_password): ?>
       document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
       document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-      link.classList.add('active');
-      document.getElementById(link.dataset.target).classList.add('active');
-    });
-  });
-
-  // ✅ Keep "Change Password" active after reload if set by PHP
-  <?php if (!empty($show_change_password) && $show_change_password): ?>
-    document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-target="change-password"]').classList.add('active');
-    document.getElementById('change-password').classList.add('active');
-  <?php endif; ?>
-</script>
-
+      document.querySelector('[data-target="change-password"]').classList.add('active');
+      document.getElementById('change-password').classList.add('active');
+    <?php endif; ?>
+  })();
+  </script>
 </body>
 </html>

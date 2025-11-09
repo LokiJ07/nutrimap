@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 29, 2025 at 05:33 PM
+-- Generation Time: Oct 04, 2025 at 07:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,6 +34,33 @@ CREATE TABLE `activity_logs` (
   `details` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `activity_logs`
+--
+
+INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `details`, `created_at`) VALUES
+(21, 8, 'Logged out', 'Trusted Device', '2025-10-01 16:59:01'),
+(22, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 16:59:05'),
+(23, 12, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:36:25'),
+(24, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:36:33'),
+(25, 8, 'Logged out', 'Trusted Device', '2025-10-01 17:36:51'),
+(26, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:36:57'),
+(27, 12, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:37:32'),
+(28, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:37:53'),
+(29, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 17:38:01'),
+(30, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:05:24'),
+(31, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:05:52'),
+(32, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:06:07'),
+(33, 8, 'Logged out', 'Trusted Device', '2025-10-01 18:06:11'),
+(34, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:06:17'),
+(35, 12, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:10:10'),
+(36, 12, 'Logged out', 'Trusted Device', '2025-10-01 18:10:12'),
+(37, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:17:51'),
+(38, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:18:15'),
+(39, 10, 'Report Added', 'Report ID 21 created for Barangay Calongonan, Year 2025 with title \'new report\'', '2025-10-01 18:19:18'),
+(40, 8, 'User logged in', 'Trusted device login from IP ::1', '2025-10-01 18:19:26'),
+(41, 10, 'User logged in', 'Trusted device login from IP ::1', '2025-10-04 16:52:39');
 
 -- --------------------------------------------------------
 
@@ -171,7 +198,8 @@ INSERT INTO `bns_reports` (`id`, `report_id`, `barangay`, `year`, `title`, `ind1
 (17, 17, 'Sambulawan', '2025', '2', 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
 (18, 18, 'Calongonan', '2025', 'dqq', 1231, 131, 1313, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 123.00, 0, 0.00, 0, 123.00, 0, 22.00, 0, 22.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
 (19, 19, 'Calongonan', '2025', 'daaad', 231, 0, 0, 0, 0, 0, 0, 0.00, 0, 1.00, 0, 1.00, 0, 1.00, 0, 1.00, 0, 1.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
-(20, 20, 'Calongonan', '2025', 'dasd', 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
+(20, 20, 'Calongonan', '2025', 'dasd', 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0),
+(21, 21, 'Calongonan', '2025', 'new report', 1232313, 1441, 0, 0, 0, 0, 0, 0.00, 0, 12.00, 0, 2.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -320,15 +348,15 @@ CREATE TABLE `login_history` (
 --
 
 INSERT INTO `login_history` (`id`, `user_id`, `session_id`, `browser`, `ip_address`, `login_time`, `logout_time`, `device_token`) VALUES
-(1, 10, '399h10ajkl28ojtuc8u1affain', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-29 13:14:14', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(1, 10, '04hk3r65n68a8bi0qb382p2fsp', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-10-04 16:52:39', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
 (2, 10, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 03:56:44', NULL, NULL),
-(3, 8, '399h10ajkl28ojtuc8u1affain', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-29 10:12:01', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(3, 8, 'ph8g5jk94suiavfbon58b31hf4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-10-01 18:19:26', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
 (4, 8, '2hauhvi1j0u8lcgslp2m8ovncv', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 04:12:29', NULL, NULL),
-(5, 12, '67kd4du5tuo4nknp82s0dg1trd', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 06:53:28', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(5, 12, 'o86fu9nin7o5i9rt5hsrvf09q9', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-10-01 18:10:10', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
 (6, 12, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:22:48', NULL, NULL),
-(7, 10, 'g9rga0rbasm7a3phvbp7rt09jr', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 13:58:05', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
+(7, 10, 'o86fu9nin7o5i9rt5hsrvf09q9', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-10-01 18:18:15', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
 (8, 10, '89jbjpmh218tvv08dbf3v77i0p', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-22 11:26:57', NULL, NULL),
-(9, 12, '8vsueecltnic705kk3f66fgdh4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 03:18:17', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
+(9, 12, 'ph8g5jk94suiavfbon58b31hf4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-10-01 16:20:25', NULL, 'eb917e6f5f80b52a73e8e69c1a03a18e'),
 (10, 12, '8vsueecltnic705kk3f66fgdh4', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-26 03:18:56', NULL, NULL),
 (11, 8, 'rr16nfgqk577b4jnm0qam3lkv0', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-29 13:39:29', NULL, 'a067af488dacc36b3d01fdb803f029e3'),
 (12, 8, 'rr16nfgqk577b4jnm0qam3lkv0', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Sa', '::1', '2025-09-29 11:35:51', NULL, NULL);
@@ -392,7 +420,8 @@ INSERT INTO `reports` (`id`, `user_id`, `report_time`, `report_date`, `status`, 
 (17, 12, '09:18:02', '2025-09-26', 'Rejected', NULL),
 (18, 10, '12:54:05', '2025-09-29', 'Pending', NULL),
 (19, 10, '13:13:07', '2025-09-29', 'Pending', NULL),
-(20, 10, '15:14:33', '2025-09-29', 'Approved', NULL);
+(20, 10, '15:14:33', '2025-09-29', 'Approved', NULL),
+(21, 10, '20:19:18', '2025-10-01', 'Pending', NULL);
 
 -- --------------------------------------------------------
 
@@ -423,9 +452,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `phone_number`, `email`, `address`, `barangay`, `profile_pic`, `user_type`, `password_hash`, `created_at`, `current_session`, `password_changed`, `status`) VALUES
-(8, 'CNO', 'ADMIN', 'CNO', '09264686830', 'louizkylaspona@gmail.com', 'Mangima Tankulan', 'CNO', '1758540105_CCS_Logo_2.png', 'CNO', '$2y$10$Xm/8kdPuxuROCeJfzlcU6.rrR0CizxiD3R7CCAy/lKlwIaZCGFJJq', '2025-09-21 13:06:17', 'rr16nfgqk577b4jnm0qam3lkv0', 0, 'Active'),
-(10, 'BNS', 'Brgy', 'bns', '09264686830', 'loki072002@gmail.com', 'Mangima Tankulan', 'Calongonan', '1758514208_2.png', 'BNS', '$2y$10$zO97F06lMGhmM.Cap0dhu.P4bn/7GyR4zMNMFnd3YS/zOK0WDjEoa', '2025-09-21 13:16:32', '399h10ajkl28ojtuc8u1affain', 0, 'Active'),
-(12, 'we', 'we', 'we', '21', 'goodies34512@gmail.com', 'Mangima Tankulan', 'Sambulawan', '1758540182_image_1.jpg', 'BNS', '$2y$10$XKrEFbJZtEkhhDpDq9vOsOQoQZ1H2ubMfaN2oEPSE8crsIW2OYoMW', '2025-09-21 13:18:02', '67kd4du5tuo4nknp82s0dg1trd', 0, 'Active');
+(8, 'CNO', 'ADMIN', 'CNO', '09264686830', 'louizkylaspona@gmail.com', 'Mangima Tankulan', 'CNO', '1758540105_CCS_Logo_2.png', 'CNO', '$2y$10$Xm/8kdPuxuROCeJfzlcU6.rrR0CizxiD3R7CCAy/lKlwIaZCGFJJq', '2025-09-21 13:06:17', 'ph8g5jk94suiavfbon58b31hf4', 0, 'Active'),
+(10, 'BNS', 'Brgy', 'bns', '09264686830', 'loki072002@gmail.com', 'Mangima Tankulan', 'Calongonan', '1758514208_2.png', 'BNS', '$2y$10$zO97F06lMGhmM.Cap0dhu.P4bn/7GyR4zMNMFnd3YS/zOK0WDjEoa', '2025-09-21 13:16:32', '04hk3r65n68a8bi0qb382p2fsp', 0, 'Active'),
+(12, 'we', 'we', 'we', '21', 'goodies34512@gmail.com', 'Mangima Tankulan', 'Sambulawan', '1758540182_image_1.jpg', 'BNS', '$2y$10$XKrEFbJZtEkhhDpDq9vOsOQoQZ1H2ubMfaN2oEPSE8crsIW2OYoMW', '2025-09-21 13:18:02', 'o86fu9nin7o5i9rt5hsrvf09q9', 0, 'Active');
 
 --
 -- Indexes for dumped tables
@@ -487,13 +516,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `bns_reports`
 --
 ALTER TABLE `bns_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `bns_reports_archive`
@@ -517,7 +546,7 @@ ALTER TABLE `otp_codes`
 -- AUTO_INCREMENT for table `reports`
 --
 ALTER TABLE `reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `users`

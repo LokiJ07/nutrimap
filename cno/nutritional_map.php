@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +23,76 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
   body { margin:0;}
   #map { height: 640px; }
 
+#chart-tooltip {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  max-width: 340px;            /* allows flexibility for smaller screens */
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  padding: 12px 14px;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1000;
+  font-family: "Poppins", sans-serif;
+  color: #222;
+}
+
+/* Barangay title */
+.tooltip-title {
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Subtext or indicator list */
+.tooltip-subtitle {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* Canvas chart area */
+#chart-tooltip canvas {
+  display: block;
+  width: 240px !important;     /* more centered sizing */
+  height: 190px !important;    /* balanced size for line/bar charts */
+  margin: 0 auto;              /* center canvas inside tooltip */
+}
+
+/* Smooth layout for side-by-side indicator list + chart */
+.tooltip-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Each indicator color + percent pair */
+.tooltip-indicator-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.tooltip-indicator-line span.color-box {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid #999;
+  margin-right: 5px;
+}
+
+
+
   #legend-buttons li {
     padding: 6px 10px;
     cursor: pointer;
@@ -32,6 +101,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
   }
   #legend-buttons li:last-child { border-bottom: none; }
   #legend-buttons li:hover { background: #f0f0f0; }
+.space-y-2 li.active {
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 6px;
+  font-weight: 600;
+  transform: scale(1.02);
+}
+.space-y-2 li {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
   .gradient-wrapper {
     
@@ -63,49 +142,133 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     justify-content: space-between;
     font-size: 12px;
   }
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 40px;
-      background: white;
-      box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
-    }
-    .logo {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-    .logo span {
-      color: #00B2B2;
-    }
-    .nav {
-      display: flex;
-      gap: 27px;
-      align-items: center;
-    }
-    .nav a {
-      text-decoration: none;
-      color: black;
-      font-size: 0.9rem;
-      transition: color 0.3s ease;
-    }
-    .nav a.active,
-    .nav a:hover {
-      color: #00B2B2;
-    }
-    .login-btn {
-      border: 1px solid black;
-      background:  #00B2B2;
-      padding: 5px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.3s ease;
-    }
-    .login-btn:hover {
-      background: #f2f2f2;
-    }
+  .active-gradient-cell {
+  border: 2px solid #000; /* black border */
+  box-shadow: 0 0 5px #000 inset;
+  transform: scale(1.05); /* optional: make it slightly bigger */
+  transition: all 0.2s;
+}
 
+  /* Header */
+      .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo .cno-color {
+    color: #00a0a0;
+}
+
+.logo-space {
+    margin-right: 8px;
+}
+
+.nav {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #666;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+    color: #000;
+}
+
+.home-btn {
+    background-color: #fff;
+    color: #00a0a0 !important;
+}
+
+.login-btn {
+    background-color: #00a0a0;
+    color: #fff !important;
+    border: 1px solid #00a0a0;
+    padding: 10px 25px;
+}
+
+.login-btn:hover {
+    background-color: #007f7f;
+}
+
+/* --- Dropdown Styling --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+    overflow: hidden;
+    left: 0;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
     /* Footer Styles */
     .footer {
   background-color: #1f2937; /* gray-800 */
@@ -206,8 +369,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 }
 </style>
 <body >
-<?php include 'header.php'; ?>
-<?php include 'sidebar.php';?>
+
+  <!-- HEADER -->
+  <?php include 'header.php'; ?>
+  <?php include 'sidebar.php'; ?>
+
 
     <!-- Main Content Section -->
   <main class="max-w-7xl mx-auto p-6 bg-white shadow mt-4 mb-28">
@@ -219,14 +385,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
         El Salvador Health and Nutrition Map: Share of children who are stunted
       </h1>
       <div class="flex flex-wrap gap-4 mt-4 md:mt-0">
+        <div id="chart-tooltip">
+  <canvas id="chartCanvas" width="200" height="120"></canvas>
+</div>
         <div>
           <label class="block text-sm font-medium text-gray-600">Select Year</label>
-       <select id="yearFilter" class="mt-1 block w-32 rounded border-gray-300 shadow-sm">
-            <option value="All">All</option>
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-       </select>
-
+      <select id="yearFilter" class="mt-1 block w-32 rounded border-gray-300 shadow-sm">
+        <option value="">Loading...</option>
+      </select>
         </div>
         <div>
           <!-- Full Barangay list -->
@@ -261,26 +427,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
    <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
   <h2 class="text-md font-semibold mb-3">Legend</h2>
   <ul class="space-y-2 text-sm">
-    <li data-field="ind7b1_pct" data-label="Severly Underweight" data-color="#8b0202"><span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Severly Underweight</li>
-    <li data-field="ind7b2_pct" data-label="Underweight" data-color="#ce6402"><span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Underweight</li>
-    <li data-field="ind7b3_pct" data-label="Normal" data-color="#338b09"><span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal</li>
-    <li data-field="ind7b4_pct" data-label="Severly Wasted" data-color="#05f5f5"><span class="w-4 h-4 mr-2 bg-cyan-400 inline-block"></span>Severly Wasted</li>
-    <li data-field="ind7b5_pct" data-label="Wasted" data-color="#ffef0e"><span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Wasted</li>
-    <li data-field="ind7b6_pct" data-label="Overweight" data-color="#694c0d"><span class="w-4 h-4 mr-2 bg-yellow-800 inline-block"></span>Overweight</li>
-    <li data-field="ind7b7_pct" data-label="Obese" data-color="#fc3c9c"><span class="w-4 h-4 mr-2 bg-pink-600 inline-block"></span>Obese</li>
-    <li data-field="ind7b8_pct" data-label="Severly Stunted" data-color="#a00686"><span class="w-4 h-4 mr-2 bg-purple-600 inline-block"></span>Severly Stunted</li>
-    <li data-field="ind7b9_pct" data-label="Stunted" data-color="#032c74"><span class="w-4 h-4 mr-2 bg-blue-500 inline-block"></span>Stunted</li>
+     <li data-field="all" data-label="All Indicators" data-color="#888"><span class="w-4 h-4 mr-2 bg-gray-400 inline-block"></span>All</li>
+    <li data-field="ind9b1_pct" data-label="Severly Underweight" data-color="#8b0202"><span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Severly Underweight</li>
+    <li data-field="ind9b2_pct" data-label="Underweight" data-color="#ce6402"><span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Underweight</li>
+    <li data-field="ind9b3_pct" data-label="Normal" data-color="#338b09"><span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal</li>
+    <li data-field="ind9b4_pct" data-label="Severly Wasted" data-color="#05f5f5"><span class="w-4 h-4 mr-2 bg-cyan-400 inline-block"></span>Severly Wasted</li>
+    <li data-field="ind9b5_pct" data-label="Wasted" data-color="#ffef0e"><span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Wasted</li>
+    <li data-field="ind9b6_pct" data-label="Overweight" data-color="#694c0d"><span class="w-4 h-4 mr-2 bg-yellow-800 inline-block"></span>Overweight</li>
+    <li data-field="ind9b7_pct" data-label="Obese" data-color="#fc3c9c"><span class="w-4 h-4 mr-2 bg-pink-600 inline-block"></span>Obese</li>
+    <li data-field="ind9b8_pct" data-label="Severly Stunted" data-color="#a00686"><span class="w-4 h-4 mr-2 bg-purple-600 inline-block"></span>Severly Stunted</li>
+    <li data-field="ind9b9_pct" data-label="Stunted" data-color="#032c74"><span class="w-4 h-4 mr-2 bg-blue-500 inline-block"></span>Stunted</li>
   </ul>
 </div>
 
     </div>
       <div class="gradient-wrapper" id="gradient-wrapper">
     <div class="gradient-grid" id="gradient-grid"></div>
-    <div class="gradient-labels">
-      <span>1–10</span><span>11–20</span><span>21–30</span><span>31–40</span>
-      <span>41–50</span><span>51–60</span><span>61–70</span><span>71–80</span>
-      <span>81–90</span><span>91–100</span>
-    </div>
+  
   </div>
   </main>
 
@@ -292,40 +455,39 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
             <!-- Logo and Description -->
             <div class="footer-logo">
                 <div class="logo-text">
-                    <span class="logo-primary">CNO</span>
-                    <span class="logo-secondary">NutriMap</span>
+                   <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+                    <span class="logo-primary">CNO</span><span class="logo-secondary">NutriMap</span>
                 </div>
                 <p class="footer-desc">
                     A tool to visualize health and nutrition data for children in El Salvador City.
                 </p>
             </div>
-            <!-- Links Column 1 -->
+                      <!-- Links Column 1 -->
             <div>
                 <h3 class="footer-title">About Us</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="pages/about_us/history.php">History</a></li>
+                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
+                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
+                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
                 </ul>
             </div>
             <!-- Links Column 2 -->
             <div>
                 <h3 class="footer-title">Quick Links</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/map_us/map.php">Map</a></li>
-                    <li><a href="pages/contact_us/get_in_touch.php">Contact Us</a></li>
-                    <li><a href="pages/contact_us/downloadable_form.php">Downloadable Forms</a></li>
+                    <li><a href="landing_page/map.php">Map</a></li>
+                    <li><a href="landing_page/pages/contact_us/contact.php">Contact Us</a></li>
                 </ul>
             </div>
             <!-- Legal & Support Column -->
             <div>
                 <h3 class="footer-title">Legal & Support</h3>
                 <ul class="footer-links">
-                    <li><a href="pages/legal_and_support/terms_of_use.php">Terms of Use</a></li>
-                    <li><a href="pages/legal_and_support/privacy_policy.php">Privacy Policy</a></li>
-                    <li><a href="pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="pages/help_and_support/faqs.php">FAQs</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
+                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
+                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
+                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
                 </ul>
             </div>
         </div>
@@ -335,10 +497,53 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     </div>
 </footer>
 
-    
+    <!-- Dropdown Script -->    
+    <script>
+        const aboutBtn = document.getElementById('about-dropdown-btn');
+        const aboutMenu = document.getElementById('about-dropdown-menu');
+        const aboutIcon = aboutBtn.querySelector('.fa-chevron-down');
+
+        function toggleDropdown(button, menu, icon) {
+            const isMenuVisible = menu.classList.contains('hidden');
+            if (isMenuVisible) {
+                menu.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                menu.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // Show dropdown on arrow click only
+        aboutIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleDropdown(aboutBtn, aboutMenu, aboutIcon);
+        });
+
+        // Allow About text to navigate to about.php
+        aboutBtn.addEventListener('click', function(e) {
+            if (e.target !== aboutIcon) {
+                // Let the link work normally
+            } else {
+                e.preventDefault();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!aboutBtn.contains(event.target) && !aboutMenu.contains(event.target)) {
+                aboutMenu.classList.add('hidden');
+                aboutIcon.classList.remove('rotate-180');
+            }
+        });
+ </script>
     <!-- map script -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
 <script>
+// ===================== MAP INITIAL SETUP =====================
 const map = L.map('map', {
   center: [8.4760268, 124.4809540],
   zoom: 12,
@@ -354,155 +559,477 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: 'Map data © OpenStreetMap contributors'
 }).addTo(map);
 
-let geoLayer;
-let geoData;
-let activeField = null;
-let activeColor = null;
-let activeYear  = 'All';
-
+// ===================== VARIABLES =====================
+let geoLayer, geoData;
+let activeField = null, activeColor = null, activeLabel = null;
+let activeYear = 'All';
+let miniChart = null;
+let activeGradientRange = null;
 const legendItems = Array.from(document.querySelectorAll('#legend-buttons li'));
 
-// -------- Fetch once --------
+// ===================== LOAD GEOJSON DATA =====================
 fetch('../landing_page/get_map_data.php')
   .then(r => r.json())
   .then(data => {
     geoData = data;
-    drawLayer();   // draw all polygons once
+
+    // Year dropdown
+    const years = [...new Set(geoData.features.map(f => f.properties.YEAR).filter(y => y && y !== ''))].sort((a,b)=>b-a);
+    const yearSelect = document.getElementById('yearFilter');
+    yearSelect.innerHTML='';
+    const allOpt = document.createElement('option');
+    allOpt.value='All';
+    allOpt.textContent='All Years';
+    yearSelect.appendChild(allOpt);
+    years.forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    });
+
+    activeYear = 'All';
+    yearSelect.value = 'All';
+    drawLayer(activeYear);
+
+    yearSelect.addEventListener('change', e => {
+      activeYear = e.target.value;
+      drawLayer(activeYear);
+    });
+  })
+  .catch(err => console.error('Error loading map data:', err));
+
+// ===================== DRAW LAYER =====================
+function drawLayer(selectedYear) {
+  if(!geoData) return;
+  if(!selectedYear) selectedYear = activeYear;
+  if(geoLayer) map.removeLayer(geoLayer);
+
+  let mergedFeatures = [];
+
+  if(selectedYear === 'All') {
+    // Use latest year per barangay
+    const barangayMap = new Map();
+    geoData.features.forEach(f => {
+      const b = f.properties.BARANGAY?.toUpperCase();
+      const year = parseInt(f.properties.YEAR || 0);
+      if(!barangayMap.has(b) || year > (barangayMap.get(b).properties.YEAR || 0)) {
+        barangayMap.set(b, f);
+      }
+    });
+    mergedFeatures = Array.from(barangayMap.values());
+  } else {
+    mergedFeatures = geoData.features.filter(f => f.properties.YEAR == selectedYear);
+  }
+
+  // Add missing barangays (no data)
+  const barangayWithData = new Set(mergedFeatures.map(f => f.properties.BARANGAY?.toUpperCase()));
+  const allBarangays = geoData.features.map(f => f.properties.BARANGAY?.toUpperCase());
+  [...new Set(allBarangays)].forEach(b => {
+    if(!barangayWithData.has(b)) {
+      const base = geoData.features.find(f => f.properties.BARANGAY?.toUpperCase() === b);
+      if(base){
+        const clone = JSON.parse(JSON.stringify(base));
+        clone.properties.NO_DATA = true;
+        mergedFeatures.push(clone);
+      }
+    }
   });
 
-// -------- Draw entire collection --------
-function drawLayer() {
-  if (geoLayer) map.removeLayer(geoLayer);
-
-  geoLayer = L.geoJSON(geoData, {
-    style: feature => styleFeature(feature),
-    onEachFeature: featureHandler
-  }).addTo(map);
+  const finalData = { type: "FeatureCollection", features: mergedFeatures };
+  geoLayer = L.geoJSON(finalData, { style: styleFeature, onEachFeature: featureHandler }).addTo(map);
 }
 
-// Style logic
-function styleFeature(feature) {
+// ===================== STYLING =====================
+function styleFeature(feature){
   const props = feature.properties;
-  const yearOK = activeYear === 'All' || String(props.YEAR) === activeYear;
 
-  if (activeField && activeColor) {
-    const val = yearOK ? props[activeField.toUpperCase()] : null;
-    return {
-      color:'#333', weight:2, fillOpacity:0.7,
-      fillColor: getGradientColor(activeColor, val)
-    };
+  // Transparent base but visible boundary for missing data
+  if(props.NO_DATA) {
+    return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
   }
 
-  // default combined coloring (only if the feature’s year matches)
-  if (activeYear !== 'All' && !yearOK) {
-    return { color:'#333', weight:2, fillOpacity:0.2, fillColor:'#c0c0c0ff' };
+  if(activeField && activeColor){
+    const val = props[activeField.toUpperCase()] ?? 0;
+    return { color:'#333', weight:1, fillOpacity:0.8, fillColor:getGradientColor(activeColor, val) };
   }
 
-  let r = 0, g = 0, b = 0, total = 0;
+  // Default mixed coloring for “All Indicators”
+  let r=0,g=0,b=0,total=0;
   legendItems.forEach(li => {
-    const val = props[li.dataset.field.toUpperCase()] ?? 0;
-    const rgb = hexToRgb(li.dataset.color);
-    r += rgb.r * val;
-    g += rgb.g * val;
-    b += rgb.b * val;
-    total += val;
+      if(li.dataset.field === 'all') return; 
+      const val = props[li.dataset.field.toUpperCase()] ?? 0;
+      const rgb = hexToRgb(li.dataset.color);
+      r += rgb.r*val;
+      g += rgb.g*val;
+      b += rgb.b*val;
+      total += val;
   });
-  if(total === 0) return { color:'#333', weight:2, fillOpacity:0.2, fillColor:'#ccc' };
-  return {
-    color:'#333', weight:2, fillOpacity:0.2,
-    fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})`
-  };
+  if(total===0) return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
+  return { color:'#333', weight:1, fillOpacity:0.8, fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})` };
 }
 
-function hexToRgb(hex){
-  const c = parseInt(hex.slice(1),16);
-  return { r:(c>>16)&255, g:(c>>8)&255, b:c&255 };
-}
-
-// Tooltip shows only if year matches (or All)
+// ===================== TOOLTIP + CHART =====================
 function featureHandler(feature, layer) {
-  const name = feature.properties.BARANGAY || "Unknown";
+  const tooltip = document.getElementById('chart-tooltip');
+
   layer.on({
     mouseover(e) {
-      const props = feature.properties;
-      const yearOK = activeYear === 'All' || String(props.YEAR) === activeYear;
-      let html = `<b>${name}</b><br>`;
+      tooltip.style.display = 'block';
+      tooltip.style.opacity = 1;
+      tooltip.innerHTML = '';
 
-      if (!yearOK) {
-        html += 'No data for selected year';
-      } else if (!activeField) {
-        legendItems.forEach(li => {
-          const val = props[li.dataset.field.toUpperCase()] ?? '0';
-          html += `${li.dataset.label}: ${val}%<br>`;
+      const barangayName = feature.properties.BARANGAY || 'Unknown';
+      let labels = [], datasets = [];
+      const indicators = legendItems.filter(li => li.dataset.field !== 'all');
+
+      // HEADER
+      const title = document.createElement('div');
+      title.className = 'tooltip-title';
+      title.textContent = barangayName;
+      tooltip.appendChild(title);
+
+      // SINGLE INDICATOR
+      if (activeField) {
+        const legendLabel = activeLabel || activeField;
+        let value = 0;
+
+        if (activeYear === 'All') {
+          // All years for this barangay
+          const allYears = [...new Set(
+            geoData.features
+              .filter(f => f.properties.BARANGAY === barangayName)
+              .map(f => f.properties.YEAR)
+          )].sort((a,b) => a - b);
+
+          labels = allYears;
+
+          const values = allYears.map(y => {
+            const f = geoData.features.find(ff =>
+              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
+            );
+            return f ? Number(f.properties[activeField.toUpperCase()] ?? null) : null;
+          });
+
+          value = values.filter(v => v !== null).pop() ?? 0;
+
+          datasets.push({
+            label: legendLabel,
+            data: values,
+            borderColor: activeColor,
+            backgroundColor: activeColor,
+            tension: 0.3,
+            borderWidth: 2,
+            fill: false,
+            spanGaps: true,
+            pointRadius: 3
+          });
+
+        } else {
+          // SPECIFIC YEAR: show only that year
+          labels = [activeYear];
+          const f = geoData.features.find(ff =>
+            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
+          );
+          value = f ? Number(f.properties[activeField.toUpperCase()] ?? 0) : 0;
+
+          datasets.push({
+            label: legendLabel,
+            data: [value],
+            borderColor: activeColor,
+            backgroundColor: activeColor,
+            borderWidth: 1
+          });
+        }
+
+        // Tooltip color + percentage
+        const legendDiv = document.createElement('div');
+        legendDiv.className = 'tooltip-indicator-line';
+        legendDiv.innerHTML = `
+          <span class="color-box" style="background:${activeColor};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
+          <strong>${value}%</strong>
+        `;
+        tooltip.appendChild(legendDiv);
+
+        // Chart canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 200;
+        tooltip.appendChild(canvas);
+
+        if (miniChart) miniChart.destroy();
+        miniChart = new Chart(canvas, {
+          type: activeYear === 'All' ? 'line' : 'bar',
+          data: { labels, datasets },
+          options: {
+            responsive: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: false },
+              datalabels: { display: false }
+            },
+            scales: {
+              x: { display: activeYear === 'All' },
+              y: { display: false, min: 0, max: 100 }
+            }
+          },
+          plugins: [ChartDataLabels]
         });
-      } else {
-        const li = document.querySelector(`#legend-buttons li[data-field="${activeField}"]`);
-        const label = li ? li.dataset.label : activeField;
-        const val = props[activeField.toUpperCase()] ?? 'No Data';
-        html += `${label}: ${val}%`;
+
+        return;
       }
-      e.target.bindTooltip(html, { direction: 'center' }).openTooltip();
+
+      // ALL INDICATORS
+      const flexWrapper = document.createElement('div');
+      flexWrapper.className = 'tooltip-flex';
+      flexWrapper.style.display = 'flex';
+      flexWrapper.style.gap = '10px';
+      tooltip.appendChild(flexWrapper);
+
+      const indicatorsDiv = document.createElement('div');
+      indicatorsDiv.style.flex = '1';
+      indicatorsDiv.style.fontSize = '13px';
+      flexWrapper.appendChild(indicatorsDiv);
+
+      const chartWrapper = document.createElement('div');
+      chartWrapper.style.flex = '1';
+      flexWrapper.appendChild(chartWrapper);
+
+      if (activeYear === 'All') {
+        const allYears = [...new Set(
+          geoData.features
+            .filter(f => f.properties.BARANGAY === barangayName)
+            .map(f => f.properties.YEAR)
+        )].sort((a,b) => a - b);
+
+        labels = allYears;
+
+        indicators.forEach(li => {
+          const field = li.dataset.field.toUpperCase();
+          const color = li.dataset.color;
+
+          const values = allYears.map(y => {
+            const f = geoData.features.find(ff =>
+              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
+            );
+            return f ? Number(f.properties[field] ?? null) : null;
+          });
+
+          const latestVal = values.filter(v => v !== null).pop() ?? 0;
+
+          datasets.push({
+            label: li.dataset.label,
+            data: values,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.3,
+            borderWidth: 2,
+            fill: false,
+            spanGaps: true,
+            pointRadius: 3
+          });
+
+          const line = document.createElement('div');
+          line.className = 'tooltip-indicator-line';
+          line.style.display = 'flex';
+          line.style.alignItems = 'center';
+          line.style.marginBottom = '6px';
+          line.innerHTML = `
+            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
+            <span>${latestVal}%</span>
+          `;
+          indicatorsDiv.appendChild(line);
+        });
+
+      } else {
+        // SPECIFIC YEAR: only show values for that year
+        labels = indicators.map(li => li.dataset.label);
+        const values = indicators.map(li => {
+          const f = geoData.features.find(ff =>
+            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
+          );
+          return f ? Number(f.properties[li.dataset.field.toUpperCase()] ?? 0) : 0;
+        });
+        const colors = indicators.map(li => li.dataset.color);
+
+        datasets.push({
+          label: 'Percentage',
+          data: values,
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 1
+        });
+
+        indicators.forEach((li, i) => {
+          const val = values[i];
+          const color = li.dataset.color;
+          const line = document.createElement('div');
+          line.className = 'tooltip-indicator-line';
+          line.style.display = 'flex';
+          line.style.alignItems = 'center';
+          line.style.marginBottom = '6px';
+          line.innerHTML = `
+            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
+            <span>${val}%</span>
+          `;
+          indicatorsDiv.appendChild(line);
+        });
+      }
+
+      // Chart canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 260;
+      canvas.height = 200;
+      chartWrapper.appendChild(canvas);
+
+      if (miniChart) miniChart.destroy();
+      miniChart = new Chart(canvas, {
+        type: activeYear === 'All' ? 'line' : 'bar',
+        data: { labels, datasets },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+            datalabels: { display: false }
+          },
+          scales: {
+            x: { display: activeYear === 'All' },
+            y: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
     },
-    mouseout(e){ e.target.closeTooltip(); }
+
+    mouseout(e) {
+      tooltip.style.opacity = 0;
+      tooltip.style.display = 'none';
+      tooltip.innerHTML = '';
+      if (miniChart) miniChart.destroy();
+    }
   });
 }
 
-// -------- Legend click --------
-legendItems.forEach(li => {
-  li.addEventListener('click', () => {
-    activeField = li.dataset.field;
-    activeColor = li.dataset.color;
-    geoLayer.setStyle(styleFeature);
-    updateGradientScale(activeColor);
+// ===================== LEGEND CLICK =====================
+legendItems.forEach(item => {
+  item.addEventListener('click', () => {
+    legendItems.forEach(li => li.classList.remove('active'));
+    item.classList.add('active');
+
+    const field = item.dataset.field;
+    activeField = field === 'all' ? null : field;
+    activeLabel = item.dataset.label;
+    activeColor = field === 'all' ? '#888' : item.dataset.color;
+
+    if (geoLayer) geoLayer.setStyle(styleFeature);
+    if (activeColor && field !== 'all') updateGradientScale(activeColor);
+    else document.getElementById('gradient-grid').innerHTML = '';
   });
 });
 
-// -------- Filters --------
-document.getElementById('barangayFilter').addEventListener('change', function () {
+// ===================== BARANGAY FILTER =====================
+document.getElementById('barangayFilter').addEventListener('change', function(){
   const selected = this.value.toLowerCase();
   geoLayer.eachLayer(layer => {
     const name = layer.feature.properties.BARANGAY?.toLowerCase();
     layer.setStyle({
       ...styleFeature(layer.feature),
-      opacity: (selected === 'all' || selected === name) ? 1 : 0.3,
-      fillOpacity: (selected === 'all' || selected === name) ? 0.7 : 0.1
+      opacity: (selected==='all'||selected===name)?1:0.3,
+      fillOpacity: (selected==='all'||selected===name)?0.7:0.1
     });
   });
 });
 
-document.getElementById('yearFilter').addEventListener('change', function () {
-  activeYear = this.value;
-  geoLayer.setStyle(styleFeature);  // just restyle, no filtering
-});
-
-// -------- Helpers --------
-function lighten(hex, amount){
-  const num = parseInt(hex.slice(1),16);
-  let r=(num>>16)&0xff, g=(num>>8)&0xff, b=num&0xff;
-  r=Math.round(r+(255-r)*amount);
-  g=Math.round(g+(255-g)*amount);
-  b=Math.round(b+(255-b)*amount);
-  return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
-}
-
+// ===================== HELPERS =====================
+function hexToRgb(hex){ const c=parseInt(hex.slice(1),16); return {r:(c>>16)&255,g:(c>>8)&255,b:c&255}; }
 function getGradientColor(baseColor, value){
-  if(value==null) return '#ccc';
-  const ratio = Math.min(1,value/100);
-  return lighten(baseColor,0.8*(1-ratio));
+  if(value==null) return '#999';
+  const ratio = Math.min(1, value/100);
+  const rgb = hexToRgb(baseColor);
+  const start = {r:190, g:190, b:180};
+  const r = Math.round(start.r + (rgb.r - start.r) * ratio);
+  const g = Math.round(start.g + (rgb.g - start.g) * ratio);
+  const b = Math.round(start.b + (rgb.b - start.b) * ratio);
+  return `rgb(${r},${g},${b})`;
 }
 
+// ===================== GRADIENT SCALE =====================
 function updateGradientScale(baseColor){
   const grid = document.getElementById('gradient-grid');
+  if(!grid) return; 
   grid.innerHTML='';
+
+  // store the currently clicked gradient cell index
+  let activeCellIndex = null;
+
   for(let i=0;i<10;i++){
-    const val=(i+1)*11;
+    const minVal = i*10;      
+    const maxVal = (i+1)*10;  
+    const val=(i+1)*10;
     const cell=document.createElement('div');
     cell.className='gradient-cell';
-    cell.style.background=getGradientColor(baseColor,val);
+    cell.style.background = getGradientColor(baseColor,val);
+    cell.title = `${minVal}% - ${maxVal}%`; 
+
+    cell.addEventListener('mouseover', () => {
+      cell.classList.add('active-gradient-cell');
+      activeGradientRange = {min:minVal, max:maxVal};
+      filterMapByGradient();
+    });
+
+    cell.addEventListener('mouseout', () => {
+  cell.classList.remove('active-gradient-cell');
+  activeGradientRange = null;
+
+  // restore all layers to normal style
+  if (geoLayer) {
+    geoLayer.eachLayer(layer => {
+      layer.setStyle(styleFeature(layer.feature));
+    });
+  }
+});
+
+
+    cell.addEventListener('click', () => {
+      // remove previous active
+      if(activeCellIndex !== null && grid.children[activeCellIndex]){
+        grid.children[activeCellIndex].classList.remove('active-gradient-cell');
+      }
+      activeCellIndex = i;
+      cell.classList.add('active-gradient-cell');
+      activeGradientRange = {min:minVal, max:maxVal};
+      filterMapByGradient();
+    });
+
     grid.appendChild(cell);
   }
+
+  // Add "No Data" transparent cell
+  const noDataCell = document.createElement('div');
+  noDataCell.className='gradient-cell';
+  noDataCell.style.background = 'transparent';
+  noDataCell.style.border = '1px dashed #333';
+  noDataCell.title = 'No Data';
+  grid.appendChild(noDataCell);
+}
+
+// ===================== FILTER BY GRADIENT =====================
+function filterMapByGradient(){
+  if(!geoLayer) return;
+  geoLayer.eachLayer(layer => {
+    if(!activeField) return layer.setStyle(styleFeature(layer.feature));
+    const val = Number(layer.feature.properties[activeField.toUpperCase()] ?? 0);
+    const inRange = activeGradientRange && val >= activeGradientRange.min && val <= activeGradientRange.max;
+    layer.setStyle({
+      ...styleFeature(layer.feature),
+      fillOpacity: inRange ? 0.8 : 0.1,
+      opacity: inRange ? 1 : 0.3
+    });
+  });
 }
 </script>
+
 
 </body>
 </html>

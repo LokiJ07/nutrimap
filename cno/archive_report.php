@@ -2,171 +2,256 @@
 session_start();
 require '../db/config.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
-    header("Location: ../login.php");
+// ✅ Require login
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$msg = "";
+$userId   = $_SESSION['user_id'];
+$userType = $_SESSION['user_type']; // 'CNO'
 
-// Handle form actions
+// ✅ Activity log function
+function logActivity($pdo, $user_id, $action) {
+    $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, ?)");
+    $stmt->execute([$user_id, $action]);
+}
+
+// ✅ Handle Bulk Actions BEFORE fetching reports
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $archivedId = (int)($_POST['id'] ?? 0);
 
-    try {
-        if ($action === 'restore' && $archivedId) {
-            $pdo->beginTransaction();
-            $pdo->prepare("
-                INSERT INTO reports (id, user_id, report_time, report_date, status)
-                SELECT report_id, :user_id, report_time, report_date, status
-                FROM bns_reports_archive
-                WHERE archived_id = :aid
-            ")->execute([':user_id' => $_SESSION['user_id'], ':aid' => $archivedId]);
-            $pdo->prepare("INSERT INTO bns_reports SELECT * FROM bns_reports_archive WHERE archived_id = :aid")
-                ->execute([':aid' => $archivedId]);
-            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")->execute([':aid' => $archivedId]);
-            $pdo->commit();
-            $msg = "✅ Report restored successfully.";
-        } elseif ($action === 'delete' && $archivedId) {
-            $pdo->prepare("DELETE FROM bns_reports_archive WHERE archived_id = :aid")->execute([':aid' => $archivedId]);
-            $msg = "🗑️ Report deleted permanently.";
-        } elseif ($action === 'delete_all') {
-            $pdo->exec("DELETE FROM bns_reports_archive");
-            $msg = "🗑️ All archived reports deleted permanently.";
+    // ✅ RESTORE ALL BUTTON — updated logic
+    if (isset($_POST['restore_all'])) {
+        // 🔹 Check if archived (not deleted) reports exist
+        $check = $pdo->prepare("
+            SELECT COUNT(*) FROM report_archives 
+            WHERE user_id = ? AND user_type = ? AND is_archived = 1 AND is_deleted = 0
+        ");
+        $check->execute([$userId, $userType]);
+        $hasArchives = $check->fetchColumn();
+
+        if ($hasArchives > 0) {
+            // 🔹 Restore all archived reports (not deleted)
+            $stmt = $pdo->prepare("
+                UPDATE report_archives 
+                SET is_archived = 0, archived_at = NULL
+                WHERE user_id = ? AND user_type = ? 
+                  AND is_archived = 1 AND is_deleted = 0
+            ");
+            $stmt->execute([$userId, $userType]);
+
+            // 🔹 Optionally restore the report statuses
+            $updateReports = $pdo->prepare("
+                UPDATE reports 
+                SET status = COALESCE(prev_status, 'Approved')
+                WHERE id IN (
+                    SELECT report_id FROM report_archives 
+                    WHERE user_id = ? AND user_type = ? AND is_deleted = 0
+                )
+            ");
+            $updateReports->execute([$userId, $userType]);
+
+            logActivity($pdo, $userId, "Restored all archived reports as $userType");
+            header("Location: ".$_SERVER['PHP_SELF']."?msg=All archived reports restored successfully!");
+            exit();
+        } else {
+            // 🔹 No archived reports found
+            header("Location: ".$_SERVER['PHP_SELF']."?msg=No archive report found.");
+            exit();
         }
-    } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        $msg = "❌ Error: " . $e->getMessage();
+    }
+
+    // ✅ DELETE ALL BUTTON — unchanged
+    if (isset($_POST['delete_all'])) {
+        // 🔹 Delete all archived reports for this user only
+        $stmt = $pdo->prepare("
+            UPDATE report_archives
+            SET is_deleted = 1, is_archived = 0, deleted_at = NOW()
+            WHERE user_id = ? AND user_type = ? AND is_archived = 1
+        ");
+        $stmt->execute([$userId, $userType]);
+
+        // 🔹 Check all reports if both users deleted
+        $fetch = $pdo->prepare("
+            SELECT DISTINCT report_id FROM report_archives 
+            WHERE user_id = ? AND user_type = ?
+        ");
+        $fetch->execute([$userId, $userType]);
+        $reportIds = $fetch->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($reportIds as $rid) {
+            $chk = $pdo->prepare("
+                SELECT 
+                    SUM(CASE WHEN user_type='BNS' AND is_deleted=1 THEN 1 ELSE 0 END) AS bns_deleted,
+                    SUM(CASE WHEN user_type='CNO' AND is_deleted=1 THEN 1 ELSE 0 END) AS cno_deleted
+                FROM report_archives WHERE report_id = :rid
+            ");
+            $chk->execute([':rid' => $rid]);
+            $both = $chk->fetch(PDO::FETCH_ASSOC);
+
+            // ✅ Permanently delete if both deleted
+            if ($both['bns_deleted'] > 0 && $both['cno_deleted'] > 0) {
+                $pdo->prepare("DELETE FROM bns_reports WHERE report_id = :rid")->execute([':rid' => $rid]);
+                $pdo->prepare("DELETE FROM reports WHERE id = :rid")->execute([':rid' => $rid]);
+                $pdo->prepare("DELETE FROM report_archives WHERE report_id = :rid")->execute([':rid' => $rid]);
+                logActivity($pdo, $userId, "Permanently deleted report (ID: $rid) after both users deleted");
+            }
+        }
+
+        logActivity($pdo, $userId, "Deleted all archived reports as $userType");
+        header("Location: ".$_SERVER['PHP_SELF']."?msg=All archived reports deleted");
+        exit();
     }
 }
 
-// Fetch all archived reports
-$archives = $pdo->query("
-    SELECT archived_id, report_id, title, barangay, year, archived_at
-    FROM bns_reports_archive
-")->fetchAll(PDO::FETCH_ASSOC);
-
+// ✅ Fetch archived reports for this user only
+$stmt = $pdo->prepare("
+    SELECT r.id, r.report_date, r.report_time, r.prev_status,
+           u.username, b.title, b.barangay, b.year, a.archived_at
+    FROM reports r
+    JOIN users u ON r.user_id = u.id
+    LEFT JOIN bns_reports b ON b.report_id = r.id
+    INNER JOIN report_archives a 
+      ON a.report_id = r.id 
+      AND a.user_id = :uid 
+      AND a.user_type = :utype
+      AND a.is_archived = 1
+      AND a.is_deleted = 0
+    ORDER BY a.archived_at DESC
+");
+$stmt->execute(['uid' => $userId, 'utype' => $userType]);
+$reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Archived BNS Reports</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;}
-.container{max-width:1200px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;}
-table{width:100%;border-collapse:collapse;margin-top:20px;}
-th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;cursor:default;}
-button{padding:6px 10px;margin:0 3px;border:none;border-radius:4px;cursor:pointer;}
-.btn-restore{background:#27ae60;color:#fff;}
-.btn-delete{background:#e74c3c;color:#fff;}
-.btn-delete-all{background:#c0392b;color:#fff;margin-bottom:10px;}
-.message{padding:10px;margin-bottom:10px;border-radius:4px;background:#e8f4e8;color:#2c662d;}
-input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:4px;width:250px;margin-bottom:10px;}
-form.inline{display:inline;}
-.sort-select{padding:6px;border:1px solid #ccc;border-radius:4px;margin-left:10px;}
-</style>
+  <meta charset="utf-8">
+  <title>CNO NutriMap — Archive</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f5f5f5; }
+    .layout { display:flex; height:100vh; flex-direction:column; }
+    .body-layout { flex:1; display:flex; }
+    .content { flex:1; padding:15px; display:flex; flex-direction:column; }
+
+    .card { background:#fff; border:1px solid #ccc; border-radius:8px; padding:15px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .toolbar-left input { padding:8px 10px; border:1px solid #ccc; border-radius:6px; width:240px; }
+    .toolbar-right select, .toolbar-right button { padding:8px; border:1px solid #ccc; border-radius:6px; margin-left:5px; cursor:pointer; }
+
+    .archive-list { display:flex; flex-direction:column; gap:8px; }
+    .archive-item {
+      background:#fff; border:1px solid #ccc; border-radius:6px; padding:12px;
+      display:flex; justify-content:space-between; align-items:center;
+      position:relative; box-shadow:0 1px 3px rgba(0,0,0,0.08);
+    }
+    .archive-item:hover { background:#f0f8ff; cursor:pointer; }
+    .archive-title { font-size:15px; font-weight:600; color:#333; }
+    .archive-meta { font-size:13px; color:#555; margin-top:3px; }
+
+    .menu-container { position:relative; }
+    .menu-btn { background:none; border:none; cursor:pointer; font-size:18px; color:#555; }
+    .menu-content {
+      display:none; position:absolute; right:0; top:25px; background:#fff; border:1px solid #ccc;
+      border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.15); z-index:10; min-width:160px;
+    }
+    .menu-content a { display:block; padding:8px 12px; font-size:14px; color:#333; text-decoration:none; }
+    .menu-content a:hover { background:#f5f5f5; }
+    .menu-container.active .menu-content { display:block; }
+
+    .status { padding:3px 8px; border-radius:10px; font-size:12px; color:#fff; }
+    .status.Pending { background:#ffc107; color:#000; }
+    .status.Approved { background:#28a745; }
+    .status.Rejected { background:#dc3545; }
+    .status.Archived { background:#6c757d; }
+
+    .msg-box {
+      background:#d4edda;
+      color:#155724;
+      padding:10px 15px;
+      border-radius:6px;
+      border:1px solid #c3e6cb;
+      margin-bottom:15px;
+      font-size:14px;
+    }
+  </style>
 </head>
 <body>
+<div class="layout">
 <?php include 'header.php'; ?>
-<?php include 'sidemenu.php'; ?>
-<div class="container">
-    <h1>Archived BNS Reports</h1>
+<div class="body-layout">
+  <div class="content">
 
-    <?php if($msg): ?>
-        <div class="message"><?=htmlspecialchars($msg)?></div>
+    <?php if (isset($_GET['msg'])): ?>
+      <div class="msg-box"><?= htmlspecialchars($_GET['msg']) ?></div>
     <?php endif; ?>
 
-    <!-- ✅ Live Search + Live Sort -->
-    <div style="margin-bottom:10px;">
-        <input type="text" id="searchInput" placeholder="Search archived reports by title or barangay">
-        Sort by:
-        <select id="sortSelect" class="sort-select">
-            <option value="desc">Newest first</option>
-            <option value="asc">Oldest first</option>
-        </select>
+    <div class="card">
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h3 style="margin:0;">Archive</h3>
+        <div class="toolbar-left" style="position:relative; margin-left:15px;">
+          <i class="fa fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#888;"></i>
+          <input type="text" id="search" placeholder="Search reports..." style="padding-left:30px;">
+        </div>
+        <div class="toolbar-right" style="margin-left:auto;">
+          <label for="sort">Sort By:</label>
+          <select id="sort">
+            <option value="title">A → Z</option>
+            <option value="date">Newest → Oldest</option>
+          </select>
+
+          <form action="" method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+            <button type="submit" name="restore_all"><i class="fa fa-undo"></i> Restore All</button>
+            <button type="submit" name="delete_all"><i class="fa fa-trash"></i> Delete All</button>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <!-- Delete All -->
-    <form method="post" onsubmit="return confirm('Delete all archived reports permanently?');">
-        <input type="hidden" name="action" value="delete_all">
-        <button type="submit" class="btn-delete-all">Delete All</button>
-    </form>
-
-    <table id="archivesTable">
-        <thead>
-            <tr>
-                <th>Archive ID</th>
-                <th>Report ID</th>
-                <th>Title</th>
-                <th>Barangay</th>
-                <th>Year</th>
-                <th>Archived At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if($archives): foreach($archives as $a): ?>
-            <tr>
-                <td><?=htmlspecialchars($a['archived_id'])?></td>
-                <td><?=htmlspecialchars($a['report_id'])?></td>
-                <td><?=htmlspecialchars($a['title'])?></td>
-                <td><?=htmlspecialchars($a['barangay'])?></td>
-                <td><?=htmlspecialchars($a['year'])?></td>
-                <td><?=htmlspecialchars($a['archived_at'])?></td>
-                <td>
-                    <form method="post" class="inline">
-                        <input type="hidden" name="id" value="<?= (int)$a['archived_id'] ?>">
-                        <input type="hidden" name="action" value="restore">
-                        <button class="btn-restore">Restore</button>
-                    </form>
-                    <form method="post" class="inline" onsubmit="return confirm('Delete permanently?');">
-                        <input type="hidden" name="id" value="<?= (int)$a['archived_id'] ?>">
-                        <input type="hidden" name="action" value="delete">
-                        <button class="btn-delete">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; else: ?>
-            <tr><td colspan="7" style="text-align:center;color:#888;">No archived reports found</td></tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+    <div class="archive-list" id="archiveList">
+      <?php if ($reports): ?>
+        <?php foreach ($reports as $r): ?>
+          <div class="archive-item">
+            <div>
+              <div class="archive-title"><?= htmlspecialchars($r['title'] ?? 'Untitled Report') ?></div>
+              <div class="archive-meta">
+                User: <?= htmlspecialchars($r['username']) ?> | 
+                Barangay: <?= htmlspecialchars($r['barangay'] ?? '-') ?> | 
+                Year: <?= htmlspecialchars($r['year'] ?? '-') ?> | 
+                <?= $r['report_date'] ? date("m-d-Y", strtotime($r['report_date'])) : '' ?> 
+                <?= $r['report_time'] ? date("h:i a", strtotime($r['report_time'])) : '' ?>
+              </div>
+            </div>
+            <div class="menu-container" onclick="event.stopPropagation();">
+              <button class="menu-btn"><i class="fa fa-ellipsis-v"></i></button>
+              <div class="menu-content">
+                <a href="view_barangay.php?id=<?= $r['id'] ?>" target="_blank"><i class="fa fa-eye"></i> View</a>
+                <a href="archive/restore_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Restore this report?')"><i class="fa fa-undo"></i> Restore</a>
+                <a href="archive/delete_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Delete this report?')"><i class="fa fa-trash"></i> Delete Permanently</a>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p style="color:#555;">No archived reports found.</p>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
-// ✅ Live search
-const searchInput = document.getElementById('searchInput');
-const sortSelect = document.getElementById('sortSelect');
-const tableBody = document.querySelector('#archivesTable tbody');
-
-function filterAndSort() {
-    const filter = searchInput.value.toLowerCase();
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-
-    // Filter
-    let filteredRows = rows.filter(row => row.textContent.toLowerCase().includes(filter));
-
-    // Sort by Archived At column
-    const asc = sortSelect.value === 'asc';
-    filteredRows.sort((a, b) => {
-        const dateA = new Date(a.cells[5].textContent);
-        const dateB = new Date(b.cells[5].textContent);
-        return asc ? dateA - dateB : dateB - dateA;
-    });
-
-    // Re-render table
-    tableBody.innerHTML = '';
-    filteredRows.forEach(row => tableBody.appendChild(row));
-}
-
-searchInput.addEventListener('input', filterAndSort);
-sortSelect.addEventListener('change', filterAndSort);
+document.querySelectorAll('.menu-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.parentElement.classList.toggle('active');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.menu-container').forEach(c => c.classList.remove('active'));
+});
 </script>
-
 </body>
 </html>

@@ -9,36 +9,39 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 }
 
 // Fetch Pending Reports
+// Fetch Pending Reports (only submitted)
 $pendingStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Pending'
+    WHERE r.status='Pending' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $pendingStmt->execute();
 $pendingReports = $pendingStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Approved Reports
+// Fetch Approved Reports (only submitted)
 $approvedStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Approved'
+    WHERE r.status='Approved' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $approvedStmt->execute();
 $approvedReports = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Rejected Reports
+// Fetch Rejected Reports (only submitted)
 $rejectedStmt = $pdo->prepare("
     SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
     FROM reports r
     JOIN bns_reports b ON b.report_id = r.id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status='Rejected'
+    WHERE r.status='Rejected' AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
 ");
 $rejectedStmt->execute();
@@ -250,21 +253,38 @@ document.getElementById('pending-reports-table-body').addEventListener('click', 
         body:`report_id=${reportId}&action=${action}`
     })
     .then(r=>r.json())
-    .then(data=>{
-        if(data.status==='approved'){
-            row.querySelector('.status').textContent='Approved';
-            row.querySelector('td:last-child').remove();
-            document.getElementById('approved-reports-table-body').appendChild(row);
-            showMessage('Report approved',true);
-        } else if(data.status==='rejected'){
-            row.querySelector('.status').textContent='Rejected';
-            row.querySelector('td:last-child').remove();
-            document.getElementById('rejected-reports-table-body').appendChild(row);
-            showMessage('Report rejected',false);
-        } else if(data.error){
-            showMessage(data.error,false);
-        }
-    }).catch(err=>console.error(err));
+.then(data => {
+    console.log('Server Response:', data); // Debug line — optional
+    if (data.error) {
+        showMessage(data.error, false);
+        return;
+    }
+
+    // Normalize status (Approved/Rejected)
+    const status = (data.status || '').toLowerCase();
+
+    if (status === 'approved') {
+        row.querySelector('.status').textContent = 'Approved';
+        row.querySelector('td:last-child').remove();
+        document.getElementById('approved-reports-table-body').appendChild(row);
+        showMessage('Report approved', true);
+    } 
+    else if (status === 'rejected') {
+        row.querySelector('.status').textContent = 'Rejected';
+        row.querySelector('td:last-child').remove();
+        document.getElementById('rejected-reports-table-body').appendChild(row);
+        showMessage('Report rejected', false);
+    } 
+    else {
+        console.error('Unexpected response:', data);
+        showMessage('Unexpected server response', false);
+    }
+})
+.catch(err => {
+    console.error('Fetch error:', err);
+    showMessage('Network error', false);
+});
+
 });
 
 // Filters & Sorting

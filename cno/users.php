@@ -1,7 +1,14 @@
 <?php
+session_start();
 require "../db/config.php";
 
-// Handle Activate/Deactivate actions
+// ✅ Allow only CNO users
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+    header("Location: ../login.php");
+    exit();
+}
+
+// ✅ Handle Activate/Deactivate actions
 if (isset($_GET['action'], $_GET['id'])) {
     $id = intval($_GET['id']);
     $action = $_GET['action'] === 'deactivate' ? 'Inactive' : 'Active';
@@ -12,6 +19,7 @@ if (isset($_GET['action'], $_GET['id'])) {
     header("Location: users.php");
     exit();
 }
+
 
 // Fetch Active Users
 $stmt = $pdo->prepare("

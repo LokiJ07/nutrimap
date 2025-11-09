@@ -7,109 +7,166 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     exit();
 }
 
+$selectedYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+
 /* Helper for clean display */
-function val($a,$k,$fmt='int'){
-    if(!isset($a[$k])||$a[$k]==='') return '—';
-    if($fmt==='int')  return (int)$a[$k];
-    if($fmt==='pct')  return number_format((float)$a[$k],2).'%';
-    if($fmt==='dec2') return number_format((float)$a[$k],2);
+function val($a, $k, $fmt='int') {
+    if(!isset($a[$k]) || $a[$k] === '') return '—';
+    if($fmt === 'int')  return (int)$a[$k];
+    if($fmt === 'pct')  return number_format((float)$a[$k],2).'%';
+    if($fmt === 'dec2') return number_format((float)$a[$k],2);
     return htmlspecialchars($a[$k]);
 }
 
 /* Build SUM query (latest approved report per barangay) */
 $base = [
- 'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a','ind8','ind9',
- 'ind10','ind11','ind12','ind13','ind14','ind16','ind17','ind18','ind19',
- 'ind21','ind22','ind23','ind24','ind25','ind31','ind32','ind33','ind34','ind36'
+ 'ind1','ind_male','ind_female','ind2','ind3','ind4','ind5','ind6a','ind6b',
+ 'ind7','ind8','ind9','ind9a','ind10','ind11','ind12','ind13','ind14','ind15',
+ 'ind16','ind17a_public','ind17a_private','ind17b_public','ind17b_private',
+ 'ind18','ind19','ind20','ind21','ind23','ind24','ind25','ind26',
+ 'ind32_no','ind32_pct','ind33_no','ind33_pct','ind34_no','ind34_pct',
+ 'ind35_no','ind35_pct','ind36_no','ind36_pct','ind37a','ind37b','ind38'
 ];
+
 $groups = [
- '7b' => ['ind7b1','ind7b2','ind7b3','ind7b4','ind7b5','ind7b6','ind7b7','ind7b8','ind7b9'],
- '20'=>['ind20a','ind20b','ind20c','ind20d','ind20e'],
- '26'=>['ind26a','ind26b','ind26c','ind26d'],
- '27'=>['ind27a','ind27b','ind27c','ind27d'],
- '28'=>['ind28a','ind28b','ind28c','ind28d','ind28e'],
- '29'=>['ind29a','ind29b','ind29c','ind29d','ind29e'],
- '30'=>['ind30a','ind30b','ind30c','ind30d','ind30e']
+ '9b' => ['ind9b1','ind9b2','ind9b3','ind9b4','ind9b5','ind9b6','ind9b7','ind9b8','ind9b9'],
+ '22'=>['ind22a','ind22b','ind22c','ind22d','ind22e','ind22f','ind22g'],
+ '27'=>['ind27a','ind27b','ind27c','ind27d','ind27e'],
+ '28'=>['ind28a','ind28b','ind28c','ind28d'],
+ '29'=>['ind29a','ind29b','ind29c','ind29d','ind29e','ind29f','ind29g'],
+ '30'=>['ind30a','ind30b','ind30c','ind30d'],
+ '31'=>['ind31a','ind31b','ind31c','ind31d','ind31e','ind31f'],
 ];
-$sel=[];
-foreach($base as $f) $sel[]="SUM(bns.$f) AS $f";
+
+$sel = [];
+foreach($base as $f) $sel[] = "SUM(bns.$f) AS $f";
 foreach($groups as $arr){
     foreach($arr as $f){
-        $sel[]="SUM(bns.{$f}_no)  AS {$f}_no";
-        $sel[]="SUM(bns.{$f}_pct) AS {$f}_pct";
+        $sel[] = "SUM(bns.{$f}_no) AS {$f}_no";
+        $sel[] = "SUM(bns.{$f}_pct) AS {$f}_pct";
     }
 }
-$sel[]="SUM(bns.ind15a_public)  AS ind15a_public";
-$sel[]="SUM(bns.ind15a_private) AS ind15a_private";
-$sel[]="SUM(bns.ind15b_public)  AS ind15b_public";
-$sel[]="SUM(bns.ind15b_private) AS ind15b_private";
-$sel[]="SUM(bns.ind35a) AS ind35a";
-$sel[]="SUM(bns.ind35b) AS ind35b";
 
-$sql="
+/* Barangay filter */
+$barangayFilter = '';
+$params = [];
+if (!empty($_GET['barangays'])) {
+    $barangays = $_GET['barangays'];
+    $placeholders = implode(',', array_fill(0, count($barangays), '?'));
+    $barangayFilter = "AND bns.barangay IN ($placeholders)";
+    $params = $barangays;
+}
+
+$sql = "
 SELECT ".implode(',', $sel)."
 FROM bns_reports bns
 JOIN reports r ON bns.report_id = r.id
-WHERE r.status='approved'
+WHERE r.status = 'approved'
+$barangayFilter
 AND bns.id IN (
     SELECT MAX(br2.id)
     FROM bns_reports br2
-    JOIN reports r2 ON r2.id = br2.report_id
-    WHERE r2.status='approved'
+    JOIN reports r2 ON br2.report_id = r2.id
+    WHERE r2.status = 'approved'
     GROUP BY br2.barangay
 )";
-$totals = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$totals = $stmt->fetch(PDO::FETCH_ASSOC);
+$has_bns = !empty($totals);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Consolidated Barangay Situation Analysis – Grand Totals</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body{background:#fafafa;font-family:"Times New Roman",serif;font-size:14px;margin:0}
-.container{max-width:900px;margin:0 auto;padding:20px}
-h2{text-align:center;margin:0 0 20px}
-table{width:100%;border-collapse:collapse;margin-bottom:20px;table-layout:fixed}
-td{border:1px solid #000;padding:6px 8px;text-align:center;word-wrap:break-word}
- .ind{border:1px solid #000;padding:6px 8px;text-align:left;word-wrap:break-word}
-th{background:#ddd; border:1px solid #000;padding:6px 8px;text-align:left;word-wrap:break-word} 
-.indent td:first-child{padding-left:20px}
-.number-cell{display:flex;justify-content:space-between}
-.number-cell div{flex:1;text-align:center;border-left:1px solid #000}
-.number-cell div:first-child{border-left:none}
-@media print{.page-break{page-break-after:always}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f0f0;font-family:"Times New Roman",serif;font-size:12px;line-height:1.4}
+.body-layout{display:flex;justify-content:center;padding:20px 0;}
+.container{max-width:1000px;width:100%;margin:0 auto;}
+.document{background:#fff;width:21cm;min-height:33cm;margin:0 auto 30px auto;padding:2.5cm;box-shadow:0 0 8px rgba(0,0,0,0.15);position:relative;page-break-after:always;}
+@media print{body{background:#fff;}.document{box-shadow:none;margin:0;width:100%;min-height:auto;padding:2cm;}}
+.header-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.header-table td{border:none;padding:4px 6px;vertical-align:middle}
+.header-left{font-weight:bold;font-size:14px}
+.header-logos{text-align:right}
+.header-logos img{height:60px;margin-left:6px}
+.report-info{text-align:center;margin-bottom:20px;font-size:12px}
+table{width:100%;border-collapse:collapse;margin-bottom:15px;table-layout:fixed}
+th,td{border:1px solid #000;padding:6px 8px;text-align:left;font-size:12px;vertical-align:top}
+th{background:#ddd}
+.indent{padding-left:20px}
+.number-cell {display:flex;justify-content:space-between;text-align:center;}
+.number-cell div {flex:1;padding:4px;border-left:1px solid #000;}
+.number-cell div:first-child {border-left:none;}
+.page-number{text-align:right;font-size:12px;color:#555;margin-top:10px}
+table td:nth-child(2) {text-align: center;}
 </style>
 </head>
 <body>
-
+<div class="body-layout">
 <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+    <h2 style="font-size:18px;">
+      <span style="font-weight:normal;">Consolidated Barangay Situation Analysis</span>
+    </h2>
     <div>
-    <!-- ✅ Fixed Edit button link -->
       <a href="javascript:history.back()" 
          style="background:#6c757d;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;">
          <i class="fa fa-arrow-left"></i> Back
       </a>
+      <a href="export_consolidated.php?<?= http_build_query(['barangays' => $_GET['barangays'] ?? []]) ?>" target="_blank" 
+         style="background:#198754;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;margin-left:5px;">
+         Export PDF
+      </a>
     </div>
 </div>
-<h2>Consolidated Barangay Situation Analysis<br>Grand Total of Latest Approved Reports</h2>
+
+<!-- SINGLE CONSOLIDATED REPORT DOCUMENT -->
+<div class="document">
+  <table class="header-table">
+    <tr>
+      <td class="header-left">BNS Form No. IC<br>Barangay Nutrition Profile</td>
+      <td class="header-logos">
+        <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png">
+        <img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png">
+        <img src="../logos/fixed/Bagong-Pilipinas-logo.png">
+      </td>
+    </tr>
+  </table>
+
+  <div class="report-info">
+      <h3>CONSOLIDATED BARANGAY SITUATIONAL ANALYSIS (BSA)</h3>
+      <strong>Calendar Year:</strong> <?= htmlspecialchars($selectedYear) ?> &nbsp;
+      <strong>City:</strong> EL SALVADOR CITY &nbsp;
+      <strong>Province:</strong> MISAMIS ORIENTAL
+  </div>
+
 
 <!-- ================= PAGE 1 ================= -->
 <table>
 <thead><tr><th style="width:70%">Indicator</th><td class="number-cell"><div>No.</div></td></tr></thead>
 <tbody>
 <tr><td class="ind">Total Population</td><td><?=val($totals,'ind1')?></td></tr>
+<tr class="indent"><td class="ind">Male</td><td><?=val($totals,'ind_male')?></td></tr>
+<tr class="indent"><td class="ind">Female</td><td><?=val($totals,'ind_female')?></td></tr>
 <tr><td class="ind">Number of households</td><td><?=val($totals,'ind2')?></td></tr>
 <tr><td class="ind">Total number of families</td><td><?=val($totals,'ind3')?></td></tr>
+<tr><td class="ind">Total Number of HHs More Than 5 Below Members</td><td><?=val($totals,'ind4')?></td></tr>
+<tr><td class="ind">Total Number of HHs More Than 5 Above Members</td><td><?=val($totals,'ind5')?></td></tr>
 <tr><td class="ind">Total number of women who are:</td><td></td></tr>
-<tr class="indent"><td class="ind">Pregnant</td><td><?=val($totals,'ind4a')?></td></tr>
-<tr class="indent"><td class="ind">Lactating</td><td><?=val($totals,'ind4b')?></td></tr>
-<tr><td class="ind">Total households with preschool children aged 0–59 months</td><td><?=val($totals,'ind5')?></td></tr>
-<tr><td class="ind">Actual population of preschool children 0–59 months</td><td><?=val($totals,'ind6')?></td></tr>
-<tr><td class="ind">Total preschool children 0–50 months measured during OPT Plus</td><td><?=val($totals,'ind7a','dec2')?></td></tr>
-<tr><td class="ind">Percent (%) measured coverage (OPT Plus)</td><td><?=val($totals,'ind7a','dec2')?>%</td></tr>
+<tr class="indent"><td class="ind">Pregnant</td><td><?=val($totals,'ind6a')?></td></tr>
+<tr class="indent"><td class="ind">Lactating</td><td><?=val($totals,'ind6b')?></td></tr>
+<tr><td class="ind">Total households with preschool children aged 0–59 months</td><td><?=val($totals,'ind7')?></td></tr>
+<tr><td class="ind">Actual population of preschool children 0–59 months</td><td><?=val($totals,'ind8')?></td></tr>
+<tr><td class="ind">Total preschool children 0–50 months measured during OPT Plus</td><td><?=val($totals,'ind9')?></td></tr>
+<tr><td class="ind">Percent (%) measured coverage (OPT Plus)</td><td><?=val($totals,'ind9a','dec2')?>%</td></tr>
 <tr><td class="ind">Number and percent (%) of preschool children according to Nutritional Status</td>
     <td class="number-cell"><div>No.</div><div>%</div></td></tr>
 <?php $nutri=['Severely underweight','Underweight','Normal weight','Severely wasted','Wasted','Overweight','Obese','Severely stunted','Stunted'];
@@ -117,18 +174,18 @@ for($i=1;$i<=9;$i++): ?>
 <tr class="indent">
   <td class="ind"><?=$nutri[$i-1]?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind7b{$i}_no")?></div>
-    <div><?=val($totals,"ind7b{$i}_pct",'pct')?></div>
+    <div><?=val($totals,"ind9b{$i}_no")?></div>
+    <div><?=val($totals,"ind9b{$i}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endfor; ?>
-<tr><td class="ind">Total number of infants 0–5 months old</td><td><?=val($totals,'ind8')?></td></tr>
-<tr><td class="ind">Total number of infants 6–11 months old</td><td><?=val($totals,'ind9')?></td></tr>
-<tr><td class="ind">Total preschool children 0–23 months old</td><td><?=val($totals,'ind10')?></td></tr>
-<tr><td class="ind">Total preschool children 12–59 months old</td><td><?=val($totals,'ind11')?></td></tr>
-<tr><td class="ind">Total preschool children 24–59 months old</td><td><?=val($totals,'ind12')?></td></tr>
-<tr><td class="ind">Total families with wasted &amp; severely wasted preschool children</td><td><?=val($totals,'ind13')?></td></tr>
-<tr><td class="ind">Total families with stunted &amp; severely stunted preschool children</td><td><?=val($totals,'ind14')?></td></tr>
+<tr><td class="ind">Total number of infants 0–5 months old</td><td><?=val($totals,'ind10')?></td></tr>
+<tr><td class="ind">Total number of infants 6–11 months old</td><td><?=val($totals,'ind11')?></td></tr>
+<tr><td class="ind">Total preschool children 0–23 months old</td><td><?=val($totals,'ind12')?></td></tr>
+<tr><td class="ind">Total preschool children 12–59 months old</td><td><?=val($totals,'ind13')?></td></tr>
+<tr><td class="ind">Total preschool children 24–59 months old</td><td><?=val($totals,'ind14')?></td></tr>
+<tr><td class="ind">Total families with wasted &amp; severely wasted preschool children</td><td><?=val($totals,'ind15')?></td></tr>
+<tr><td class="ind">Total families with stunted &amp; severely stunted preschool children</td><td><?=val($totals,'ind16')?></td></tr>
 </tbody>
 </table>
 
@@ -140,35 +197,35 @@ for($i=1;$i<=9;$i++): ?>
 <tbody>
 <tr class="indent"><td class="ind">Total number of Educational Institutions</td><td></td></tr>
 <tr class="indent"><td class="ind">Number of Day Care Centers – Public / Private</td>
-  <td class="number-cell"><div><?=val($totals,'ind15a_public')?></div><div><?=val($totals,'ind15a_private')?></div></td></tr>
+  <td class="number-cell"><div><?=val($totals,'ind17a_public')?></div><div><?=val($totals,'ind17a_private')?></div></td></tr>
 <tr><td class="ind">Number of Elementary Schools – Public / Private</td>
-  <td class="number-cell"><div><?=val($totals,'ind15b_public')?></div><div><?=val($totals,'ind15b_private')?></div></td></tr>
-<tr><td class="ind">Total number of children enrolled in Kindergarten (DepEd supervised)</td><td><?=val($totals,'ind16')?></td></tr>
-<tr><td class="ind">Total number of school children (Grades 1–6)</td><td><?=val($totals,'ind17')?></td></tr>
-<tr><td class="ind">Total number of school children weighed at the start of the school year (K–Gr.6)</td><td><?=val($totals,'ind18')?></td></tr>
-<tr><td class="ind">Percentage (%) coverage of school children measured</td><td><?=val($totals,'ind19','dec2')?>%</td></tr>
+  <td class="number-cell"><div><?=val($totals,'ind17b_public')?></div><div><?=val($totals,'ind17b_private')?></div></td></tr>
+<tr><td class="ind">Total number of children enrolled in Kindergarten (DepEd supervised)</td><td><?=val($totals,'ind18')?></td></tr>
+<tr><td class="ind">Total number of school children (Grades 1–6)</td><td><?=val($totals,'ind19')?></td></tr>
+<tr><td class="ind">Total number of school children weighed at the start of the school year (K–Gr.6)</td><td><?=val($totals,'ind20')?></td></tr>
+<tr><td class="ind">Percentage (%) coverage of school children measured</td><td><?=val($totals,'ind21','dec2')?>%</td></tr>
 <tr><td class="ind">Number and percent (%) of school children according to Nutritional Status</td>
     <td class="number-cell"><div>No.</div><div>%</div></td></tr>
 <?php foreach(['a'=>'Severely Wasted','b'=>'Wasted','c'=>'Normal','d'=>'Overweight','e'=>'Obese'] as $c=>$lbl): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind20{$c}_no")?></div>
-    <div><?=val($totals,"ind20{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind22{$c}_no")?></div>
+    <div><?=val($totals,"ind22{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
-<tr><td class="ind">0–5 months old children exclusively breastfed</td><td><?=val($totals,'ind21')?></td></tr>
-<tr><td class="ind">Households with severely wasted and wasted school children</td><td><?=val($totals,'ind22')?></td></tr>
-<tr><td class="ind">School children dewormed at start of school year</td><td><?=val($totals,'ind23')?></td></tr>
-<tr><td class="ind">Fully immunized children</td><td><?=val($totals,'ind24')?></td></tr>
+<tr><td class="ind">0–5 months old children exclusively breastfed</td><td><?=val($totals,'ind23')?></td></tr>
+<tr><td class="ind">Households with severely wasted and wasted school children</td><td><?=val($totals,'ind24')?></td></tr>
+<tr><td class="ind">School children dewormed at start of school year</td><td><?=val($totals,'ind25')?></td></tr>
+<tr><td class="ind">Fully immunized children</td><td><?=val($totals,'ind26')?></td></tr>
 <tr><td class="ind">Households by type of toilet facility:</td><td class="number-cell"><div>No.</div><div>%</div></td></tr>
 <?php foreach(['a'=>'Water-sealed toilet','b'=>'Antipolo (Unsanitary Toilet)','c'=>'Open Pit/Shared','d'=>'No Toilet'] as $c=>$lbl): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind26{$c}_no")?></div>
-    <div><?=val($totals,"ind26{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind27{$c}_no")?></div>
+    <div><?=val($totals,"ind27{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
@@ -186,8 +243,8 @@ for($i=1;$i<=9;$i++): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind27{$c}_no")?></div>
-    <div><?=val($totals,"ind27{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind28{$c}_no")?></div>
+    <div><?=val($totals,"ind28{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
@@ -196,8 +253,8 @@ for($i=1;$i<=9;$i++): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind28{$c}_no")?></div>
-    <div><?=val($totals,"ind28{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind29{$c}_no")?></div>
+    <div><?=val($totals,"ind29{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
@@ -206,8 +263,8 @@ for($i=1;$i<=9;$i++): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind29{$c}_no")?></div>
-    <div><?=val($totals,"ind29{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind30{$c}_no")?></div>
+    <div><?=val($totals,"ind30{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
@@ -216,19 +273,20 @@ for($i=1;$i<=9;$i++): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
-    <div><?=val($totals,"ind30{$c}_no")?></div>
-    <div><?=val($totals,"ind30{$c}_pct",'pct')?></div>
+    <div><?=val($totals,"ind31{$c}_no")?></div>
+    <div><?=val($totals,"ind31{$c}_pct",'pct')?></div>
   </td>
 </tr>
 <?php endforeach; ?>
-<tr><td class="ind">Total number of households using iodized salt</td><td><?=val($totals,'ind31')?></td></tr>
-<tr><td class="ind">Total number of eateries/carenderia</td><td><?=val($totals,'ind32')?></td></tr>
-<tr><td class="ind">Total number of bakeries</td><td><?=val($totals,'ind33')?></td></tr>
-<tr><td class="ind">Total number of sari-sari stores</td><td><?=val($totals,'ind34')?></td></tr>
+<tr><td class="ind">Total number of households using iodized salt</td><td class="number-cell"><div><?=val($totals,'ind32_no')?></div><div><?=val($totals,'ind32_pct','pct')?></div></td></tr>
+<tr><td class="ind">Total number of eateries/carenderia</td><td class="number-cell"><div><?=val($totals,'ind33_no')?></div><div><?=val($totals,'ind33_pct','pct')?></div></td></tr>
+<tr><td class="ind">Total number of bakeries</td><td class="number-cell"><div><?=val($totals,'ind34_no')?></div><div><?=val($totals,'ind34_pct','pct')?></div></td></tr>
+<tr><td class="ind">Total number of sari-sari stores</td><td class="number-cell"><div><?=val($totals,'ind35_no')?></div><div><?=val($totals,'ind35_pct','pct')?></div></td></tr>
+<tr><td class="ind">Total Number of Bakery With Fortified Flour</td><td class="number-cell"><div><?=val($totals,'ind36_no')?></div><div><?=val($totals,'ind36_pct','pct')?></div></td></tr>
 <tr><td class="ind">Number of health and nutrition workers:</td><td></td></tr>
-<tr class="indent"><td class="ind">Barangay Nutrition Scholar</td><td><?=val($totals,'ind35a')?></td></tr>
-<tr class="indent"><td class="ind">Barangay Health Worker</td><td><?=val($totals,'ind35b')?></td></tr>
-<tr><td class="ind">Total number of households beneficiaries of Pantawid Pamilyang Pilipino</td><td><?=val($totals,'ind36')?></td></tr>
+<tr class="indent"><td class="ind">Barangay Nutrition Scholar</td><td><?=val($totals,'ind37a')?></td></tr>
+<tr class="indent"><td class="ind">Barangay Health Worker</td><td><?=val($totals,'ind37b')?></td></tr>
+<tr><td class="ind">Total number of households beneficiaries of Pantawid Pamilyang Pilipino</td><td><?=val($totals,'ind38')?></td></tr>
 </tbody>
 </table>
 </div>

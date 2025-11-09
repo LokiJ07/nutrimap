@@ -1,7 +1,7 @@
 <?php
 
 $DB_HOST = 'localhost';   
-$DB_NAME = 'nutri_map';      
+$DB_NAME = 'nutrimap_db';      
 $DB_USER = 'root';        
 $DB_PASS = '';           
 $DB_CHARSET = 'utf8mb4';
@@ -18,3 +18,8 @@ try {
 } catch (PDOException $e) {
     exit('Database connection failed: ' . $e->getMessage());
 }
+
+//FTP Username : if0_40031431 
+//FTP Password : NutriLab2025X  
+//FTP Hostname : ftpupload.net
+//FTP Port (optional) : 21

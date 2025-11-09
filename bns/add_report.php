@@ -1,10 +1,10 @@
   <?php
-  session_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
   require '../db/config.php';
+
+
   // ✅ Require login
   if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     header("Location: ../login.php");
@@ -29,9 +29,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
           // 1️⃣ Insert into reports table
           $stmt = $pdo->prepare("
-              INSERT INTO reports (user_id, report_time, report_date)
-              VALUES (:user_id, :report_time, :report_date)
-          ");
+    INSERT INTO reports (user_id, report_time, report_date, is_submitted)
+    VALUES (:user_id, :report_time, :report_date, 1)
+");
+$stmt->execute([
+    ':user_id' => $user_id,
+    ':report_time' => date('H:i:s'),
+    ':report_date' => date('Y-m-d')
+]);
+
           $stmt->execute([
               ':user_id' => $user_id,
               ':report_time' => date('H:i:s'),
@@ -41,27 +47,55 @@ if (session_status() === PHP_SESSION_NONE) {
           $report_id = $pdo->lastInsertId();
 
           // 2️⃣ Prepare data for bns_reports
-          $fields = [
-              'report_id', 'barangay', 'year', 'title',
-              'ind1','ind2','ind3','ind4a','ind4b','ind5','ind6','ind7a',
-              'ind7b1_no','ind7b1_pct','ind7b2_no','ind7b2_pct','ind7b3_no','ind7b3_pct',
-              'ind7b4_no','ind7b4_pct','ind7b5_no','ind7b5_pct','ind7b6_no','ind7b6_pct',
-              'ind7b7_no','ind7b7_pct','ind7b8_no','ind7b8_pct','ind7b9_no','ind7b9_pct',
-              'ind8','ind9','ind10','ind11','ind12','ind13','ind14',
-              'ind15a_public','ind15a_private','ind15b_public','ind15b_private',
-              'ind16','ind17','ind18','ind19',
-              'ind20a_no','ind20a_pct','ind20b_no','ind20b_pct','ind20c_no','ind20c_pct',
-              'ind20d_no','ind20d_pct','ind20e_no','ind20e_pct',
-              'ind21','ind22','ind23','ind24','ind25',
-              'ind26a_no','ind26a_pct','ind26b_no','ind26b_pct','ind26c_no','ind26c_pct','ind26d_no','ind26d_pct',
-              'ind27a_no','ind27a_pct','ind27b_no','ind27b_pct','ind27c_no','ind27c_pct','ind27d_no','ind27d_pct',
-              'ind28a_no','ind28a_pct','ind28b_no','ind28b_pct','ind28c_no','ind28c_pct','ind28d_no','ind28d_pct','ind28e_no','ind28e_pct',
-              'ind29a_no','ind29a_pct','ind29b_no','ind29b_pct','ind29c_no','ind29c_pct','ind29d_no','ind29d_pct','ind29e_no','ind29e_pct',
-              'ind30a_no','ind30a_pct','ind30b_no','ind30b_pct','ind30c_no','ind30c_pct','ind30d_no','ind30d_pct','ind30e_no','ind30e_pct',
-              'ind31','ind32','ind33','ind34',
-              'ind35a','ind35b',
-              'ind36'
-          ];
+            $fields = [
+            'report_id', 'barangay', 'year', 'title',
+            
+            'ind1', 'ind_male', 'ind_female',
+            'ind2', 'ind3', 'ind4', 'ind5',
+            
+            'ind6a', 'ind6b',
+            'ind7', 'ind8', 'ind9',
+            
+            'ind9a',
+            'ind9b1_no','ind9b1_pct','ind9b2_no','ind9b2_pct','ind9b3_no','ind9b3_pct',
+            'ind9b4_no','ind9b4_pct','ind9b5_no','ind9b5_pct','ind9b6_no','ind9b6_pct',
+            'ind9b7_no','ind9b7_pct','ind9b8_no','ind9b8_pct','ind9b9_no','ind9b9_pct',
+
+            'ind10','ind11','ind12','ind13','ind14','ind15','ind16',
+
+            'ind17a_public','ind17a_private','ind17b_public','ind17b_private',
+
+            'ind18','ind19','ind20','ind21',
+
+            'ind22a_no','ind22a_pct','ind22b_no','ind22b_pct','ind22c_no','ind22c_pct',
+            'ind22d_no','ind22d_pct','ind22e_no','ind22e_pct', 'ind22f_no','ind22f_pct', 'ind22g_no','ind22g_pct',
+            
+            'ind23','ind24','ind25','ind26',
+
+            'ind27a_no','ind27a_pct','ind27b_no','ind27b_pct','ind27c_no','ind27c_pct',
+            'ind27d_no','ind27d_pct','ind27e_no','ind27e_pct',
+
+            'ind28a_no','ind28a_pct','ind28b_no','ind28b_pct','ind28c_no','ind28c_pct',
+            'ind28d_no','ind28d_pct',
+
+            'ind29a_no','ind29a_pct','ind29b_no','ind29b_pct','ind29c_no','ind29c_pct',
+            'ind29d_no','ind29d_pct','ind29e_no','ind29e_pct','ind29f_no','ind29f_pct',
+            'ind29g_no','ind29g_pct',
+
+            'ind30a_no','ind30a_pct','ind30b_no','ind30b_pct','ind30c_no','ind30c_pct',
+            'ind30d_no','ind30d_pct',
+
+            'ind31a_no','ind31a_pct','ind31b_no','ind31b_pct','ind31c_no','ind31c_pct',
+            'ind31d_no','ind31d_pct','ind31e_no','ind31e_pct','ind31f_no','ind31f_pct',
+
+            'ind32_no', 'ind32_pct',
+            
+            'ind33_no','ind33_pct',
+            'ind34_no','ind34_pct',
+            'ind35_no','ind35_pct',
+            'ind36_no','ind36_pct',
+            'ind37a','ind37b','ind38'
+        ];
 
           $placeholders = [];
           $params = [];
@@ -101,6 +135,24 @@ if (session_status() === PHP_SESSION_NONE) {
             ':details' => "Report ID: $report_id, Created for Barangay: $barangay, Year: $year, Title: '$title'"
         ]);
 
+           // NOTIFICATION
+         $cnoStmt = $pdo->query("SELECT id FROM users WHERE user_type = 'CNO'");
+$cnoUsers = $cnoStmt->fetchAll(PDO::FETCH_COLUMN);
+
+$notifMessage = "A new report has been submitted by {$barangay}.";
+
+$notifStmt = $pdo->prepare("
+    INSERT INTO notifications (user_id, sender_id, message, date)
+    VALUES (:user_id, :sender_id, :message, NOW())
+");
+
+foreach ($cnoUsers as $cnoId) {
+    $notifStmt->execute([
+        ':user_id' => $cnoId,
+        ':sender_id' => $user_id,
+        ':message' => $notifMessage
+    ]);
+}
           // Commit transaction
           $pdo->commit();
 
@@ -158,7 +210,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <div class="reports-label" style="display:flex; align-items:center; gap:10px;">
     <div style="font-weight:bold; font-size:22px;">Reports</div>
     <div style="display:flex; align-items:center; gap:5px;">
-        <label for="report-title" style="font-size:14px; font-weight:normal;">Title:</label>
+        <label for="report-title" style="font-size:14px; font-weight:normal;">Title:</label> 
         <input type="text" id="report-title" name="title" placeholder="Enter report title"
               style="padding:4px 6px; font-size:14px; height:28px; width:250px;">
     </div>
@@ -173,8 +225,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
   <form method="post" onsubmit="copyTitle()">
     <input type="hidden" id="hidden-title" name="title">
-
-    <form method="post"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 
       <!-- Left: Titles -->
       <div style="text-align:left;">
@@ -208,26 +259,31 @@ if (session_status() === PHP_SESSION_NONE) {
       <strong>Province:</strong> MISAMIS ORIENTAL
     </div>
 
-
           <!-- Full Indicators Form -->
-          <div class="form-section">
-            <h3>Indicators</h3>
+           <div class="form-section">
+               <input type="file" id="csvFile" accept=".csv">
             <table>
               <tr><th>Indicator</th><th>Number</th></tr>
 
               <tr><td>1. Total Population</td><td><input type="number" name="ind1"></td></tr>
-              <tr><td>2. Number of households</td><td><input type="number" name="ind2"></td></tr>
-              <tr><td>3. Total number of families</td><td><input type="number" name="ind3"></td></tr>
-              <tr><td>4. Total number of women who are:</td><td></td></tr>
-              <tr><td class="indent">a. Pregnant</td><td><input type="number" name="ind4a"></td></tr>
-              <tr><td class="indent">b. Lactating</td><td><input type="number" name="ind4b"></td></tr>
+              <tr><td class="indent">Male</td><td><input type="number" name="ind_male"></td></tr>
+              <tr><td class="indent">Female</td><td><input type="number" name="ind_female"></td></tr>
 
-              <tr><td>5. Total number of households with preschool children 0-59 months</td><td><input type="number" name="ind5"></td></tr>
-              <tr><td>6. Actual population of preschool children 0-59 months</td><td><input type="number" name="ind6"></td></tr>
-              <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td></td></tr>
-              <tr><td>7a. Percent (%) measured coverage (OPT Plus)</td><td><input type="number" step="0.01" name="ind7a"></td></tr>
+              <tr><td>2. Total Number of Households</td><td><input type="number" name="ind2"></td></tr>
+              <tr><td>3. Total Number of Family</td><td><input type="number" name="ind3"></td></tr>
+              <tr><td>4. Total Number of HHs More Than 5 Below Members</td><td><input type="number" name="ind4"></td></tr>
+              <tr><td>5. Total Number of HHs more Than 5 Above Members</td><td><input type="number" name="ind5"></td></tr>
+
+              <tr><td>6. Total Number of Women Who Are:</td><td></td></tr>
+              <tr><td class="indent">a. Pregnant</td><td><input type="number" name="ind6a"></td></tr>
+              <tr><td class="indent">b. Lactating</td><td><input type="number" name="ind6b"></td></tr>
+
+              <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td><td><input type="number" name="ind7"></td></tr>
+              <tr><td>8. Actual Population of Preschool Children 0-59 Months</td><td><input type="number" name="ind8"></td></tr>
+              <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td><td><input type="number" name="ind9"></td></tr>
+              <tr><td>a. Percent (%) Measured Coverage (OPT Plus)</td><td><input type="number" step="0.01" name="ind9a"></td></tr>
   <tr>
-    <td>7b. Number and percent (%) of preschool children according to Nutritional Status</td>
+    <td>b. Number and Percent (%) of Preschool Children According to Nutritional Status</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
@@ -236,14 +292,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
   <?php
   $nutri = [
-      '1) Severely underweight',
+      '1) Severely Underweight',
       '2) Underweight',
-      '3) Normal weight',
-      '4) Severely wasted',
+      '3) Normal Weight',
+      '4) Severely Wasted',
       '5) Wasted',
       '6) Overweight',
       '7) Obese',
-      '8) Severely stunted',
+      '8) Severely Stunted',
       '9) Stunted'
   ];
 
@@ -252,25 +308,25 @@ if (session_status() === PHP_SESSION_NONE) {
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
-                  <input type='number' name='ind7b{$n}_no' placeholder='No' style='flex:1;'>
-                  <input type='number' step='0.01' name='ind7b{$n}_pct' placeholder='%' style='flex:1;'>
+                  <input type='number' name='ind9b{$n}_no' placeholder='No' style='flex:1;'>
+                  <input type='number' step='0.01' name='ind9b{$n}_pct' placeholder='%' style='flex:1;'>
               </td>
             </tr>";
   }
   ?>
 
   <!-- All other table rows remain unchanged -->
-              <tr><td>8. Infants 0-5 months old</td><td><input type="number" name="ind8"></td></tr>
-              <tr><td>9. Infants 6-11 months old</td><td><input type="number" name="ind9"></td></tr>
-              <tr><td>10. Preschool children 0-23 months old</td><td><input type="number" name="ind10"></td></tr>
-              <tr><td>11. Preschool children 12-59 months old</td><td><input type="number" name="ind11"></td></tr>
-              <tr><td>12. Preschool children 24-59 months old</td><td><input type="number" name="ind12"></td></tr>
+              <tr><td>10. Total Number of Infants 0-5 Months Old</td><td><input type="number" name="ind10"></td></tr>
+              <tr><td>11. Total Number of Infants 6-11 Months Old</td><td><input type="number" name="ind11"></td></tr>
+              <tr><td>12. Total Number of Preschool Children 0-23 Months Old</td><td><input type="number" name="ind12"></td></tr>
+              <tr><td>13. Total Number of Preschool Children 12-59 Months Old</td><td><input type="number" name="ind13"></td></tr>
+              <tr><td>14. Total Number of Preschool Children 24-59 Months Old</td><td><input type="number" name="ind14"></td></tr>
 
-              <tr><td>13. Families with wasted and severely wasted preschool children</td><td><input type="number" name="ind13"></td></tr>
-              <tr><td>14. Families with stunted and severely stunted preschool children</td><td><input type="number" name="ind14"></td></tr>
-
+              <tr><td>15. Total Number of Families With Wasted and Severely Wasted Preschool Children</td><td><input type="number" name="ind15"></td></tr>
+              <tr><td>16. Total Number of Families With Stunted and Severely Stunted Preschool Children</td><td><input type="number" name="ind16"></td></tr>
+ 
   <tr>
-    <td>15. Educational Institutions</td>
+    <td>17. Total Bumber of Educational Institutions(Pub./Priv.)</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">Public</span>
       <span style="flex:1; text-align:center;">Private</span>
@@ -286,19 +342,19 @@ if (session_status() === PHP_SESSION_NONE) {
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
-                  <input type='number' name='ind15{$n}_public' placeholder='Public' style='flex:1; text-align:center;'>
-                  <input type='number' name='ind15{$n}_private' placeholder='Private' style='flex:1; text-align:center;'>
+                  <input type='number' name='ind17{$n}_public' placeholder='Public' style='flex:1; text-align:center;'>
+                  <input type='number' name='ind17{$n}_private' placeholder='Private' style='flex:1; text-align:center;'>
               </td>
             </tr>";
   }
   ?>
 
-              <tr><td>16. Children enrolled in Kindergarten</td><td><input type="number" name="ind16"></td></tr>
-              <tr><td>17. School children (grades 1-6)</td><td><input type="number" name="ind17"></td></tr>
-              <tr><td>18. School children weighed at start of school year</td><td><input type="number" name="ind18"></td></tr>
-              <tr><td>19. Percentage (%) coverage of school children measured</td><td><input type="number" step="0.01" name="ind19"></td></tr>
+              <tr><td>18. Total Number of Children Enrolled in Kindergarten</td><td><input type="number" name="ind18"></td></tr>
+              <tr><td>19. Total Number of School Children (grades 1-6)</td><td><input type="number" name="ind19"></td></tr>
+              <tr><td>20. Total Number of School Children Weighed at Start of School Year</td><td><input type="number" name="ind20"></td></tr>
+              <tr><td>21. Percentage (%) Coverage of School Children Measured</td><td><input type="number" step="0.01" name="ind21"></td></tr>
   <tr>
-    <td>20. Number and percent (%) of school children according to Nutritional Status</td>
+    <td>22. Number and Percent (%) of School Children According to Nutritional Status Body Mas Index</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
@@ -308,9 +364,11 @@ if (session_status() === PHP_SESSION_NONE) {
   $school = [
       'a) Severely Wasted',
       'b) Wasted',
-      'c) Normal',
-      'd) Overweight',
-      'e) Obese'
+      'c) Severely Stunted',
+      'd) Stunted',
+      'e) Normal',
+      'f) Overweight',
+      'g) Obese'
   ];
 
   foreach($school as $i => $name) {
@@ -318,21 +376,20 @@ if (session_status() === PHP_SESSION_NONE) {
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
-                  <input type='number' name='ind20{$n}_no' placeholder='No' style='flex:1;'>
-                  <input type='number' step='0.01' name='ind20{$n}_pct' placeholder='%' style='flex:1;'>
+                  <input type='number' name='ind22{$n}_no' placeholder='No' style='flex:1;'>
+                  <input type='number' step='0.01' name='ind22{$n}_pct' placeholder='%' style='flex:1;'>
               </td>
             </tr>";
   }
   ?>
 
 
-              <tr><td>21. 0-5 months old children exclusively breastfed</td><td><input type="number" name="ind21"></td></tr>
-              <tr><td>22. Infants given complementary foods (6 months+)</td><td><input type="number" name="ind22"></td></tr>
-              <tr><td>23. Households with wasted school children</td><td><input type="number" name="ind23"></td></tr>
-              <tr><td>24. School children dewormed</td><td><input type="number" name="ind24"></td></tr>
-              <tr><td>25. Fully immunized children</td><td><input type="number" name="ind25"></td></tr>
+              <tr><td>23. 0-5 Months Old Children Exclusively Breastfeed</td><td><input type="number" name="ind23"></td></tr>
+              <tr><td>24. Households with Severely Wasted School Children</td><td><input type="number" name="ind24"></td></tr>
+              <tr><td>25. School Children Dewormed at the Start of the School Year</td><td><input type="number" name="ind25"></td></tr>
+              <tr><td>26. Fully Immunized Children(FIC)</td><td><input type="number" name="ind26"></td></tr>
   <tr>
-    <td>26. Households, by type of toilet facility</td>
+    <td>27. Households, by Type of Toilet Facility</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
@@ -341,38 +398,14 @@ if (session_status() === PHP_SESSION_NONE) {
   $toilet = [
       'a) Water-sealed toilet',
       'b) Antipolo (Unsanitary Toilet)',
-      'c) Open Pit/Shared',
-      'd) No Toilet'
+      'c) Open Pit',
+      'd) Shared',
+      'e) No Toilet'
+
   ];
 
   foreach($toilet as $i => $name) {
       $n = chr(97 + $i); 
-      echo "<tr>
-              <td style='width:60%;'>$name</td>
-              <td style='display:flex; gap:10px;'>
-                  <input type='number' name='ind26{$n}_no' placeholder='No' style='flex:1;'>
-                  <input type='number' step='0.01' name='ind26{$n}_pct' placeholder='%' style='flex:1;'>
-              </td>
-            </tr>";
-  }
-  ?>
-  <tr>
-    <td>27. Households, by type of garbage disposal</td>
-    <td style="display:flex; gap:10px; font-weight:bold;">
-      <span style="flex:1; text-align:center;">No.</span>
-      <span style="flex:1; text-align:center;">%</span>
-    </td>
-  </tr>
-  <?php
-  $garbage_types = [
-      'a) Barangay/City garbage collection',
-      'b) Own compose pit',
-      'c) Burning',
-      'd) Dumping'
-  ];
-
-  foreach($garbage_types as $i => $name) {
-      $n = chr(97 + $i);
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
@@ -382,25 +415,23 @@ if (session_status() === PHP_SESSION_NONE) {
             </tr>";
   }
   ?>
-
   <tr>
-    <td>28. Household, by type of water source</td>
+    <td>28. Households, by Type of Garbage Disposal</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
     </td>
   </tr>
-              <?php
-  $water_sources = [
-      'a) Pipe water system',
-      'b) Well – Level II',
-      'c) Deep well with topstand communal source water system (Level II)',
-      'd) Mineral water/water dispensing stores',
-      'e) Open shallow dug well (Level I)'
+  <?php
+  $garbage_types = [
+      'a) Barangay/City Garbage Collection',
+      'b) Own Compose Pit',
+      'c) Burning',
+      'd) Dumping'
   ];
 
-  foreach($water_sources as $i => $name) {
-      $n = chr(97 + $i); 
+  foreach($garbage_types as $i => $name) {
+      $n = chr(97 + $i);
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
@@ -412,22 +443,26 @@ if (session_status() === PHP_SESSION_NONE) {
   ?>
 
   <tr>
-    <td>29. Household with</td>
+    <td>29. Household, by Type of Water Source</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
     </td>
   </tr>
-  <?php
-  $household_items = [
-      'a) Vegetable garden',
-      'b) Livestock/poultry',
-      'c) Combination vegetable garden & livestock/poultry',
-      'd) Fishponds',
-      'e) No garden'
+              <?php
+  $water_sources = [
+      'a) Pipe Water System(Level III)',
+      'b) Spring (Level II)',
+      'c) Deep Well With Topstand Communal Source Water System (Level II)',
+      'd) Deep Well With Individual Faucet (Level III)',
+      'e) Purified Station (Level III)',
+      'f) Open Shallow Dug Well (Level I)',
+      'g) Artesian Well '
+
   ];
-  foreach($household_items as $i => $name) {
-      $n = chr(97 + $i);
+
+  foreach($water_sources as $i => $name) {
+      $n = chr(97 + $i); 
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
@@ -439,20 +474,20 @@ if (session_status() === PHP_SESSION_NONE) {
   ?>
 
   <tr>
-    <td>30. Households according to type of dwelling unit:</td>
+    <td>30. Household with</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">No.</span>
       <span style="flex:1; text-align:center;">%</span>
     </td>
+  </tr>
   <?php
-  $dwelling_types = [
-      'a) Concrete',
-      'b) Semi concrete',
-      'c) Wooden house',
-      'd) Nipa bamboo house',
-      'e) Barong-barong makeshift'
+  $household_items = [
+      'a) Vegetable Garden',
+      'b) Livestock Poultry',
+      'c) Fishponds',
+      'd) Other Specify: No Garden'
   ];
-  foreach($dwelling_types as $i => $name) {
+  foreach($household_items as $i => $name) {
       $n = chr(97 + $i);
       echo "<tr>
               <td style='width:60%;'>$name</td>
@@ -464,13 +499,73 @@ if (session_status() === PHP_SESSION_NONE) {
   }
   ?>
 
-  <tr><td>31. Total number of households using iodized salt</td><td><input type="number" name="ind31"></td></tr>
-  <tr><td>32. Total number of eateries/carenderia</td><td><input type="number" name="ind32"></td></tr>
-  <tr><td>33. Total number of bakeries</td><td><input type="number" name="ind33"></td></tr>
-  <tr><td>34. Total number of sari-sari stores</td><td><input type="number" name="ind34"></td></tr>
+  <tr>
+    <td>31. Households according to type of dwelling unit:</td>
+    <td style="display:flex; gap:10px; font-weight:bold;">
+      <span style="flex:1; text-align:center;">No.</span>
+      <span style="flex:1; text-align:center;">%</span>
+    </td>
+  <?php
+  $dwelling_types = [
+      'a) Concrete',
+      'b) Semi Concrete',
+      'c) Wooden House',
+      'd) Nipa Bamboo House',
+      'e) Barong-Barong Makeshift',
+      'f) Makeshift'
+  ];
+  foreach($dwelling_types as $i => $name) {
+      $n = chr(97 + $i);
+      echo "<tr>
+              <td style='width:60%;'>$name</td>
+              <td style='display:flex; gap:10px;'>
+                  <input type='number' name='ind31{$n}_no' placeholder='No' style='flex:1;'>
+                  <input type='number' step='0.01' name='ind31{$n}_pct' placeholder='%' style='flex:1;'>
+              </td>
+            </tr>";
+  }
+  ?>
+<tr>
+  <td style="width:60%; font-weight:normal;">32. Total Number of Households Using Iodized Salt</td>
+  <td style="display:flex; gap:10px;">
+      <input type="number" name="ind32_no" placeholder="No" style="flex:1;">
+      <input type="number" step="0.01" name="ind32_pct" placeholder="%" style="flex:1;">
+  </td>
+</tr>
 
+<tr>
+  <td style="width:60%; font-weight:normal;">33. Total Number of Eateries/Carenderia</td>
+  <td style="display:flex; gap:10px;">
+      <input type="number" name="ind33_no" placeholder="No" style="flex:1;">
+      <input type="number" step="0.01" name="ind33_pct" placeholder="%" style="flex:1;">
+  </td>
+</tr>
 
-  <tr><td>35. Number of health and nutrition workers:</td><td></td></tr>
+<tr>
+  <td style="width:60%; font-weight:normal;">34. Total Number of Sari-Sari Stores Related to Iodized Salt</td>
+  <td style="display:flex; gap:10px;">
+      <input type="number" name="ind34_no" placeholder="No" style="flex:1;">
+      <input type="number" step="0.01" name="ind34_pct" placeholder="%" style="flex:1;">
+  </td>
+</tr>
+
+<tr>
+  <td style="width:60%; font-weight:normal;">35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
+  <td style="display:flex; gap:10px;">
+      <input type="number" name="ind35_no" placeholder="No" style="flex:1;">
+      <input type="number" step="0.01" name="ind35_pct" placeholder="%" style="flex:1;">
+  </td>
+</tr>
+
+<tr>
+  <td style="width:60%; font-weight:normal;">36. Total Number of Bakery With Fortified Flour</td>
+  <td style="display:flex; gap:10px;">
+      <input type="number" name="ind36_no" placeholder="No" style="flex:1;">
+      <input type="number" step="0.01" name="ind36_pct" placeholder="%" style="flex:1;">
+  </td>
+</tr>
+
+  <tr><td>37. Number of Health and Nutrition Workers:</td><td></td></tr>
   <?php
   $health_workers = [
       'a) Barangay Nutrition Scholar',
@@ -481,12 +576,12 @@ if (session_status() === PHP_SESSION_NONE) {
       echo "<tr>
               <td style='width:60%;'>$name</td>
               <td style='display:flex; gap:10px;'>
-                  <input type='number' name='ind35{$n}' placeholder='No' style='flex:1;'>
+                  <input type='number' name='ind37{$n}' placeholder='No' style='flex:1;'>
               </td>
             </tr>";
   }
   ?>
-  <tr><td>36. Total number of households beneficiaries of Pantawid Pamilyang Pilipino</td><td><input type="number" name="ind36"></td></tr>
+  <tr><td>38. Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program</td><td><input type="number" name="ind38"></td></tr>
 
 
             </table>
@@ -496,6 +591,7 @@ if (session_status() === PHP_SESSION_NONE) {
       <div class="form-bottom">
         <button type="submit" class="submit-btn">Submit</button>
       </div>
+      
     </form>
   </div>
 
@@ -505,6 +601,98 @@ function copyTitle() {
         document.getElementById('report-title').value;
 }
   </script>
+
+<script>
+document.getElementById('csvFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const text = event.target.result;
+        const rows = text.split(/\r?\n/).filter(r => r.trim() !== '');
+
+        // Flatten numeric values, including percentages
+        let values = [];
+        for (let i = 5; i < rows.length; i++) { // skip header
+            const cols = rows[i].split(/\t|,/); // split tab or comma
+            cols.forEach(cell => {
+                let val = cell.trim();
+                if (val.endsWith('%')) val = val.replace('%',''); // remove %
+                if (val !== '' && !isNaN(val)) {
+                    values.push(val);
+                }
+            });
+        }
+
+        // Input names in order of your form
+        const inputMapping = [
+           'ind1', 'ind_male', 'ind_female',
+            'ind2', 'ind3', 'ind4', 'ind5',
+            
+            'ind6a', 'ind6b',
+            'ind7', 'ind8', 'ind9',
+            
+            'ind9a',
+            'ind9b1_no','ind9b1_pct','ind9b2_no','ind9b2_pct','ind9b3_no','ind9b3_pct',
+            'ind9b4_no','ind9b4_pct','ind9b5_no','ind9b5_pct','ind9b6_no','ind9b6_pct',
+            'ind9b7_no','ind9b7_pct','ind9b8_no','ind9b8_pct','ind9b9_no','ind9b9_pct',
+
+            'ind10','ind11','ind12','ind13','ind14','ind15','ind16',
+
+            'ind17a_public','ind17a_private','ind17b_public','ind17b_private',
+
+            'ind18','ind19','ind20','ind21',
+
+            'ind22a_no','ind22a_pct','ind22b_no','ind22b_pct','ind22c_no','ind22c_pct',
+            'ind22d_no','ind22d_pct','ind22e_no','ind22e_pct', 'ind22f_no','ind22f_pct', 'ind22g_no','ind22g_pct',
+            
+            'ind23','ind24','ind25','ind26',
+
+            'ind27a_no','ind27a_pct','ind27b_no','ind27b_pct','ind27c_no','ind27c_pct',
+            'ind27d_no','ind27d_pct','ind27e_no','ind27e_pct',
+
+            'ind28a_no','ind28a_pct','ind28b_no','ind28b_pct','ind28c_no','ind28c_pct',
+            'ind28d_no','ind28d_pct',
+
+            'ind29a_no','ind29a_pct','ind29b_no','ind29b_pct','ind29c_no','ind29c_pct',
+            'ind29d_no','ind29d_pct','ind29e_no','ind29e_pct','ind29f_no','ind29f_pct',
+            'ind29g_no','ind29g_pct',
+
+            'ind30a_no','ind30a_pct','ind30b_no','ind30b_pct','ind30c_no','ind30c_pct',
+            'ind30d_no','ind30d_pct',
+
+            'ind31a_no','ind31a_pct','ind31b_no','ind31b_pct','ind31c_no','ind31c_pct',
+            'ind31d_no','ind31d_pct','ind31e_no','ind31e_pct','ind31f_no','ind31f_pct',
+
+            'ind32_no', 'ind32_pct',
+            
+            'ind33_no','ind33_pct',
+            'ind34_no','ind34_pct',
+            'ind35_no','ind35_pct',
+            'ind36_no','ind36_pct',
+            'ind37a','ind37b','ind38'
+        ];
+
+        // Fill the form inputs in order
+        let valueIndex = 0;
+        inputMapping.forEach(name => {
+            const el = document.querySelector(`[name="${name}"]`);
+            if (!el) return;
+            // Skip undefined values
+            while (valueIndex < values.length && (values[valueIndex] === '' || values[valueIndex] === undefined)) {
+                valueIndex++;
+            }
+            el.value = values[valueIndex] || '';
+            valueIndex++;
+        });
+
+        console.log('Form filled with values:', values);
+    };
+
+    reader.readAsText(file);
+});
+</script>
 
         </main>
       </div>

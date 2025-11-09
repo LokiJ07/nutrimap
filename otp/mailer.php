@@ -50,3 +50,34 @@ function sendOTP($toEmail, $otp) {
         return false;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   ✅ Generic Email Sender
+   --------------------------------------------------------------------------- */
+function sendEmailNotification($toEmail, $subject, $message) {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'danmarkpetalcurin@gmail.com';
+        $mail->Password   = 'qdal zfxu fsej bqqf';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('danmarkpetalcurin@gmail.com', 'CNO NutriMap');
+        $mail->addAddress($toEmail);
+
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+        $mail->AltBody = strip_tags($message);
+
+        $mail->send();
+        error_log("✅ Generic Email sent to $toEmail");
+        return true;
+    } catch (Exception $e) {
+        error_log("❌ Generic Email Error: " . $mail->ErrorInfo);
+        return false;
+    }
+}
