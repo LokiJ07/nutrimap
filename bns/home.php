@@ -66,8 +66,8 @@ $totalPages = ceil($totalRows / $limit);
 $stmt = $pdo->prepare("
     SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date
     FROM reports r
-     JOIN users u ON r.user_id = u.id
-    LEFT JOIN bns_reports b ON r.id = b.report_id
+    JOIN users u ON r.user_id = u.id
+    JOIN bns_reports b ON r.id = b.report_id
     WHERE r.user_id = :userId
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
