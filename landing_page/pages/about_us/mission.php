@@ -201,12 +201,12 @@
             <a href="../../../index.php" class="nav-link">Home</a>
             <a href="../../map.php" class="nav-link">Map</a>
             <div class="dropdown">
-                <a href="about.php" class="nav-link dropdown-link active">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
+                <a href="about.php" class="nav-link dropdown-link ">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
                 <div class="dropdown-content">
                     <a href="profile.php">Profile <i class="fas fa-caret-right"></i></a>
                     <a href="history.php">History <i class="fas fa-caret-right"></i></a>
                     <a href="vision.php">Vision <i class="fas fa-caret-right"></i></a>
-                    <a href="mission.php">Mission <i class="fas fa-caret-right"></i></a>
+                    <a href="mission.php" class="active">Mission <i class="fas fa-caret-right"></i></a>
                 </div>
             </div>
             <a href="../contact_us/contact.php" class="nav-link">Contact Us</a>
