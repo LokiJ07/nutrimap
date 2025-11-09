@@ -48,7 +48,7 @@ if (session_status() === PHP_SESSION_NONE) {
             'ind2', 'ind3', 'ind4', 'ind5',
             
             'ind6a', 'ind6b',
-            'ind7', 'ind8',
+            'ind7', 'ind8', 'ind9',
             
             'ind9a',
             'ind9b1_no','ind9b1_pct','ind9b2_no','ind9b2_pct','ind9b3_no','ind9b3_pct',
@@ -625,7 +625,7 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
             'ind2', 'ind3', 'ind4', 'ind5',
             
             'ind6a', 'ind6b',
-            'ind7', 'ind8',
+            'ind7', 'ind8', 'ind9',
             
             'ind9a',
             'ind9b1_no','ind9b1_pct','ind9b2_no','ind9b2_pct','ind9b3_no','ind9b3_pct',
