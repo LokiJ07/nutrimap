@@ -209,26 +209,26 @@ burgerBtn.addEventListener('click', () => {
         <div>
           <h3 class="footer-title text-white font-semibold mb-4">About Us</h3>
           <ul class="footer-links space-y-2">
-            <li><a href="landing_page/pages/about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
-            <li><a href="landing_page/pages/about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="landing_page/pages/about_us/history.php" class="hover:text-cyan-600">History</a></li>
+            <li><a href="pages/about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
+            <li><a href="pages/about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
+            <li><a href="pages/about_us/history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>
           <h3 class="footer-title text-white font-semibold mb-4">Quick Links</h3>
           <ul class="footer-links space-y-2">
-            <li><a href="landing_page/map.php" class="hover:text-cyan-600">Map</a></li>
-            <li><a href="landing_page/pages/contact_us/contact.php" class="hover:text-cyan-600">Contact Us</a></li>
+            <li><a href="map.php" class="hover:text-cyan-600">Map</a></li>
+            <li><a href="pages/contact_us/contact.php" class="hover:text-cyan-600">Contact Us</a></li>
           </ul>
         </div>
         <div>
           <h3 class="footer-title text-white font-semibold mb-4">Legal & Support</h3>
           <ul class="footer-links space-y-2">
-            <li><a href="landing_page/pages/legal_and_support/terms.php" class="hover:text-cyan-600">Terms of Use</a></li>
-            <li><a href="landing_page/pages/legal_and_support/privacy.php" class="hover:text-cyan-600">Privacy Policy</a></li>
-            <li><a href="landing_page/pages/legal_and_support/cookies.php" class="hover:text-cyan-600">Cookies</a></li>
-            <li><a href="landing_page/pages/help_and_support/help.php" class="hover:text-cyan-600">Help</a></li>
-            <li><a href="landing_page/pages/help_and_support/faqs.php" class="hover:text-cyan-600">FAQs</a></li>
+            <li><a href="pages/legal_and_support/terms.php" class="hover:text-cyan-600">Terms of Use</a></li>
+            <li><a href="pages/legal_and_support/privacy.php" class="hover:text-cyan-600">Privacy Policy</a></li>
+            <li><a href="pages/legal_and_support/cookies.php" class="hover:text-cyan-600">Cookies</a></li>
+            <li><a href="pages/help_and_support/help.php" class="hover:text-cyan-600">Help</a></li>
+            <li><a href="pages/help_and_support/faqs.php" class="hover:text-cyan-600">FAQs</a></li>
           </ul>
         </div>
       </div>
@@ -243,7 +243,6 @@ burgerBtn.addEventListener('click', () => {
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script>
-
 // ===================== MAP INITIAL SETUP =====================
 const map = L.map('map', {
   center: [8.4760268, 124.4809540],
