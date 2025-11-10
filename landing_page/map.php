@@ -355,93 +355,115 @@ function styleFeature(feature){
 // ===================== TOOLTIP + CHART =====================
 function featureHandler(feature, layer) {
   const tooltip = document.getElementById('chart-tooltip');
-  const isMobile = window.innerWidth < 768; // mobile breakpoint
 
   layer.on({
     mouseover(e) {
+      const isMobile = window.innerWidth < 768;
       tooltip.style.display = 'block';
       tooltip.style.opacity = 1;
       tooltip.innerHTML = '';
+      tooltip.style.padding = '8px';
 
       const barangayName = feature.properties.BARANGAY || 'Unknown';
       let labels = [], datasets = [];
-      const indicators = legendItems.filter(li => li.dataset.field !== 'all');
 
-      // HEADER
+      // HEADER: always show barangay name
       const title = document.createElement('div');
       title.className = 'tooltip-title';
       title.textContent = barangayName;
+      title.style.fontWeight = 'bold';
+      title.style.marginBottom = '6px';
       tooltip.appendChild(title);
 
-      // SINGLE INDICATOR
-      if (activeField) {
-        const legendLabel = activeLabel || activeField;
-        let value = 0;
+      const indicators = legendItems.filter(li => li.dataset.field !== 'all');
 
-        if (activeYear === 'All') {
-          const allYears = [...new Set(
-            geoData.features
-              .filter(f => f.properties.BARANGAY === barangayName)
-              .map(f => f.properties.YEAR)
-          )].sort((a,b) => a - b);
-
-          labels = allYears;
-          const values = allYears.map(y => {
-            const f = geoData.features.find(ff =>
-              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
-            );
-            return f ? Number(f.properties[activeField.toUpperCase()] ?? null) : null;
-          });
-
-          value = values.filter(v => v !== null).pop() ?? 0;
-
+      // Prepare chart data
+      if (activeField && activeField !== 'all') {
+        // SINGLE INDICATOR
+        labels = getYears(barangayName);
+        const values = labels.map(y => getValue(barangayName, y, activeField));
+        datasets.push({
+          label: activeLabel || activeField,
+          data: values,
+          borderColor: activeColor,
+          backgroundColor: activeColor,
+          tension: 0.3,
+          borderWidth: 2,
+          fill: false,
+          spanGaps: true,
+          pointRadius: 3
+        });
+      } else {
+        // ALL INDICATORS
+        labels = getYears(barangayName);
+        indicators.forEach(li => {
+          const values = labels.map(y => getValue(barangayName, y, li.dataset.field));
           datasets.push({
-            label: legendLabel,
+            label: li.dataset.label,
             data: values,
-            borderColor: activeColor,
-            backgroundColor: activeColor,
+            borderColor: li.dataset.color,
+            backgroundColor: li.dataset.color,
             tension: 0.3,
             borderWidth: 2,
             fill: false,
             spanGaps: true,
             pointRadius: 3
           });
-        } else {
-          labels = [activeYear];
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          value = f ? Number(f.properties[activeField.toUpperCase()] ?? 0) : 0;
+        });
+      }
 
-          datasets.push({
-            label: legendLabel,
-            data: [value],
-            borderColor: activeColor,
-            backgroundColor: activeColor,
-            borderWidth: 1
-          });
+      // MOBILE VIEW
+      if (isMobile) {
+        createChart('70vw', '120px', labels, datasets);
+
+        // Only show indicator if single indicator is selected
+        if (activeField && activeField !== 'all') {
+          showSingleIndicator(barangayName, activeField, activeColor, labels);
         }
+        return;
+      }
 
-        // Tooltip color + percentage
-        const legendDiv = document.createElement('div');
-        legendDiv.className = 'tooltip-indicator-line';
-        legendDiv.innerHTML = `
-          <span class="color-box" style="background:${activeColor};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-          <strong>${value}%</strong>
-        `;
-        tooltip.appendChild(legendDiv);
+      // DESKTOP VIEW
+      createChart('300px', '150px', labels, datasets);
 
-        // Chart container
-        const chartWrapperDiv = document.createElement('div');
-        chartWrapperDiv.style.width = isMobile ? '95vw' : '300px';
-        chartWrapperDiv.style.height = '150px';
-        chartWrapperDiv.style.marginTop = '6px';
-        tooltip.appendChild(chartWrapperDiv);
+      // Desktop indicators
+      if (activeField && activeField !== 'all') {
+        showSingleIndicator(barangayName, activeField, activeColor, labels);
+      } else {
+        showAllIndicators(barangayName, indicators, labels);
+      }
+
+      // ===== Helper Functions =====
+      function getYears(barangay) {
+        if (activeYear === 'All') {
+          return [...new Set(
+            geoData.features
+              .filter(f => f.properties.BARANGAY === barangay)
+              .map(f => f.properties.YEAR)
+          )].sort((a,b) => a - b);
+        } else {
+          return [activeYear];
+        }
+      }
+
+      function getValue(barangay, year, field) {
+        const f = geoData.features.find(ff =>
+          ff.properties.BARANGAY === barangay && String(ff.properties.YEAR) === String(year)
+        );
+        return f ? Number(f.properties[field.toUpperCase()] ?? 0) : 0;
+      }
+
+      function createChart(width, height, labels, datasets) {
+        const chartWrapper = document.createElement('div');
+        chartWrapper.style.width = width;
+        chartWrapper.style.height = height;
+        chartWrapper.style.marginTop = '4px';
+        tooltip.appendChild(chartWrapper);
 
         const canvas = document.createElement('canvas');
         canvas.style.width = '100%';
         canvas.style.height = '100%';
-        chartWrapperDiv.appendChild(canvas);
+        chartWrapper.appendChild(canvas);
 
         if (miniChart) miniChart.destroy();
         miniChart = new Chart(canvas, {
@@ -451,129 +473,54 @@ function featureHandler(feature, layer) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false }, tooltip: { enabled: false }, datalabels: { display: false } },
-            scales: { x: { display: activeYear === 'All' }, y: { display: true, min: 0, max: 100 } }
+            scales: { x: { display: true }, y: { display: true, min: 0, max: 100 } }
           },
           plugins: [ChartDataLabels]
         });
-
-        return;
       }
 
-      // ALL INDICATORS
-      const flexWrapper = document.createElement('div');
-      flexWrapper.style.display = 'flex';
-      flexWrapper.style.flexDirection = isMobile ? 'column' : 'row';
-      flexWrapper.style.alignItems = 'flex-start';
-      flexWrapper.style.gap = '6px';
-      tooltip.appendChild(flexWrapper);
-
-      // Indicators
-      const indicatorsDiv = document.createElement('div');
-      indicatorsDiv.style.flex = '0 0 auto';
-      indicatorsDiv.style.fontSize = '13px';
-      flexWrapper.appendChild(indicatorsDiv);
-
-      // Chart
-      const chartWrapper = document.createElement('div');
-      chartWrapper.style.flex = '1 1 auto';
-      chartWrapper.style.minWidth = isMobile ? '95vw' : '200px';
-      chartWrapper.style.height = '150px';
-      flexWrapper.appendChild(chartWrapper);
-
-      const canvas = document.createElement('canvas');
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      chartWrapper.appendChild(canvas);
-
-      if (activeYear === 'All') {
-        const allYears = [...new Set(
-          geoData.features
-            .filter(f => f.properties.BARANGAY === barangayName)
-            .map(f => f.properties.YEAR)
-        )].sort((a,b) => a - b);
-        labels = allYears;
+      function showAllIndicators(barangay, indicators, years) {
+        const indicatorsDiv = document.createElement('div');
+        indicatorsDiv.style.marginTop = '4px';
+        tooltip.appendChild(indicatorsDiv);
 
         indicators.forEach(li => {
-          const field = li.dataset.field.toUpperCase();
-          const color = li.dataset.color;
-          const values = allYears.map(y => {
-            const f = geoData.features.find(ff =>
-              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
-            );
-            return f ? Number(f.properties[field] ?? null) : null;
-          });
-
+          const values = years.map(y => getValue(barangay, y, li.dataset.field));
           const latestVal = values.filter(v => v !== null).pop() ?? 0;
-
-          datasets.push({
-            label: li.dataset.label,
-            data: values,
-            borderColor: color,
-            backgroundColor: color,
-            tension: 0.3,
-            borderWidth: 2,
-            fill: false,
-            spanGaps: true,
-            pointRadius: 3
-          });
 
           const line = document.createElement('div');
           line.className = 'tooltip-indicator-line';
           line.style.display = 'flex';
           line.style.alignItems = 'center';
-          line.style.marginBottom = '4px';
+          line.style.marginBottom = '2px';
           line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
+            <span class="color-box" style="background:${li.dataset.color};width:12px;height:12px;display:inline-block;margin-right:4px;border:1px solid #333;"></span>
             <span>${latestVal}%</span>
           `;
           indicatorsDiv.appendChild(line);
         });
-      } else {
-        labels = indicators.map(li => li.dataset.label);
-        const values = indicators.map(li => {
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          return f ? Number(f.properties[li.dataset.field.toUpperCase()] ?? 0) : 0;
-        });
-        const colors = indicators.map(li => li.dataset.color);
-
-        datasets.push({
-          label: 'Percentage',
-          data: values,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 1
-        });
-
-        indicators.forEach((li, i) => {
-          const val = values[i];
-          const color = li.dataset.color;
-          const line = document.createElement('div');
-          line.className = 'tooltip-indicator-line';
-          line.style.display = 'flex';
-          line.style.alignItems = 'center';
-          line.style.marginBottom = '4px';
-          line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-            <span>${val}%</span>
-          `;
-          indicatorsDiv.appendChild(line);
-        });
       }
 
-      if (miniChart) miniChart.destroy();
-      miniChart = new Chart(canvas, {
-        type: activeYear === 'All' ? 'line' : 'bar',
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { enabled: false }, datalabels: { display: false } },
-          scales: { x: { display: activeYear === 'All' }, y: { display: true, min: 0, max: 100 } }
-        },
-        plugins: [ChartDataLabels]
-      });
+      function showSingleIndicator(barangay, field, color, years) {
+        const values = years.map(y => getValue(barangay, y, field));
+        const latestVal = values.filter(v => v !== null).pop() ?? 0;
+
+        const indicatorsDiv = document.createElement('div');
+        indicatorsDiv.style.marginTop = '4px';
+        tooltip.appendChild(indicatorsDiv);
+
+        const line = document.createElement('div');
+        line.className = 'tooltip-indicator-line';
+        line.style.display = 'flex';
+        line.style.alignItems = 'center';
+        line.style.marginBottom = '2px';
+        line.innerHTML = `
+          <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:4px;border:1px solid #333;"></span>
+          <span>${latestVal}%</span>
+        `;
+        indicatorsDiv.appendChild(line);
+      }
+
     },
 
     mouseout(e) {
@@ -629,72 +576,106 @@ function getGradientColor(baseColor, value){
 }
 
 // ===================== GRADIENT SCALE =====================
-function updateGradientScale(baseColor){
+function updateGradientScale(baseColor) {
   const grid = document.getElementById('gradient-grid');
-  if(!grid) return; 
-  grid.innerHTML='';
+  if (!grid) return;
+  grid.innerHTML = '';
 
-  // store the currently clicked gradient cell index
   let activeCellIndex = null;
 
-  for(let i=0;i<10;i++){
-    const minVal = i*10;      
-    const maxVal = (i+1)*10;  
-    const val=(i+1)*10;
-    const cell=document.createElement('div');
-    cell.className='gradient-cell';
-    cell.style.background = getGradientColor(baseColor,val);
-    cell.title = `${minVal}% - ${maxVal}%`; 
+  // Create 10 gradient cells (1–10, 11–20, ..., 91–100)
+  for (let i = 1; i <= 10; i++) {
+    const minVal = (i - 1) * 10 + 0.000001; // >0
+    const maxVal = i * 10;
+
+    const cell = document.createElement('div');
+    cell.className = 'gradient-cell';
+    cell.style.background = getGradientColor(baseColor, maxVal); // color based on upper range
+    cell.title = `${minVal.toFixed(0)}% - ${maxVal}%`;
 
     cell.addEventListener('mouseover', () => {
       cell.classList.add('active-gradient-cell');
-      activeGradientRange = {min:minVal, max:maxVal};
+      activeGradientRange = { min: minVal, max: maxVal };
       filterMapByGradient();
     });
 
     cell.addEventListener('mouseout', () => {
-  cell.classList.remove('active-gradient-cell');
-  activeGradientRange = null;
-
-  // restore all layers to normal style
-  if (geoLayer) {
-    geoLayer.eachLayer(layer => {
-      layer.setStyle(styleFeature(layer.feature));
+      cell.classList.remove('active-gradient-cell');
+      activeGradientRange = null;
+      filterMapByGradient();
     });
-  }
-});
-
 
     cell.addEventListener('click', () => {
-      // remove previous active
-      if(activeCellIndex !== null && grid.children[activeCellIndex]){
+      if (activeCellIndex !== null && grid.children[activeCellIndex]) {
         grid.children[activeCellIndex].classList.remove('active-gradient-cell');
       }
-      activeCellIndex = i;
+      activeCellIndex = i - 1;
       cell.classList.add('active-gradient-cell');
-      activeGradientRange = {min:minVal, max:maxVal};
+      activeGradientRange = { min: minVal, max: maxVal };
       filterMapByGradient();
     });
 
     grid.appendChild(cell);
   }
 
-  // Add "No Data" transparent cell
+  // No Data cell
   const noDataCell = document.createElement('div');
-  noDataCell.className='gradient-cell';
+  noDataCell.className = 'gradient-cell';
   noDataCell.style.background = 'transparent';
   noDataCell.style.border = '1px dashed #333';
   noDataCell.title = 'No Data';
+
+  noDataCell.addEventListener('mouseover', () => {
+    noDataCell.classList.add('active-gradient-cell');
+    activeGradientRange = 'nodata';
+    filterMapByGradient();
+  });
+  noDataCell.addEventListener('mouseout', () => {
+    noDataCell.classList.remove('active-gradient-cell');
+    activeGradientRange = null;
+    filterMapByGradient();
+  });
+  noDataCell.addEventListener('click', () => {
+    if (activeCellIndex !== null && grid.children[activeCellIndex]) {
+      grid.children[activeCellIndex].classList.remove('active-gradient-cell');
+    }
+    activeCellIndex = 10; // last cell = No Data
+    noDataCell.classList.add('active-gradient-cell');
+    activeGradientRange = 'nodata';
+    filterMapByGradient();
+  });
+
   grid.appendChild(noDataCell);
 }
 
 // ===================== FILTER BY GRADIENT =====================
 function filterMapByGradient(){
   if(!geoLayer) return;
+
   geoLayer.eachLayer(layer => {
+    const props = layer.feature.properties;
     if(!activeField) return layer.setStyle(styleFeature(layer.feature));
-    const val = Number(layer.feature.properties[activeField.toUpperCase()] ?? 0);
-    const inRange = activeGradientRange && val >= activeGradientRange.min && val <= activeGradientRange.max;
+
+    let valRaw = props[activeField.toUpperCase()];
+    let val = valRaw != null ? Number(valRaw) : null;
+
+    // Treat 0 or missing as No Data
+    if(val === 0 || val === null || props.NO_DATA === true) {
+      val = null; // mark as No Data
+    }
+
+    let inRange = false;
+
+    if(activeGradientRange === 'nodata'){
+      inRange = val === null; // only truly missing or zero
+    } else if(activeGradientRange){
+      if(val !== null) {
+        inRange = val >= activeGradientRange.min && val <= activeGradientRange.max;
+      }
+    } else {
+      inRange = true;
+    }
+
     layer.setStyle({
       ...styleFeature(layer.feature),
       fillOpacity: inRange ? 0.8 : 0.1,
@@ -702,6 +683,7 @@ function filterMapByGradient(){
     });
   });
 }
+
 </script>
 
 
