@@ -41,15 +41,33 @@
     height: 120px !important; /* smaller chart for mobile */
   }
 }
-    .gradient-cell {
-      height: 20px;
-      width: 20px;
-      display:inline-block;
-      margin-right:4px;
-      margin-bottom:4px;
-      cursor:pointer;
-    }
-    .active-gradient-cell { outline: 2px solid #000; }
+   .gradient-wrapper {
+  margin-top: 1rem;
+}
+
+.gradient-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr); /* 10 gradient cells + No Data */
+  gap: 2px;
+  max-width: 720px; /* optional: adjust to fit nicely */
+}
+
+.gradient-cell {
+  height: 25px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: transform 0.1s, outline 0.1s;
+}
+
+.gradient-cell:hover {
+  transform: scale(1.1);
+}
+
+.active-gradient-cell {
+  outline: 2px solid #000;
+}
+
   </style>
 <body class="flex flex-col min-h-screen">
 
