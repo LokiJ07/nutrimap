@@ -72,7 +72,7 @@
 <body class="flex flex-col min-h-screen">
 
   <!-- HEADER -->
-<header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
   <!-- Logo -->
   <div class="flex items-center font-bold text-2xl text-gray-700">
     <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
@@ -81,21 +81,29 @@
 
   <!-- Desktop nav -->
   <nav class="hidden md:flex items-center space-x-6 font-semibold">
-    <a href="../index.php" class="nav-link">Home</a>
+    <a href="../index.php" >Home</a>
     <a href="map.php" class="text-teal-600">Map</a>
-    <div class="dropdown relative">
-      <a href="pages/about_us/about.php" class="nav-link dropdown-link flex items-center gap-1">
-        About CNO
-        <svg class="dropdown-arrow w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-      </a>
-      <div class="dropdown-content absolute hidden bg-gray-100 min-w-[160px] shadow rounded overflow-hidden left-0 z-10">
-        <a href="pages/about_us/profile.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Profile</a>
-        <a href="pages/about_us/history.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">History</a>
-        <a href="pages/about_us/vision.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Vision</a>
-        <a href="pages/about_us/mission.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Mission</a>
-      </div>
-    </div>
-    <a href="pages/contact_us/contact.php" class="nav-link">Contact Us</a>
+<!-- Dropdown Parent -->
+<div class="relative">
+  <!-- Toggle Button -->
+  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-black cursor-pointer focus:outline-none">
+    About CNO
+    <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
+    <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
+    <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
+    <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
+    <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
+    <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
+  </div>
+</div>
+
+    <a href="pages/contact_us/contact.php" >Contact Us</a>
     <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
   </nav>
 
@@ -110,8 +118,8 @@
 
   <!-- Mobile menu -->
   <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
-    <a href="../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
-    <a href="map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+    <a href="./index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+    <a href="landing_page/map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
     <a href="pages/about_us/about.php" class="px-6 py-3 border-b hover:bg-gray-100">About CNO</a>
     <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
     <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
@@ -119,12 +127,32 @@
 </header>
 
 <script>
-const burgerBtn = document.getElementById('burgerBtn');
-const mobileMenu = document.getElementById('mobileMenu');
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
 
-burgerBtn.addEventListener('click', () => {
-  mobileMenu.classList.toggle('hidden');
+  burgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
 });
+// Dropdown functionality for About CNO
+ const aboutBtn = document.getElementById('aboutBtn');
+  const aboutDropdown = document.getElementById('aboutDropdown');
+  const aboutArrow = document.getElementById('aboutArrow');
+
+  aboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent document click
+    aboutDropdown.classList.toggle('hidden');
+    aboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Close dropdown if clicked outside
+  document.addEventListener('click', () => {
+    if(!aboutDropdown.classList.contains('hidden')) {
+      aboutDropdown.classList.add('hidden');
+      aboutArrow.classList.remove('rotate-180');
+    }
+  });
 </script>
 
 
