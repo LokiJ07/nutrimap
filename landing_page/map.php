@@ -345,13 +345,14 @@ function drawLayer(selectedYear) {
 function styleFeature(feature){
   const props = feature.properties;
 
-  // Transparent base but visible boundary for missing data
-  if(props.NO_DATA) {
-    return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
-  }
-
+  // Treat 0 or missing as No Data
+  const valKeys = Object.keys(props);
+  let val;
   if(activeField && activeColor){
-    const val = props[activeField.toUpperCase()] ?? 0;
+    val = props[activeField.toUpperCase()];
+    if(val === 0 || val == null || props.NO_DATA === true) {
+      return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
+    }
     return { color:'#333', weight:1, fillOpacity:0.8, fillColor:getGradientColor(activeColor, val) };
   }
 
@@ -359,12 +360,13 @@ function styleFeature(feature){
   let r=0,g=0,b=0,total=0;
   legendItems.forEach(li => {
       if(li.dataset.field === 'all') return; 
-      const val = props[li.dataset.field.toUpperCase()] ?? 0;
+      const v = props[li.dataset.field.toUpperCase()];
+      if(v === 0 || v == null) return; // skip zero/no data
       const rgb = hexToRgb(li.dataset.color);
-      r += rgb.r*val;
-      g += rgb.g*val;
-      b += rgb.b*val;
-      total += val;
+      r += rgb.r*v;
+      g += rgb.g*v;
+      b += rgb.b*v;
+      total += v;
   });
   if(total===0) return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
   return { color:'#333', weight:1, fillOpacity:0.8, fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})` };
@@ -696,12 +698,11 @@ function filterMapByGradient(){
 
     layer.setStyle({
       ...styleFeature(layer.feature),
-      fillOpacity: inRange ? 0.8 : 0.1,
+      fillOpacity: inRange ? (val === null ? 0 : 0.8) : 0.1,
       opacity: inRange ? 1 : 0.3
     });
   });
 }
-
 </script>
 
 
