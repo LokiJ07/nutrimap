@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <style>
+
   body { margin:0;}
   #map { height: 640px; }
 
@@ -690,142 +691,83 @@ function featureHandler(feature, layer) {
       tooltip.innerHTML = '';
 
       const barangayName = feature.properties.BARANGAY || 'Unknown';
-      let labels = [], datasets = [];
-      const indicators = legendItems.filter(li => li.dataset.field !== 'all');
+      const indicators = Array.from(legendItems).filter(li => li.dataset.field && li.dataset.field !== 'all');
+      const chartWrapper = document.createElement('div');
+      chartWrapper.style.flex = '1';
+      const indicatorsDiv = document.createElement('div');
+      indicatorsDiv.style.flex = '1';
+      indicatorsDiv.style.fontSize = '13px';
 
-      // HEADER
+      // Tooltip title
       const title = document.createElement('div');
       title.className = 'tooltip-title';
       title.textContent = barangayName;
       tooltip.appendChild(title);
 
-      // SINGLE INDICATOR
-      if (activeField) {
-        const legendLabel = activeLabel || activeField;
-        let value = 0;
-
-        if (activeYear === 'All') {
-          // All years for this barangay
-          const allYears = [...new Set(
-            geoData.features
-              .filter(f => f.properties.BARANGAY === barangayName)
-              .map(f => f.properties.YEAR)
-          )].sort((a,b) => a - b);
-
-          labels = allYears;
-
-          const values = allYears.map(y => {
-            const f = geoData.features.find(ff =>
-              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
-            );
-            return f ? Number(f.properties[activeField.toUpperCase()] ?? null) : null;
-          });
-
-          value = values.filter(v => v !== null).pop() ?? 0;
-
-          datasets.push({
-            label: legendLabel,
-            data: values,
-            borderColor: activeColor,
-            backgroundColor: activeColor,
-            tension: 0.3,
-            borderWidth: 2,
-            fill: false,
-            spanGaps: true,
-            pointRadius: 3
-          });
-
-        } else {
-          // SPECIFIC YEAR: show only that year
-          labels = [activeYear];
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          value = f ? Number(f.properties[activeField.toUpperCase()] ?? 0) : 0;
-
-          datasets.push({
-            label: legendLabel,
-            data: [value],
-            borderColor: activeColor,
-            backgroundColor: activeColor,
-            borderWidth: 1
-          });
-        }
-
-        // Tooltip color + percentage
-        const legendDiv = document.createElement('div');
-        legendDiv.className = 'tooltip-indicator-line';
-        legendDiv.innerHTML = `
-          <span class="color-box" style="background:${activeColor};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-          <strong>${value}%</strong>
-        `;
-        tooltip.appendChild(legendDiv);
-
-        // Chart canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 200;
-        tooltip.appendChild(canvas);
-
-        if (miniChart) miniChart.destroy();
-        miniChart = new Chart(canvas, {
-          type: activeYear === 'All' ? 'line' : 'bar',
-          data: { labels, datasets },
-          options: {
-            responsive: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: { enabled: false },
-              datalabels: { display: false }
-            },
-            scales: {
-              x: { display: activeYear === 'All' },
-              y: { display: false, min: 0, max: 100 }
-            }
-          },
-          plugins: [ChartDataLabels]
-        });
-
-        return;
-      }
-
-      // ALL INDICATORS
+      // Flex wrapper for indicators + chart
       const flexWrapper = document.createElement('div');
       flexWrapper.className = 'tooltip-flex';
       flexWrapper.style.display = 'flex';
       flexWrapper.style.gap = '10px';
+      flexWrapper.appendChild(indicatorsDiv);
+      flexWrapper.appendChild(chartWrapper);
       tooltip.appendChild(flexWrapper);
 
-      const indicatorsDiv = document.createElement('div');
-      indicatorsDiv.style.flex = '1';
-      indicatorsDiv.style.fontSize = '13px';
-      flexWrapper.appendChild(indicatorsDiv);
-
-      const chartWrapper = document.createElement('div');
-      chartWrapper.style.flex = '1';
-      flexWrapper.appendChild(chartWrapper);
-
+      // Determine years to show
+      let labels = [];
       if (activeYear === 'All') {
-        const allYears = [...new Set(
+        labels = [...new Set(
           geoData.features
             .filter(f => f.properties.BARANGAY === barangayName)
             .map(f => f.properties.YEAR)
-        )].sort((a,b) => a - b);
+        )].sort((a, b) => a - b);
+      } else {
+        labels = [activeYear];
+      }
 
-        labels = allYears;
+      // Build datasets
+      let datasets = [];
+      if (activeField) {
+        // Single Indicator
+        const field = activeField.toUpperCase();
+        const color = activeColor;
+        const values = labels.map(y => {
+          const f = geoData.features.find(ff =>
+            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
+          );
+          return f ? Number(f.properties[field] ?? 0) : 0;
+        });
 
+        datasets.push({
+          label: activeLabel || activeField,
+          data: values,
+          borderColor: color,
+          backgroundColor: color,
+          tension: 0.3,
+          borderWidth: 2,
+          fill: false,
+          spanGaps: true,
+          pointRadius: 3
+        });
+
+        // Tooltip line
+        const latestVal = values[values.length - 1];
+        const line = document.createElement('div');
+        line.className = 'tooltip-indicator-line';
+        line.innerHTML = `<span class="color-box" style="background:${color};width:12px;height:12px;margin-right:8px;border:1px solid #333;"></span><span>${latestVal}%</span>`;
+        indicatorsDiv.appendChild(line);
+
+      } else {
+        // All Indicators
         indicators.forEach(li => {
           const field = li.dataset.field.toUpperCase();
           const color = li.dataset.color;
-
-          const values = allYears.map(y => {
+          const values = labels.map(y => {
             const f = geoData.features.find(ff =>
               ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
             );
-            return f ? Number(f.properties[field] ?? null) : null;
+            return f ? Number(f.properties[field] ?? 0) : 0;
           });
-
-          const latestVal = values.filter(v => v !== null).pop() ?? 0;
 
           datasets.push({
             label: li.dataset.label,
@@ -839,74 +781,29 @@ function featureHandler(feature, layer) {
             pointRadius: 3
           });
 
+          // Tooltip line
+          const latestVal = values[values.length - 1];
           const line = document.createElement('div');
           line.className = 'tooltip-indicator-line';
-          line.style.display = 'flex';
-          line.style.alignItems = 'center';
-          line.style.marginBottom = '6px';
-          line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-            <span>${latestVal}%</span>
-          `;
-          indicatorsDiv.appendChild(line);
-        });
-
-      } else {
-        // SPECIFIC YEAR: only show values for that year
-        labels = indicators.map(li => li.dataset.label);
-        const values = indicators.map(li => {
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          return f ? Number(f.properties[li.dataset.field.toUpperCase()] ?? 0) : 0;
-        });
-        const colors = indicators.map(li => li.dataset.color);
-
-        datasets.push({
-          label: 'Percentage',
-          data: values,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 1
-        });
-
-        indicators.forEach((li, i) => {
-          const val = values[i];
-          const color = li.dataset.color;
-          const line = document.createElement('div');
-          line.className = 'tooltip-indicator-line';
-          line.style.display = 'flex';
-          line.style.alignItems = 'center';
-          line.style.marginBottom = '6px';
-          line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-            <span>${val}%</span>
-          `;
+          line.innerHTML = `<span class="color-box" style="background:${color};width:12px;height:12px;margin-right:8px;border:1px solid #333;"></span><span>${latestVal}%</span>`;
           indicatorsDiv.appendChild(line);
         });
       }
 
-      // Chart canvas
+      // Create mini chart
       const canvas = document.createElement('canvas');
-      canvas.width = 260;
+      canvas.width = 320;
       canvas.height = 200;
       chartWrapper.appendChild(canvas);
 
       if (miniChart) miniChart.destroy();
       miniChart = new Chart(canvas, {
-        type: activeYear === 'All' ? 'line' : 'bar',
+        type: 'line',
         data: { labels, datasets },
         options: {
           responsive: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: false },
-            datalabels: { display: false }
-          },
-          scales: {
-            x: { display: activeYear === 'All' },
-            y: { display: false, min: 0, max: 100 }
-          }
+          plugins: { legend:{display:false}, tooltip:{enabled:false}, datalabels:{display:false} },
+          scales: { x:{display:true}, y:{display:false, min:0, max:100} }
         },
         plugins: [ChartDataLabels]
       });
