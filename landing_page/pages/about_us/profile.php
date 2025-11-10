@@ -6,116 +6,10 @@
   <title>CNO NutriMap - Organizational Chart</title>
   <link rel="icon" type="image/png" href="../../img/CNO_Logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css">
   <style>
     body {font-family: 'Arial', sans-serif; margin:0; padding:0; background:#f0f2f5; color:#333; display:flex; flex-direction:column; min-height:100vh;}
-    .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            font-size: 24px;
-            color: #333;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        .logo .cno-color {
-            color: #00a0a0;
-        }
-        .logo-space {
-            margin-right: 8px;
-        }
-        .nav {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        .nav-link {
-            text-decoration: none;
-            color: #666;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 8px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .nav-link:hover {
-            color: #000;
-        }
-        .home-btn {
-            background-color: #f0f2f5;
-            color: #00a0a0 !important;
-        }
-        .login-btn {
-            background-color: #00a0a0;
-            color: #fff !important;
-            border: 1px solid #00a0a0;
-            padding: 10px 25px;
-        }
-        .login-btn:hover {
-            background-color: #007f7f;
-        }
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        .dropdown-link {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .dropdown-arrow {
-            transition: transform 0.3s ease;
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-        .dropdown:hover .dropdown-arrow {
-            transform: rotate(180deg);
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 5px;
-            overflow: hidden;
-            left: 0;
-            top: 100%;
-        }
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-weight: normal;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        .dropdown-link.active,
-        .dropdown-content a.active {
-            background-color: #e0f0f0;
-            color: #008c8c;
-            font-weight: 700;
-        }
     .org-chart-page-container {flex-grow:1; display:flex; justify-content:center; align-items:flex-start; padding:30px; overflow-x:auto; background:#f7f7f7;}
     .org-chart {background:linear-gradient(to bottom,#e0ffe0,#c0ffc0); border-radius:10px; padding:40px; box-shadow:0 5px 15px rgba(0,0,0,0.1); display:flex; flex-direction:column; align-items:center; min-width:900px; max-width:1200px;}
     .chart-header-logos {display:flex; justify-content:space-between; width:100%; margin-bottom:20px; padding:0 50px;}
@@ -159,27 +53,126 @@
   </style>
 </head>
 <body>
-   <header class="header">
-        <div class="logo">
-             <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo"> 
-            <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
-        </div>
-        <nav class="nav">
-            <a href="../../../index.php" class="nav-link">Home</a>
-            <a href="../../map.php" class="nav-link">Map</a>
-            <div class="dropdown">
-                <a href="about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
-                <div class="dropdown-content">
-                    <a href="profile.php" class=" active">Profile <i class="fas fa-caret-right"></i></a>
-                    <a href="history.php">History <i class="fas fa-caret-right"></i></a>
-                    <a href="vision.php">Vision <i class="fas fa-caret-right"></i></a>
-                    <a href="mission.php">Mission <i class="fas fa-caret-right"></i></a>
-                </div>
-            </div>
-            <a href="../contact_us/contact.php" class="nav-link">Contact Us</a>
-            <a href="../../../login.php" class="nav-link login-btn">Login</a>
-        </nav>
-    </header>
+  <!-- Header -->
+  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <!-- Logo -->
+  <div class="flex items-center font-bold text-2xl text-gray-700">
+    <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <span class="cno-color">CNO</span><span class="ml-2">NutriMap</span>
+  </div>
+
+  <!-- Desktop nav -->
+  <nav class="hidden md:flex items-center space-x-6 font-semibold">
+    <a href="../../../index.php" class="hover:text-teal-600">Home</a>
+    <a href="../../map.php" class="hover:text-teal-600">Map</a>
+<!-- Dropdown Parent -->
+<div class="relative">
+  <!-- Toggle Button -->
+  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-teal-600 cursor-pointer focus:outline-none">
+    About CNO
+    <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
+    <a href="../about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
+    <a href="../about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
+    <a href="../about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
+    <a href="../about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
+    <a href="../about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
+  </div>
+</div>
+
+    <a href="contact.php" class="text-teal-600">Contact Us</a>
+    <a href="../../../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
+  </nav>
+
+  <!-- Mobile Burger -->
+  <div class="md:hidden flex items-center">
+    <button id="burgerBtn" class="text-gray-700 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+ <!-- Mobile menu -->
+<div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+  <a href="../../../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+  <a href="../../map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+
+  <!-- Mobile About CNO Dropdown -->
+  <div class="flex flex-col">
+    <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
+      About CNO
+      <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+      </svg>
+    </button>
+    <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
+      <a href="../about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
+      <a href="../about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
+      <a href="../about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+      <a href="../about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
+      <a href="../about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+    </div>
+  </div>
+
+  <a href="contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+  <a href="../../../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+</div>
+</header>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  burgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  // Mobile About CNO Dropdown
+  const mobileAboutBtn = document.getElementById('mobileAboutBtn');
+  const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
+  const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+
+  mobileAboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileAboutDropdown.classList.toggle('hidden');
+    mobileAboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Optional: close dropdown if clicked outside mobile menu
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target)) {
+      mobileAboutDropdown.classList.add('hidden');
+      mobileAboutArrow.classList.remove('rotate-180');
+    }
+  });
+});
+// Dropdown functionality for About CNO
+ const aboutBtn = document.getElementById('aboutBtn');
+  const aboutDropdown = document.getElementById('aboutDropdown');
+  const aboutArrow = document.getElementById('aboutArrow');
+
+  aboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent document click
+    aboutDropdown.classList.toggle('hidden');
+    aboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Close dropdown if clicked outside
+  document.addEventListener('click', () => {
+    if(!aboutDropdown.classList.contains('hidden')) {
+      aboutDropdown.classList.add('hidden');
+      aboutArrow.classList.remove('rotate-180');
+    }
+  });
+</script>
+
     <div class="org-chart-page-container">
       <div class="org-chart">
         <div class="chart-header-logos">

@@ -21,12 +21,12 @@
 
   <!-- Desktop nav -->
   <nav class="hidden md:flex items-center space-x-6 font-semibold">
-    <a href="../../../index.php" >Home</a>
-    <a href="../../map.php">Map</a>
+    <a href="../../../index.php" class="hover:text-teal-600">Home</a>
+    <a href="../../map.php" class="hover:text-teal-600">Map</a>
 <!-- Dropdown Parent -->
 <div class="relative">
   <!-- Toggle Button -->
-  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-black cursor-pointer focus:outline-none">
+  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-teal-600 cursor-pointer focus:outline-none">
     About CNO
     <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
@@ -56,14 +56,31 @@
     </button>
   </div>
 
-  <!-- Mobile menu -->
-  <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
-    <a href="./index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
-    <a href="landing_page/map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
-    <a href="pages/about_us/about.php" class="px-6 py-3 border-b hover:bg-gray-100">About CNO</a>
-    <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
-    <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+ <!-- Mobile menu -->
+<div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+  <a href="../../../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+  <a href="../../map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+
+  <!-- Mobile About CNO Dropdown -->
+  <div class="flex flex-col">
+    <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
+      About CNO
+      <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+      </svg>
+    </button>
+    <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
+      <a href="../about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
+      <a href="../about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
+      <a href="../about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+      <a href="../about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
+      <a href="../about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+    </div>
   </div>
+
+  <a href="contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+  <a href="../../../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+</div>
 </header>
 
 <script>
@@ -73,6 +90,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   burgerBtn.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
+  });
+
+  // Mobile About CNO Dropdown
+  const mobileAboutBtn = document.getElementById('mobileAboutBtn');
+  const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
+  const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+
+  mobileAboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileAboutDropdown.classList.toggle('hidden');
+    mobileAboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Optional: close dropdown if clicked outside mobile menu
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target)) {
+      mobileAboutDropdown.classList.add('hidden');
+      mobileAboutArrow.classList.remove('rotate-180');
+    }
   });
 });
 // Dropdown functionality for About CNO
@@ -94,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 </script>
+
 
   <!-- Main Content -->
   <main class="container mx-auto px-6 py-10 flex flex-col gap-8">

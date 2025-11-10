@@ -7,7 +7,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CNO NutriMap | Home</title>
-  <link rel="icon" type="image/png" href="./img/CNO_Logo.png" />
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link
     rel="stylesheet"
@@ -16,32 +16,40 @@
 </head>
 <body class="font-sans text-gray-800">
 
-  <!-- HEADER -->
+  <!-- Header -->
   <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
   <!-- Logo -->
   <div class="flex items-center font-bold text-2xl text-gray-700">
-    <img src="img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
     <span class="cno-color">CNO</span><span class="ml-2">NutriMap</span>
   </div>
 
   <!-- Desktop nav -->
   <nav class="hidden md:flex items-center space-x-6 font-semibold">
-    <a href="./index.php" class="text-teal-600">Home</a>
-    <a href="landing_page/map.php">Map</a>
-    <div class="dropdown relative">
-      <a href="landing_page/pages/about_us/about.php" class="nav-link dropdown-link flex items-center gap-1">
-        About CNO
-        <svg class="dropdown-arrow w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-      </a>
-      <div class="dropdown-content absolute hidden bg-gray-100 min-w-[160px] shadow rounded overflow-hidden left-0 z-10">
-        <a href="landing_page/pages/about_us/profile.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Profile</a>
-        <a href="landing_page/pages/about_us/history.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">History</a>
-        <a href="landing_page/pages/about_us/vision.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Vision</a>
-        <a href="landing_page/pages/about_us/mission.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Mission</a>
-      </div>
-    </div>
-    <a href="landing_page/pages/contact_us/contact.php" class="nav-link">Contact Us</a>
-    <a href="./login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
+    <a href="../index.php" class="text-teal-600">Home</a>
+    <a href="map.php" class="hover:text-teal-600">Map</a>
+<!-- Dropdown Parent -->
+<div class="relative">
+  <!-- Toggle Button -->
+  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-teal-600 cursor-pointer focus:outline-none">
+    About CNO
+    <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
+    <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
+    <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
+    <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
+    <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
+    <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
+  </div>
+</div>
+
+    <a href="pages/contact_us/contact.php" class="hover:text-teal-600">Contact Us</a>
+    <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
   </nav>
 
   <!-- Mobile Burger -->
@@ -53,14 +61,31 @@
     </button>
   </div>
 
-  <!-- Mobile menu -->
-  <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
-    <a href="./index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
-    <a href="landing_page/map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
-    <a href="pages/about_us/about.php" class="px-6 py-3 border-b hover:bg-gray-100">About CNO</a>
-    <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
-    <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+ <!-- Mobile menu -->
+<div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+  <a href="../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+  <a href="map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+
+  <!-- Mobile About CNO Dropdown -->
+  <div class="flex flex-col">
+    <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
+      About CNO
+      <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+      </svg>
+    </button>
+    <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
+      <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
+      <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
+      <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+      <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
+      <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+    </div>
   </div>
+
+  <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+  <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+</div>
 </header>
 
 <script>
@@ -71,34 +96,48 @@ document.addEventListener('DOMContentLoaded', () => {
   burgerBtn.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
   });
+
+  // Mobile About CNO Dropdown
+  const mobileAboutBtn = document.getElementById('mobileAboutBtn');
+  const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
+  const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+
+  mobileAboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileAboutDropdown.classList.toggle('hidden');
+    mobileAboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Optional: close dropdown if clicked outside mobile menu
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target)) {
+      mobileAboutDropdown.classList.add('hidden');
+      mobileAboutArrow.classList.remove('rotate-180');
+    }
+  });
 });
+// Dropdown functionality for About CNO
+ const aboutBtn = document.getElementById('aboutBtn');
+  const aboutDropdown = document.getElementById('aboutDropdown');
+  const aboutArrow = document.getElementById('aboutArrow');
+
+  aboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent document click
+    aboutDropdown.classList.toggle('hidden');
+    aboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Close dropdown if clicked outside
+  document.addEventListener('click', () => {
+    if(!aboutDropdown.classList.contains('hidden')) {
+      aboutDropdown.classList.add('hidden');
+      aboutArrow.classList.remove('rotate-180');
+    }
+  });
 </script>
 
-  <!-- MOBILE MENU -->
-  <div id="mobile-menu" class="hidden md:hidden flex-col bg-white shadow-md border-t">
-    <a href="index.php" class="px-6 py-3 text-teal-600 font-semibold border-b">Home</a>
-    <a href="landing_page/map.php" class="px-6 py-3 border-b">Map</a>
-
-    <!-- Mobile dropdown -->
-    <div class="border-b">
-      <button id="mobile-dropdown-toggle" class="flex justify-between items-center w-full px-6 py-3 font-semibold text-gray-700 focus:outline-none">
-        <span>About CNO</span>
-        <i class="fas fa-chevron-down"></i>
-      </button>
-      <div id="mobile-dropdown" class="hidden flex-col bg-gray-50">
-        <a href="landing_page/pages/about_us/profile.php" class="px-8 py-2 text-sm hover:bg-gray-100">Profile</a>
-        <a href="landing_page/pages/about_us/history.php" class="px-8 py-2 text-sm hover:bg-gray-100">History</a>
-        <a href="landing_page/pages/about_us/vision.php" class="px-8 py-2 text-sm hover:bg-gray-100">Vision</a>
-        <a href="landing_page/pages/about_us/mission.php" class="px-8 py-2 text-sm hover:bg-gray-100">Mission</a>
-      </div>
-    </div>
-
-    <a href="landing_page/pages/contact_us/contact.php" class="px-6 py-3 border-b">Contact Us</a>
-    <a href="../login.php" class="px-6 py-3 bg-teal-600 text-white text-center font-semibold">Login</a>
-  </div>
-
   <!-- MAIN -->
-  <main class="relative flex items-center justify-center text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('img/bg_img.jpg');">
+  <main class="relative flex items-center justify-center text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
     <div class="absolute inset-0 bg-black/50"></div>
 
     <div class="relative z-10 px-6 md:px-12 text-center md:text-left max-w-3xl">
@@ -106,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Welcome to <br><span class="text-teal-400">City Nutrition Office</span>
       </h1>
       <p class="text-lg md:text-xl mb-6">El Salvador, Misamis Oriental</p>
-      <a href="landing_page/pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg">Know More About Us!</a>
+      <a href="pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg">Know More About Us!</a>
     </div>
   </main>
 
@@ -116,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Logo -->
       <div class="md:col-span-2">
         <div class="flex items-center mb-4">
-          <img src="./img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg" />
+          <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg" />
           <span class="text-teal-500 text-xl font-bold">CNO</span>
           <span class="text-white text-xl font-bold ml-1">NutriMap</span>
         </div>
