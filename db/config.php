@@ -1,7 +1,7 @@
 <?php
 
 $DB_HOST = 'localhost';   
-$DB_NAME = 'nutrimap_db';      
+$DB_NAME = 'nutrimap';      
 $DB_USER = 'root';        
 $DB_PASS = '';           
 $DB_CHARSET = 'utf8mb4';

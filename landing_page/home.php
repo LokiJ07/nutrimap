@@ -4,387 +4,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="./img/CNO_Logo.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CNO NutriMap | Home</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    /* Header */
-      .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 24px;
-    color: #333;
-}
-
-.logo img {
-    height: 40px;
-    margin-right: 10px;
-}
-
-.logo .cno-color {
-    color: #00a0a0;
-}
-
-.logo-space {
-    margin-right: 8px;
-}
-
-.nav {
-    display: flex;
-    gap: 30px;
-    align-items: center;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #666;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.nav-link:hover {
-    color: #000;
-}
-
-.home-btn {
-    background-color: #fff;
-    color: #00a0a0 !important;
-}
-
-.login-btn {
-    background-color: #00a0a0;
-    color: #fff !important;
-    border: 1px solid #00a0a0;
-    padding: 10px 25px;
-}
-
-.login-btn:hover {
-    background-color: #007f7f;
-}
-
-/* --- Dropdown Styling --- */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-link {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.dropdown-arrow {
-    transition: transform 0.3s ease;
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-}
-
-.dropdown:hover .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 5px;
-    overflow: hidden;
-    left: 0;
-}
-
-.dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-weight: normal;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-    /* Main */
-    main {
-      position: relative;
-      background-image: url('img/bg_img.jpg');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 50px;
-    }
-    main .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-    }
-    main .content {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1100px;
-      width: 100%;
-    }
-    .left {
-      flex: 1;
-    }
-    .left h1 {
-      font-size: 50px;
-      font-weight: bold;
-      line-height: 1;
-    }
-    .left h1 span {
-      color: #00B2B2;
-    }
-    .left p {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    .left a.button {
-      margin-top: 20px;
-      display: inline-block;
-      background: #00B2B2;
-      color: white;
-      font-weight: bold;
-      padding: 12px 24px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
-    .left a.button:hover {
-      background: #009090;
-    }
-    .right-panel {
-      flex: 1;
-      text-align: center;
-    }
-    .right-panel img {
-      max-width: 500px;
-      height: auto;
-    }
-
-        /* Footer Styles */
-    .footer {
-  background-color: #1f2937; /* gray-800 */
-  color: #d1d5db; /* gray-300 */
-  padding: 2.5rem 0;
-  margin-top: auto;
-  position: relative;
-  z-index: 10;
-}
-
-.footer-container {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
-@media (min-width: 768px) {
-  .footer-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-  .footer-logo {
-    grid-column: span 2 / span 2;
-  }
-}
-
-.footer-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.logo-text {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.logo-primary {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00a0a0;
-}
-
-.logo-secondary {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-left: 0.25rem;
-  color: #fff;
-}
-
-.footer-desc {
-  font-size: 0.875rem;
-}
-
-.footer-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 1rem;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-links a {
-  color: #d1d5db;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: #00a0a0;
-}
-
-.footer-bottom {
-  margin-top: 2rem;
-  border-top: 1px solid #374151; /* gray-700 */
-  padding-top: 2rem;
-  text-align: center;
-}
-
-.footer-bottom p {
-  color: #9ca3af; /* gray-400 */
-  font-size: 0.875rem;
-}
-  </style>
+  <link rel="icon" type="image/png" href="./img/CNO_Logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
 </head>
-<body>
+<body class="font-sans text-gray-800">
 
   <!-- HEADER -->
-    <header class="header">
-        <div class="logo">
-          <img src="img/CNO_Logo.png" alt="CNO NutriMap Logo">
-            <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
-        </div>
-        <nav class="nav">
-            <a href="index.php" class="nav-link home-btn">Home</a>
-            <a href="landing_page/map.php" class="nav-link">Map</a>
-            <div class="dropdown">
-                <a href="landing_page/pages/about_us/about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
-                <div class="dropdown-content">
-                    <a href="landing_page/pages/about_us/profile.php">Profile <i class="fas fa-caret-right"></i></a>
-                    <a href="landing_page/pages/about_us/history.php">History <i class="fas fa-caret-right"></i></a>
-                    <a href="landing_page/pages/about_us/vision.php">Vision <i class="fas fa-caret-right"></i></a>
-                    <a href="landing_page/pages/about_us/mission.php">Mission <i class="fas fa-caret-right"></i></a>
-                </div>
-            </div>
-            <a href="landing_page/pages/contact_us/contact.php" class="nav-link">Contact Us</a>
-            <a href="./login.php" class="nav-link login-btn">Login</a>
-        </nav>
-    </header>
+    <!-- HEADER -->
+  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <!-- Logo -->
+  <div class="flex items-center font-bold text-2xl text-gray-700">
+    <img src="img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <span class="cno-color">CNO</span><span class="ml-2">NutriMap</span>
+  </div>
 
-  <!-- Main -->
-  <main>
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="left">
-        <h1>Welcome to <br><span>City Nutrition Office</span></h1>
-        <p>El Salvador, Misamis Oriental</p>
-        <a href="landing_page/pages/kmau.php" class="button">Know More About Us!</a>
+  <!-- Desktop nav -->
+  <nav class="hidden md:flex items-center space-x-6 font-semibold">
+    <a href="./index.php" class="text-teal-600">Home</a>
+    <a href="landing_page/map.php">Map</a>
+    <div class="dropdown relative">
+      <a href="pages/about_us/about.php" class="nav-link dropdown-link flex items-center gap-1">
+        About CNO
+        <svg class="dropdown-arrow w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+      </a>
+      <div class="dropdown-content absolute hidden bg-gray-100 min-w-[160px] shadow rounded overflow-hidden left-0 z-10">
+        <a href="pages/about_us/profile.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Profile</a>
+        <a href="pages/about_us/history.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">History</a>
+        <a href="pages/about_us/vision.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Vision</a>
+        <a href="pages/about_us/mission.php" class="flex justify-between px-4 py-2 hover:bg-gray-200">Mission</a>
       </div>
     </div>
-  </main>
-  <!-- Footer -->
-   <footer class="footer">
-    <div class="footer-container">
-        <div class="footer-grid">
-            <!-- Logo and Description -->
-            <div class="footer-logo">
-                <div class="logo-text">
-                   <img src="./img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
-                    <span class="logo-primary">CNO</span>
-                    <span class="logo-secondary">NutriMap</span>
-                </div>
-                <p class="footer-desc">
-                    A tool to visualize health and nutrition data for children in El Salvador City.
-                </p>
-            </div>
-            <!-- Links Column 1 -->
-            <div>
-                <h3 class="footer-title">About Us</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
-                </ul>
-            </div>
-            <!-- Links Column 2 -->
-            <div>
-                <h3 class="footer-title">Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/map.php">Map</a></li>
-                    <li><a href="landing_page/pages/contact_us/contact.php">Contact Us</a></li>
-                </ul>
-            </div>
-            <!-- Legal & Support Column -->
-            <div>
-                <h3 class="footer-title">Legal & Support</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
-        </div>
+    <a href="pages/contact_us/contact.php" class="nav-link">Contact Us</a>
+    <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
+  </nav>
+
+  <!-- Mobile Burger -->
+  <div class="md:hidden flex items-center">
+    <button id="burgerBtn" class="text-gray-700 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+    <a href="./index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+    <a href="landing_page/map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+    <a href="pages/about_us/about.php" class="px-6 py-3 border-b hover:bg-gray-100">About CNO</a>
+    <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+    <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+  </div>
+</header>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  burgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+});
+</script>
+
+  <!-- MOBILE MENU -->
+  <div id="mobile-menu" class="hidden md:hidden flex-col bg-white shadow-md border-t">
+    <a href="index.php" class="px-6 py-3 text-teal-600 font-semibold border-b">Home</a>
+    <a href="landing_page/map.php" class="px-6 py-3 border-b">Map</a>
+
+    <!-- Mobile dropdown -->
+    <div class="border-b">
+      <button id="mobile-dropdown-toggle" class="flex justify-between items-center w-full px-6 py-3 font-semibold text-gray-700 focus:outline-none">
+        <span>About CNO</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div id="mobile-dropdown" class="hidden flex-col bg-gray-50">
+        <a href="landing_page/pages/about_us/profile.php" class="px-8 py-2 text-sm hover:bg-gray-100">Profile</a>
+        <a href="landing_page/pages/about_us/history.php" class="px-8 py-2 text-sm hover:bg-gray-100">History</a>
+        <a href="landing_page/pages/about_us/vision.php" class="px-8 py-2 text-sm hover:bg-gray-100">Vision</a>
+        <a href="landing_page/pages/about_us/mission.php" class="px-8 py-2 text-sm hover:bg-gray-100">Mission</a>
+      </div>
     </div>
-</footer>
+
+    <a href="landing_page/pages/contact_us/contact.php" class="px-6 py-3 border-b">Contact Us</a>
+    <a href="../login.php" class="px-6 py-3 bg-teal-600 text-white text-center font-semibold">Login</a>
+  </div>
+
+  <!-- MAIN -->
+  <main class="relative flex items-center justify-center text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('img/bg_img.jpg');">
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <div class="relative z-10 px-6 md:px-12 text-center md:text-left max-w-3xl">
+      <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
+        Welcome to <br><span class="text-teal-400">City Nutrition Office</span>
+      </h1>
+      <p class="text-lg md:text-xl mb-6">El Salvador, Misamis Oriental</p>
+      <a href="landing_page/pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg">Know More About Us!</a>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-800 text-gray-300 py-10 mt-10">
+    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-8">
+      <!-- Logo -->
+      <div class="md:col-span-2">
+        <div class="flex items-center mb-4">
+          <img src="./img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg" />
+          <span class="text-teal-500 text-xl font-bold">CNO</span>
+          <span class="text-white text-xl font-bold ml-1">NutriMap</span>
+        </div>
+        <p class="text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
+      </div>
+
+      <!-- About -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-3">About Us</h3>
+        <ul class="space-y-2">
+          <li><a href="landing_page/pages/about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
+          <li><a href="landing_page/pages/about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
+          <li><a href="landing_page/pages/about_us/history.php" class="hover:text-teal-400">History</a></li>
+        </ul>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-3">Quick Links</h3>
+        <ul class="space-y-2">
+          <li><a href="landing_page/map.php" class="hover:text-teal-400">Map</a></li>
+          <li><a href="landing_page/pages/contact_us/contact.php" class="hover:text-teal-400">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-3">Legal & Support</h3>
+        <ul class="space-y-2">
+          <li><a href="landing_page/pages/legal_and_support/terms.php" class="hover:text-teal-400">Terms of Use</a></li>
+          <li><a href="landing_page/pages/legal_and_support/privacy.php" class="hover:text-teal-400">Privacy Policy</a></li>
+          <li><a href="landing_page/pages/legal_and_support/cookies.php" class="hover:text-teal-400">Cookies</a></li>
+          <li><a href="landing_page/pages/help_and_support/help.php" class="hover:text-teal-400">Help</a></li>
+          <li><a href="landing_page/pages/help_and_support/faqs.php" class="hover:text-teal-400">FAQs</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-700 mt-10 pt-6 text-center text-gray-400 text-sm">
+      <p>Copyright &copy; 2025 CNO NutriMap. All Rights Reserved.<br>Developed By NBSC ICS 4th Year Student.</p>
+    </div>
+  </footer>
+
+  <!-- JS for dropdown + mobile menu -->
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const dropdownToggle = document.getElementById('mobile-dropdown-toggle');
+    const dropdownMenu = document.getElementById('mobile-dropdown');
+
+    // Toggle mobile menu
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Toggle mobile dropdown
+    dropdownToggle.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('hidden');
+      dropdownToggle.querySelector('i').classList.toggle('fa-chevron-down');
+      dropdownToggle.querySelector('i').classList.toggle('fa-chevron-up');
+    });
+  </script>
+
 </body>
 </html>
