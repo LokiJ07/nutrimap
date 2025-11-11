@@ -143,6 +143,7 @@
 </div>
 </header>
 
+<!-- SCRIPT HEADER -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const burgerBtn = document.getElementById('burgerBtn');
@@ -300,12 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
   </footer>
+</body>
+</html>
 
   <!-- SCRIPTS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script src="js/map.js"></script>
-
-</body>
-</html>
