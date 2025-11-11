@@ -167,8 +167,6 @@ foreach ($cnoUsers as $cnoId) {
       }
   }
   ?>
-
-
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -176,108 +174,69 @@ foreach ($cnoUsers as $cnoId) {
   <title>Add Report — CNO NutriMap</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-  body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; font-size:13px; }
-  .layout { display:flex; flex-direction:column; min-height:100vh; }
-  .body-layout { display:flex; flex:1; }
-  .content { flex:1; padding:15px; overflow-y:auto; position:relative; }
-  button, .btn { padding:6px 14px; border:none; border-radius:4px; font-size:13px; cursor:pointer; }
-  .submit-btn { background:#009688; color:#fff; }
-  .back-btn { background:#ff5722; color:#fff; font-weight:bold; position:absolute; top:15px; right:15px; }
-  .form-wrapper { background:#fff; padding:20px; border-radius:6px; max-width:900px; margin:auto; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-  .form-section { margin-bottom:40px; }
-  .form-section h3 { text-align:center; margin-bottom:20px; }
-  table { width:100%; border-collapse:collapse; margin-bottom:20px; }
-  th, td { border:1px solid #ddd; padding:6px 8px; vertical-align:top; }
-  input[type="text"], input[type="number"] { width:100%; padding:4px; font-size:13px; box-sizing:border-box; }
-  .success { background:#d4edda; color:#155724; padding:10px; border-radius:4px; margin-bottom:15px; text-align:center; }
-  .indent { padding-left:20px; }
-  .nested-table { width:100%; border:none; border-collapse:collapse; }
-  .nested-table td { border:none; padding:2px 4px; }
-  .form-bottom { display:flex; justify-content:flex-end; margin-top:20px; }
-  .reports-label { font-size:22px; font-weight:bold; margin-bottom:15px; text-align:left; }
-
-  </style>
+ <link rel="stylesheet" href="css/add_report.css">
   </head>
   <body>
-     <?php include 'header.php'; ?>
     <div class="layout">
-     
       <div class="body-layout">
         <main class="content">
           <a href="reports.php" class="btn back-btn">Back</a>
-
 <div class="reports-label" style="display:flex; align-items:center; gap:10px;">
     <div style="font-weight:bold; font-size:22px;">Reports</div>
     <div style="display:flex; align-items:center; gap:5px;">
         <label for="report-title" style="font-size:14px; font-weight:normal;">Title:</label> 
         <input type="text" id="report-title" name="title" placeholder="Enter report title"
-              style="padding:4px 6px; font-size:14px; height:28px; width:250px;">
+              style="padding:4px 6px; font-size:14px; height:28px; width:250px;">        
     </div>
+    <a style="font-size:14px; font-weight:normal;">Import CSV:</a> <input type="file" id="csvFile" accept=".csv">
 </div>
-
           <?php if (!empty($success)): ?>
             <div class="success"><?= htmlspecialchars($success) ?></div>
           <?php endif; ?>
-
-
     <div class="form-wrapper">
-
   <form method="post" onsubmit="copyTitle()">
     <input type="hidden" id="hidden-title" name="title">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-
       <!-- Left: Titles -->
       <div style="text-align:left;">
         <h2 style="margin:0; font-size:15px;">BNS Form No. IC</h2>
         <h3 style="margin:0; font-size:15px;">Barangay Nutrition Profile</h3>
       </div>
-
       <!-- Right: Logos -->
       <div style="display:flex; align-items:center; gap:15px;">
         <!-- Dynamic Barangay Logo -->
         <img src="../logos/barangays/<?= strtolower(str_replace(' ', '_', $barangay)) ?>.png" 
             alt="<?= htmlspecialchars($barangay) ?> Logo" 
             style="height:100px;">
-
         <!-- Fixed Logos -->
         <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="Logo 1" style="height:100px;">
         <img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png" alt="Logo 2" style="height:100px;">
         <img src="../logos/fixed/Bagong-Pilipinas-logo.png" alt="Logo 3" style="height:100px;">
       </div>
     </div>
-
     <h3 style="text-align:center; margin:0 0 15px 0;">BARANGAY SITUATIONAL ANALYSIS (BSA)</h3>
     <h3 style="text-align:center; margin:0;"  ><strong>Calendar Year</strong> 
       <input type="number" name="year" value="2025" style="width:80px;"> &nbsp;&nbsp;</h3>
-
-
     <div style="text-align:center; margin-bottom:20px; font-size:14px;">
       <strong>Barangay:</strong> 
       <input type="text" name="barangay" value="<?= htmlspecialchars($barangay) ?>" readonly style="width:200px;"> &nbsp;&nbsp;
       <strong>City/Municipality:</strong> EL SALVADOR CITY &nbsp;&nbsp;
       <strong>Province:</strong> MISAMIS ORIENTAL
     </div>
-
           <!-- Full Indicators Form -->
            <div class="form-section">
-               <input type="file" id="csvFile" accept=".csv">
             <table>
               <tr><th>Indicator</th><th>Number</th></tr>
-
               <tr><td>1. Total Population</td><td><input type="number" name="ind1"></td></tr>
               <tr><td class="indent">Male</td><td><input type="number" name="ind_male"></td></tr>
               <tr><td class="indent">Female</td><td><input type="number" name="ind_female"></td></tr>
-
               <tr><td>2. Total Number of Households</td><td><input type="number" name="ind2"></td></tr>
               <tr><td>3. Total Number of Family</td><td><input type="number" name="ind3"></td></tr>
               <tr><td>4. Total Number of HHs More Than 5 Below Members</td><td><input type="number" name="ind4"></td></tr>
               <tr><td>5. Total Number of HHs more Than 5 Above Members</td><td><input type="number" name="ind5"></td></tr>
-
               <tr><td>6. Total Number of Women Who Are:</td><td></td></tr>
               <tr><td class="indent">a. Pregnant</td><td><input type="number" name="ind6a"></td></tr>
               <tr><td class="indent">b. Lactating</td><td><input type="number" name="ind6b"></td></tr>
-
               <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td><td><input type="number" name="ind7"></td></tr>
               <tr><td>8. Actual Population of Preschool Children 0-59 Months</td><td><input type="number" name="ind8"></td></tr>
               <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td><td><input type="number" name="ind9"></td></tr>
@@ -289,7 +248,6 @@ foreach ($cnoUsers as $cnoId) {
       <span style="flex:1; text-align:center;">%</span>
     </td>
   </tr>
-
   <?php
   $nutri = [
       '1) Severely Underweight',
@@ -302,7 +260,6 @@ foreach ($cnoUsers as $cnoId) {
       '8) Severely Stunted',
       '9) Stunted'
   ];
-
   foreach($nutri as $i => $name) {
       $n = $i + 1;
       echo "<tr>
@@ -314,7 +271,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
   <!-- All other table rows remain unchanged -->
               <tr><td>10. Total Number of Infants 0-5 Months Old</td><td><input type="number" name="ind10"></td></tr>
               <tr><td>11. Total Number of Infants 6-11 Months Old</td><td><input type="number" name="ind11"></td></tr>
@@ -324,9 +280,8 @@ foreach ($cnoUsers as $cnoId) {
 
               <tr><td>15. Total Number of Families With Wasted and Severely Wasted Preschool Children</td><td><input type="number" name="ind15"></td></tr>
               <tr><td>16. Total Number of Families With Stunted and Severely Stunted Preschool Children</td><td><input type="number" name="ind16"></td></tr>
- 
   <tr>
-    <td>17. Total Bumber of Educational Institutions(Pub./Priv.)</td>
+    <td>17. Total Number of Educational Institutions(Pub./Priv.)</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
       <span style="flex:1; text-align:center;">Public</span>
       <span style="flex:1; text-align:center;">Private</span>
@@ -336,7 +291,6 @@ foreach ($cnoUsers as $cnoId) {
       'a) Number of Day Care Centers',
       'b) Number of Elementary Schools'
   ];
-
   foreach($edu as $i => $name) {
       $n = chr(97 + $i); // a, b
       echo "<tr>
@@ -348,7 +302,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
               <tr><td>18. Total Number of Children Enrolled in Kindergarten</td><td><input type="number" name="ind18"></td></tr>
               <tr><td>19. Total Number of School Children (grades 1-6)</td><td><input type="number" name="ind19"></td></tr>
               <tr><td>20. Total Number of School Children Weighed at Start of School Year</td><td><input type="number" name="ind20"></td></tr>
@@ -370,7 +323,6 @@ foreach ($cnoUsers as $cnoId) {
       'f) Overweight',
       'g) Obese'
   ];
-
   foreach($school as $i => $name) {
       $n = chr(97 + $i); 
       echo "<tr>
@@ -382,8 +334,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
-
               <tr><td>23. 0-5 Months Old Children Exclusively Breastfeed</td><td><input type="number" name="ind23"></td></tr>
               <tr><td>24. Households with Severely Wasted School Children</td><td><input type="number" name="ind24"></td></tr>
               <tr><td>25. School Children Dewormed at the Start of the School Year</td><td><input type="number" name="ind25"></td></tr>
@@ -401,9 +351,7 @@ foreach ($cnoUsers as $cnoId) {
       'c) Open Pit',
       'd) Shared',
       'e) No Toilet'
-
   ];
-
   foreach($toilet as $i => $name) {
       $n = chr(97 + $i); 
       echo "<tr>
@@ -429,7 +377,6 @@ foreach ($cnoUsers as $cnoId) {
       'c) Burning',
       'd) Dumping'
   ];
-
   foreach($garbage_types as $i => $name) {
       $n = chr(97 + $i);
       echo "<tr>
@@ -441,7 +388,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
   <tr>
     <td>29. Household, by Type of Water Source</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
@@ -458,9 +404,7 @@ foreach ($cnoUsers as $cnoId) {
       'e) Purified Station (Level III)',
       'f) Open Shallow Dug Well (Level I)',
       'g) Artesian Well '
-
   ];
-
   foreach($water_sources as $i => $name) {
       $n = chr(97 + $i); 
       echo "<tr>
@@ -472,7 +416,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
   <tr>
     <td>30. Household with</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
@@ -498,7 +441,6 @@ foreach ($cnoUsers as $cnoId) {
             </tr>";
   }
   ?>
-
   <tr>
     <td>31. Households according to type of dwelling unit:</td>
     <td style="display:flex; gap:10px; font-weight:bold;">
@@ -532,7 +474,6 @@ foreach ($cnoUsers as $cnoId) {
       <input type="number" step="0.01" name="ind32_pct" placeholder="%" style="flex:1;">
   </td>
 </tr>
-
 <tr>
   <td style="width:60%; font-weight:normal;">33. Total Number of Eateries/Carenderia</td>
   <td style="display:flex; gap:10px;">
@@ -540,7 +481,6 @@ foreach ($cnoUsers as $cnoId) {
       <input type="number" step="0.01" name="ind33_pct" placeholder="%" style="flex:1;">
   </td>
 </tr>
-
 <tr>
   <td style="width:60%; font-weight:normal;">34. Total Number of Sari-Sari Stores Related to Iodized Salt</td>
   <td style="display:flex; gap:10px;">
@@ -548,7 +488,6 @@ foreach ($cnoUsers as $cnoId) {
       <input type="number" step="0.01" name="ind34_pct" placeholder="%" style="flex:1;">
   </td>
 </tr>
-
 <tr>
   <td style="width:60%; font-weight:normal;">35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
   <td style="display:flex; gap:10px;">
@@ -556,7 +495,6 @@ foreach ($cnoUsers as $cnoId) {
       <input type="number" step="0.01" name="ind35_pct" placeholder="%" style="flex:1;">
   </td>
 </tr>
-
 <tr>
   <td style="width:60%; font-weight:normal;">36. Total Number of Bakery With Fortified Flour</td>
   <td style="display:flex; gap:10px;">
@@ -564,7 +502,6 @@ foreach ($cnoUsers as $cnoId) {
       <input type="number" step="0.01" name="ind36_pct" placeholder="%" style="flex:1;">
   </td>
 </tr>
-
   <tr><td>37. Number of Health and Nutrition Workers:</td><td></td></tr>
   <?php
   $health_workers = [
@@ -582,25 +519,17 @@ foreach ($cnoUsers as $cnoId) {
   }
   ?>
   <tr><td>38. Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program</td><td><input type="number" name="ind38"></td></tr>
-
-
             </table>
           </div>
       <!-- all your form fields here (unchanged) -->
-
       <div class="form-bottom">
         <button type="submit" class="submit-btn">Submit</button>
-      </div>
-      
+      </div>      
     </form>
   </div>
-
-
-
         </main>
       </div>
     </div>
   </body>
   </html>
-
   <script src="js/add_report.js"></script>
