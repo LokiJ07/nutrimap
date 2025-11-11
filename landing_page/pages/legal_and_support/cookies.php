@@ -7,12 +7,7 @@
   <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .arrow-icon { transition: transform 0.3s ease-in-out; }
-    .arrow-down { transform: rotate(180deg); }
-  </style>
+
 </head>
 
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
@@ -22,7 +17,7 @@
   <!-- Logo -->
   <div class="flex items-center font-bold text-2xl text-gray-700">
     <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
-    <span class="cno-color">CNO</span><span class="ml-2">NutriMap</span>
+    <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
   </div>
 
   <!-- Desktop nav -->
