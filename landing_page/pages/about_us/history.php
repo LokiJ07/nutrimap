@@ -7,14 +7,10 @@
   <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-  </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
-  <!-- Header -->
+ <!-- Header -->
   <header class="bg-white shadow flex justify-between items-center px-6 md:px-10 py-4 relative z-50">
     <!-- Logo -->
     <div class="flex items-center font-bold text-2xl text-gray-700">

@@ -14,7 +14,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 </head>
-<body class="font-sans text-gray-800">
+<body class="text-gray-800">
 
   <!-- HEADER -->
   <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">

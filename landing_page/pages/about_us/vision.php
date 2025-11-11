@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body class="flex flex-col min-h-screen bg-gray-100 font-sans">
+<body class="flex flex-col min-h-screen bg-gray-100">
 
   <!-- Header -->
   <header class="bg-white shadow flex justify-between items-center px-6 md:px-10 py-4 relative z-50">
@@ -25,7 +25,7 @@
 
       <!-- Dropdown Parent -->
       <div class="relative">
-        <button id="aboutBtn" class="flex items-center gap-1 text-gray-700 hover:text-teal-600 focus:outline-none">
+        <button id="aboutBtn" class="flex items-center gap-1 text-gray-700 text-teal-600 focus:outline-none">
           About CNO
           <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <a href="../contact_us/contact.php" class="text-teal-600">Contact Us</a>
+      <a href="../contact_us/contact.php" class="hover:text-teal-600">Contact Us</a>
       <a href="../../../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
     </nav>
 
