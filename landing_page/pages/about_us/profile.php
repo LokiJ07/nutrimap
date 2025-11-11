@@ -194,52 +194,47 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-gray-800 text-gray-300 mt-auto relative z-10">
-    <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-5 gap-8">
-      <!-- Logo -->
-      <div class="md:col-span-2 flex flex-col">
-        <div class="flex items-center mb-4">
-          <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 w-10 mr-2 rounded">
-          <div class="text-2xl font-bold"><span class="text-teal-500">CNO</span><span class="text-white ml-1">NutriMap</span></div>
+  <!-- FOOTER -->
+  <footer class="footer mt-auto bg-gray-800 text-gray-300 py-10 relative z-10">
+    <div class="footer-container max-w-7xl mx-auto px-4">
+      <div class="footer-grid grid gap-8 md:grid-cols-5">
+        <div class="footer-logo md:col-span-2 flex flex-col items-start">
+          <div class="logo-text flex items-center mb-4">
+            <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+            <span class="logo-primary text-cyan-600 text-xl font-bold">CNO</span>
+            <span class="logo-secondary text-white text-xl font-bold ml-1">NutriMap</span>
+          </div>
+          <p class="footer-desc text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
         </div>
-        <p class="text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">About Us</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="../about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
+            <li><a href="../about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
+            <li><a href="../about_us/history.php" class="hover:text-cyan-600">History</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">Quick Links</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="../../map.php" class="hover:text-cyan-600">Map</a></li>
+            <li><a href="contact.php" class="hover:text-cyan-600">Contact Us</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">Legal & Support</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="../legal_and_support/terms.php" class="hover:text-cyan-600">Terms of Use</a></li>
+            <li><a href="../legal_and_support/privacy.php" class="hover:text-cyan-600">Privacy Policy</a></li>
+            <li><a href="../legal_and_support/cookies.php" class="hover:text-cyan-600">Cookies</a></li>
+            <li><a href="../help_and_support/help.php" class="hover:text-cyan-600">Help</a></li>
+            <li><a href="../help_and_support/faqs.php" class="hover:text-cyan-600">FAQs</a></li>
+          </ul>
+        </div>
       </div>
-
-      <!-- About -->
-      <div>
-        <h3 class="text-white font-semibold text-lg mb-2">About Us</h3>
-        <ul class="space-y-1">
-          <li><a href="pages/about_us/mission.php" class="hover:text-teal-500">Our Mission</a></li>
-          <li><a href="pages/about_us/vision.php" class="hover:text-teal-500">Our Vision</a></li>
-          <li><a href="pages/about_us/history.php" class="hover:text-teal-500">History</a></li>
-        </ul>
+      <div class="footer-bottom mt-8 border-t border-gray-700 pt-8 text-center text-gray-400 text-sm">
+        <p>Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
       </div>
-
-      <!-- Quick Links -->
-      <div>
-        <h3 class="text-white font-semibold text-lg mb-2">Quick Links</h3>
-        <ul class="space-y-1">
-          <li><a href="pages/map_us/map.php" class="hover:text-teal-500">Map</a></li>
-          <li><a href="pages/contact_us/get_in_touch.php" class="hover:text-teal-500">Contact Us</a></li>
-          <li><a href="pages/contact_us/downloadable_form.php" class="hover:text-teal-500">Downloadable Forms</a></li>
-        </ul>
-      </div>
-
-      <!-- Legal & Support -->
-      <div>
-        <h3 class="text-white font-semibold text-lg mb-2">Legal & Support</h3>
-        <ul class="space-y-1">
-          <li><a href="pages/legal_and_support/terms_of_use.php" class="hover:text-teal-500">Terms of Use</a></li>
-          <li><a href="pages/legal_and_support/privacy_policy.php" class="hover:text-teal-500">Privacy Policy</a></li>
-          <li><a href="pages/legal_and_support/cookies.php" class="hover:text-teal-500">Cookies</a></li>
-          <li><a href="pages/help_and_support/help.php" class="hover:text-teal-500">Help</a></li>
-          <li><a href="pages/help_and_support/faqs.php" class="hover:text-teal-500">FAQs</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="border-t border-gray-700 text-center py-4 text-sm text-gray-400">
-      Copyright &copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.
     </div>
   </footer>
 
