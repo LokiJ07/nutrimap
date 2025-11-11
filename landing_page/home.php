@@ -16,136 +16,90 @@
 </head>
 <body class="font-sans text-gray-800">
 
-  <!-- Header -->
-  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
-  <!-- Logo -->
-  <div class="flex items-center font-bold text-2xl text-gray-700">
-    <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
-    <span class="cno-color">CNO</span><span class="ml-2">NutriMap</span>
-  </div>
-
-  <!-- Desktop nav -->
-  <nav class="hidden md:flex items-center space-x-6 font-semibold">
-    <a href="../index.php" class="text-teal-600">Home</a>
-    <a href="map.php" class="hover:text-teal-600">Map</a>
-<!-- Dropdown Parent -->
-<div class="relative">
-  <!-- Toggle Button -->
-  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-teal-600 cursor-pointer focus:outline-none">
-    About CNO
-    <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-    </svg>
-  </button>
-
-  <!-- Dropdown Menu -->
-  <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
-    <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
-    <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-    <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
-    <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
-    <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
-  </div>
-</div>
-
-    <a href="pages/contact_us/contact.php" class="hover:text-teal-600">Contact Us</a>
-    <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
-  </nav>
-
-  <!-- Mobile Burger -->
-  <div class="md:hidden flex items-center">
-    <button id="burgerBtn" class="text-gray-700 focus:outline-none">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
-  </div>
-
- <!-- Mobile menu -->
-<div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
-  <a href="../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
-  <a href="map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
-
-  <!-- Mobile About CNO Dropdown -->
-  <div class="flex flex-col">
-    <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
-      About CNO
-      <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-      </svg>
-    </button>
-    <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
-      <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
-      <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-      <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
-      <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
-      <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+  <!-- HEADER -->
+  <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+    <!-- Logo -->
+    <div class="flex items-center font-bold text-2xl text-gray-700">
+      <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
-  </div>
 
-  <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
-  <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
-</div>
-</header>
+    <!-- Desktop Nav -->
+    <nav class="hidden md:flex items-center space-x-6 font-semibold">
+      <a href="../index.php" class="text-teal-600">Home</a>
+      <a href="map.php" class="hover:text-teal-600">Map</a>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const burgerBtn = document.getElementById('burgerBtn');
-  const mobileMenu = document.getElementById('mobileMenu');
+      <!-- Dropdown -->
+      <div class="relative">
+        <button id="aboutBtn" class="flex items-center gap-1 text-gray-700 hover:text-teal-600 focus:outline-none">
+          About CNO
+          <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+          </svg>
+        </button>
+        <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded hidden z-50">
+          <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-100">About</a>
+          <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+          <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-100">History</a>
+          <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-100">Vision</a>
+          <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-100">Mission</a>
+        </div>
+      </div>
 
-  burgerBtn.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-  });
+      <a href="pages/contact_us/contact.php" class="hover:text-teal-600">Contact Us</a>
+      <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
+    </nav>
 
-  // Mobile About CNO Dropdown
-  const mobileAboutBtn = document.getElementById('mobileAboutBtn');
-  const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
-  const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+    <!-- Mobile Burger -->
+    <div class="md:hidden flex items-center">
+      <button id="burgerBtn" class="text-gray-700 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
 
-  mobileAboutBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    mobileAboutDropdown.classList.toggle('hidden');
-    mobileAboutArrow.classList.toggle('rotate-180');
-  });
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+      <a href="../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+      <a href="map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
 
-  // Optional: close dropdown if clicked outside mobile menu
-  document.addEventListener('click', (e) => {
-    if (!mobileMenu.contains(e.target)) {
-      mobileAboutDropdown.classList.add('hidden');
-      mobileAboutArrow.classList.remove('rotate-180');
-    }
-  });
-});
-// Dropdown functionality for About CNO
- const aboutBtn = document.getElementById('aboutBtn');
-  const aboutDropdown = document.getElementById('aboutDropdown');
-  const aboutArrow = document.getElementById('aboutArrow');
+      <!-- Mobile About -->
+      <div class="flex flex-col">
+        <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
+          About CNO
+          <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+          </svg>
+        </button>
+        <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
+          <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
+          <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
+          <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+          <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
+          <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+        </div>
+      </div>
 
-  aboutBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // prevent document click
-    aboutDropdown.classList.toggle('hidden');
-    aboutArrow.classList.toggle('rotate-180');
-  });
+      <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+      <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+    </div>
+  </header>
 
-  // Close dropdown if clicked outside
-  document.addEventListener('click', () => {
-    if(!aboutDropdown.classList.contains('hidden')) {
-      aboutDropdown.classList.add('hidden');
-      aboutArrow.classList.remove('rotate-180');
-    }
-  });
-</script>
-
-  <!-- MAIN -->
-  <main class="relative flex items-center justify-center text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
+  <!-- HERO SECTION -->
+  <main class="relative flex items-center justify-start text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
+    <!-- Overlay -->
     <div class="absolute inset-0 bg-black/50"></div>
 
-    <div class="relative z-10 px-6 md:px-12 text-center md:text-left max-w-3xl">
+    <!-- Text Content -->
+    <div class="relative z-10 px-8 md:px-16 lg:px-24 max-w-4xl text-left">
       <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
         Welcome to <br><span class="text-teal-400">City Nutrition Office</span>
       </h1>
       <p class="text-lg md:text-xl mb-6">El Salvador, Misamis Oriental</p>
-      <a href="pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg">Know More About Us!</a>
+      <a href="pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md">
+        Know More About Us!
+      </a>
     </div>
   </main>
 
@@ -199,24 +153,38 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </footer>
 
-  <!-- JS for dropdown + mobile menu -->
+  <!-- JS DROPDOWN -->
   <script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const dropdownToggle = document.getElementById('mobile-dropdown-toggle');
-    const dropdownMenu = document.getElementById('mobile-dropdown');
+  document.addEventListener('DOMContentLoaded', () => {
+    const burgerBtn = document.getElementById('burgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    burgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-    // Toggle mobile menu
-    menuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutDropdown = document.getElementById('aboutDropdown');
+    const aboutArrow = document.getElementById('aboutArrow');
+    aboutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      aboutDropdown.classList.toggle('hidden');
+      aboutArrow.classList.toggle('rotate-180');
     });
 
-    // Toggle mobile dropdown
-    dropdownToggle.addEventListener('click', () => {
-      dropdownMenu.classList.toggle('hidden');
-      dropdownToggle.querySelector('i').classList.toggle('fa-chevron-down');
-      dropdownToggle.querySelector('i').classList.toggle('fa-chevron-up');
+    document.addEventListener('click', () => {
+      if (!aboutDropdown.classList.contains('hidden')) {
+        aboutDropdown.classList.add('hidden');
+        aboutArrow.classList.remove('rotate-180');
+      }
     });
+
+    const mobileAboutBtn = document.getElementById('mobileAboutBtn');
+    const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
+    const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+    mobileAboutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileAboutDropdown.classList.toggle('hidden');
+      mobileAboutArrow.classList.toggle('rotate-180');
+    });
+  });
   </script>
 
 </body>

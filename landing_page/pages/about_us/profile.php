@@ -209,16 +209,16 @@
         <div>
           <h3 class="footer-title text-white font-semibold mb-4">About Us</h3>
           <ul class="footer-links space-y-2">
-            <li><a href="../about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
-            <li><a href="../about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="../about_us/history.php" class="hover:text-cyan-600">History</a></li>
+            <li><a href="mission.php" class="hover:text-cyan-600">Our Mission</a></li>
+            <li><a href="vision.php" class="hover:text-cyan-600">Our Vision</a></li>
+            <li><a href="history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>
           <h3 class="footer-title text-white font-semibold mb-4">Quick Links</h3>
           <ul class="footer-links space-y-2">
             <li><a href="../../map.php" class="hover:text-cyan-600">Map</a></li>
-            <li><a href="contact.php" class="hover:text-cyan-600">Contact Us</a></li>
+            <li><a href="../contact_us/contact.php" class="hover:text-cyan-600">Contact Us</a></li>
           </ul>
         </div>
         <div>
