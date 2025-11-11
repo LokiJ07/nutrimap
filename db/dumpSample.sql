@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2025 at 08:55 AM
+-- Generation Time: Nov 11, 2025 at 08:56 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -87,21 +87,6 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `details`, `created_at`)
 (1532, 12, 'Report Added', 'Report ID: 270, Created for Barangay: Himaya, Year: 2026, Title: \'new report\'', '2025-11-11 15:51:53'),
 (1533, 1, 'User logged in', 'Trusted device login from IP ::1', '2025-11-11 15:52:11'),
 (1534, 12, 'Logged out', 'Trusted Device', '2025-11-11 15:52:30');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `barangay_consolidated_reports`
---
-
-CREATE TABLE `barangay_consolidated_reports` (
-  `id` int(11) NOT NULL,
-  `barangay` varchar(255) NOT NULL,
-  `year` year(4) NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -254,22 +239,6 @@ INSERT INTO `bns_reports` (`id`, `report_id`, `barangay`, `year`, `title`, `ind1
 (0, 266, 'Himaya', '2025', 'news', 111, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NULL, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 44.00, 44, 88.00, 88, 88.00, 77, 1.00, 1, 1.00, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1, 1, 1, 1, 1.00, 1, 1.00, 11, 111.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 1, 1.00, 11, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0),
 (0, 268, 'Himaya', '2024', 'dasd', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 44.00, 0, 33.00, 0, 22.00, 0, 1.00, 0, 99.00, 0, 88.00, 0, 77.00, 0, 55.00, 0, 66.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0),
 (0, 270, 'Himaya', '2026', 'new report', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 99.00, 0, 88.00, 0, 55.00, 0, 66.00, 0, 77.00, 0, 33.00, 0, 22.00, 0, 1.00, 0, 44.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0, 0, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0.00, 0, 0, 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `consolidated_reports`
---
-
-CREATE TABLE `consolidated_reports` (
-  `id` int(11) NOT NULL,
-  `year` year(4) NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `barangay` varchar(100) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -448,22 +417,10 @@ ALTER TABLE `activity_logs`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `barangay_consolidated_reports`
---
-ALTER TABLE `barangay_consolidated_reports`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `bns_reports`
 --
 ALTER TABLE `bns_reports`
   ADD KEY `bns_reports_report_fk` (`report_id`);
-
---
--- Indexes for table `consolidated_reports`
---
-ALTER TABLE `consolidated_reports`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `login_history`
@@ -517,18 +474,6 @@ ALTER TABLE `users`
 --
 ALTER TABLE `activity_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1535;
-
---
--- AUTO_INCREMENT for table `barangay_consolidated_reports`
---
-ALTER TABLE `barangay_consolidated_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `consolidated_reports`
---
-ALTER TABLE `consolidated_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `login_history`
