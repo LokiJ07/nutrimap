@@ -143,7 +143,7 @@ class MYPDF extends TCPDF {
 
         // Barangay Logo
         if($this->barangayLogo){
-            $this->Image(__DIR__ . '/../logos/barangays/' . $this->barangayLogo, 110, 8, 20);
+            $this->Image(__DIR__ . '/../logos/barangay/' . $this->barangayLogo, 110, 8, 20);
         }
 
         // Other Logos

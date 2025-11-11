@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_type'] = $user['user_type'];
+            $_SESSION['barangay'] = $user['barangay']; 
             header("Location: " . ($user['user_type'] === 'CNO' ? "cno/home.php" : "bns/home.php"));
             exit();
         } else {
