@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body class="flex flex-col min-h-screen bg-gray-100 font-sans">
+<body class="flex flex-col min-h-screen bg-gray-100">
 
   <!-- Header -->
   <header class="bg-white shadow px-6 md:px-10 py-4 flex justify-between items-center relative z-50">
