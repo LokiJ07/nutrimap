@@ -166,9 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>
         <h3 class="text-white font-semibold text-lg mb-3">About Us</h3>
         <ul class="space-y-2">
-          <li><a href="landing_page/pages/about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
-          <li><a href="landing_page/pages/about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
-          <li><a href="landing_page/pages/about_us/history.php" class="hover:text-teal-400">History</a></li>
+          <li><a href="pages/about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
+          <li><a href="pages/about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
+          <li><a href="pages/about_us/history.php" class="hover:text-teal-400">History</a></li>
         </ul>
       </div>
 
@@ -176,8 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>
         <h3 class="text-white font-semibold text-lg mb-3">Quick Links</h3>
         <ul class="space-y-2">
-          <li><a href="landing_page/map.php" class="hover:text-teal-400">Map</a></li>
-          <li><a href="landing_page/pages/contact_us/contact.php" class="hover:text-teal-400">Contact Us</a></li>
+          <li><a href="map.php" class="hover:text-teal-400">Map</a></li>
+          <li><a href="pages/contact_us/contact.php" class="hover:text-teal-400">Contact Us</a></li>
         </ul>
       </div>
 
@@ -185,11 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>
         <h3 class="text-white font-semibold text-lg mb-3">Legal & Support</h3>
         <ul class="space-y-2">
-          <li><a href="landing_page/pages/legal_and_support/terms.php" class="hover:text-teal-400">Terms of Use</a></li>
-          <li><a href="landing_page/pages/legal_and_support/privacy.php" class="hover:text-teal-400">Privacy Policy</a></li>
-          <li><a href="landing_page/pages/legal_and_support/cookies.php" class="hover:text-teal-400">Cookies</a></li>
-          <li><a href="landing_page/pages/help_and_support/help.php" class="hover:text-teal-400">Help</a></li>
-          <li><a href="landing_page/pages/help_and_support/faqs.php" class="hover:text-teal-400">FAQs</a></li>
+          <li><a href="pages/legal_and_support/terms.php" class="hover:text-teal-400">Terms of Use</a></li>
+          <li><a href="pages/legal_and_support/privacy.php" class="hover:text-teal-400">Privacy Policy</a></li>
+          <li><a href="pages/legal_and_support/cookies.php" class="hover:text-teal-400">Cookies</a></li>
+          <li><a href="pages/help_and_support/help.php" class="hover:text-teal-400">Help</a></li>
+          <li><a href="pages/help_and_support/faqs.php" class="hover:text-teal-400">FAQs</a></li>
         </ul>
       </div>
     </div>
