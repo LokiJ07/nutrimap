@@ -231,7 +231,7 @@ table th:nth-child(2) {
 
   <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td><td><?= $has_bns ? val($row,'ind7','int') : '—' ?></td></tr>
   <tr><td>8. Actual Population of Preschool Children 0-59 Months</td><td><?= $has_bns ? val($row,'ind8','int') : '—' ?></td></tr>
-    <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td><td><?= $has_bns ? val($row,'ind9','dec2') : '—' ?></td></tr>
+    <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td><td><?= $has_bns ? val($row,'ind9','int') : '—' ?></td></tr>
   <tr><td>a. Percent (%) Measured Coverage (OPT Plus)</td><td><?= $has_bns ? val($row,'ind9a','dec2') : '—' ?></td></tr>
   <tr>
     <td>b. Number and Percent (%) of Preschool Children According to Nutritional Status</td>
