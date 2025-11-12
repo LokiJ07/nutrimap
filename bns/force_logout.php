@@ -3,7 +3,7 @@ session_start();
 require '../db/config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../auth/login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -15,7 +15,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $user_id = $_SESSION['user_id'];
 $login_id = (int) $_GET['id'];
 
-// ✅ Fetch session ID and device token of that login
+// ✅ Fetch the specific login record
 $stmt = $pdo->prepare("SELECT session_id, device_token FROM login_history WHERE id = ? AND user_id = ?");
 $stmt->execute([$login_id, $user_id]);
 $login = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -24,33 +24,26 @@ if ($login) {
     $sessionId = $login['session_id'];
     $deviceToken = $login['device_token'];
 
-    // Delete login history
+    // ✅ Delete only this specific login record (the clicked device)
     $delete = $pdo->prepare("DELETE FROM login_history WHERE id = ? AND user_id = ?");
     $delete->execute([$login_id, $user_id]);
 
-    // Remove PHP session file (if accessible)
+    // ✅ Remove PHP session file (end session)
     $sessionPath = session_save_path() ?: sys_get_temp_dir();
     $sessionFile = rtrim($sessionPath, '/') . "/sess_" . $sessionId;
     if (file_exists($sessionFile)) {
         @unlink($sessionFile);
     }
 
-    // Clear current session and force OTP on next login
-    $clearSession = $pdo->prepare("UPDATE users SET current_session = NULL, otp_verified = 0 WHERE id = ?");
-    $clearSession->execute([$user_id]);
+    // ✅ (Optional) also remove this token from cookies/trusted list if stored elsewhere
+    // Example: $pdo->prepare("DELETE FROM trusted_devices WHERE device_token = ? AND user_id = ?")->execute([$deviceToken, $user_id]);
 
-    // Remove this device token association
-    $removeDevice = $pdo->prepare("DELETE FROM login_history WHERE device_token = ? AND user_id = ?");
-    $removeDevice->execute([$deviceToken, $user_id]);
-
-    // Log activity
+    // ✅ Log the activity
     $log = $pdo->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
-    $log->execute([$user_id, 'Force logged out another device']);
+    $log->execute([$user_id, 'Force logged out a specific device']);
 
-    // Flash message
-    $_SESSION['flash_message'] = "Device successfully logged out.";
-
-    // Redirect back to security page
+    // ✅ Flash message and redirect
+    $_SESSION['flash_message'] = "Selected device has been force logged out.";
     header("Location: security.php");
     exit();
 } else {
@@ -58,3 +51,4 @@ if ($login) {
     header("Location: security.php");
     exit();
 }
+?>

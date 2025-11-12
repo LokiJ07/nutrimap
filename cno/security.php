@@ -2,8 +2,9 @@
 session_start();
 require '../db/config.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../auth/login.php");
+// ✅ Only CNO
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+    header("Location: ../login.php");
     exit();
 }
 

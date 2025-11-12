@@ -71,6 +71,9 @@ function getOS($ua) {
 // 🔹 Compose friendly device name
 $browser = getBrowser($userAgent) . ' on ' . getOS($userAgent);
 
+// Generate secure device token
+$device_token = bin2hex(random_bytes(16)); // e.g. "f23a5c1d8b7e4e1b..."
+
 // Check if device already exists
 $checkStmt = $pdo->prepare("
     SELECT id FROM login_history
@@ -81,19 +84,23 @@ $checkStmt->execute([$user_id, $browser, $ip]);
 $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$existing) {
-    // Insert only if not already saved
+    // Insert new device record with device token
     $insertStmt = $pdo->prepare("
-        INSERT INTO login_history (user_id, session_id, browser, ip_address)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token)
+        VALUES (?, ?, ?, ?, ?)
     ");
-    $insertStmt->execute([$user_id, $session_id, $browser, $ip]);
+    $insertStmt->execute([$user_id, $session_id, $browser, $ip, $device_token]);
 } else {
-    // Update session_id if user logs in again on same device
+    // Update device token and session id (refresh trust)
     $updateStmt = $pdo->prepare("
-        UPDATE login_history SET session_id = ? WHERE id = ?
+        UPDATE login_history SET session_id = ?, device_token = ? WHERE id = ?
     ");
-    $updateStmt->execute([$session_id, $existing['id']]);
+    $updateStmt->execute([$session_id, $device_token, $existing['id']]);
 }
+
+// Store this token in session for reference (optional)
+$_SESSION['device_token'] = $device_token;
+
 
             // ✅ clear pending values
             unset(
