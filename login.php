@@ -130,201 +130,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>CNO NutriMap - Login</title>
-  <!-- ✅ Font Awesome for Eye Icon -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #d3d3d3;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    /* Top brand header */
-    .brand {
-      font-weight: bold;
-      font-size: 22px; /* Slightly bigger */
-      padding: 20px 40px;
-    }
-
-    .brand span {
-      color: #00AEEF;
-    }
-
-    /* Main container split */
-    .container {
-      flex: 1;
-      display: flex;
-    }
-
-    .left-panel {
-      width: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .login-box {
-      width: 360px; /* Slightly bigger box */
-    }
-
-    .login-box h2 {
-      margin-bottom: 25px;
-      font-size: 26px;
-      font-weight: bold;
-      color: #000;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 18px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-      background: #fff;
-      box-sizing: border-box;
-    }
-
-    .password-wrapper {
-      position: relative;
-    }
-
-    .password-wrapper input {
-      padding-right: 40px;
-    }
-
-    .toggle-password {
-      position: absolute;
-      top: 40%;
-      right: 12px;
-      transform: translateY(-50%);
-      cursor: pointer;
-      font-size: 18px;
-      color: #555;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 14px;
-      background: #008080;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .login-box button:hover {
-      background: #006666;
-    }
-
-    .options {
-      margin-top: 12px;
-      font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .options label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 14px;
-    }
-
-    .options a {
-      text-decoration: none;
-      color: #00AEEF;
-      font-weight: bold;
-    }
-
-    .error {
-      color: red;
-      font-size: 15px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    .right-panel {
-      width: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .right-panel img {
-      max-width: 85%;
-      height: auto;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for Eye Icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- Top brand -->
-  <div class="brand"><span>CNO</span> NutriMap</div>
+  <!-- Brand header -->
+  <div class="bg-white shadow py-4 px-6 md:px-10 text-2xl font-bold text-gray-800">
+    <span class="text-teal-500">CNO</span> NutriMap
+  </div>
 
-  <!-- Split panels -->
-  <div class="container">
-    <!-- Left login form -->
-    <div class="left-panel">
-      <div class="login-box">
-        <h2>LOGIN</h2>
+  <!-- Main container -->
+  <div class="flex flex-1 flex-col md:flex-row">
+
+    <!-- Left panel: Login Form -->
+    <div class="md:w-1/2 flex justify-center items-center p-6">
+      <div class="w-full max-w-md bg-white shadow-md rounded-lg p-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Login</h2>
 
         <?php if (!empty($error)): ?>
-          <p class="error"><?= $error ?></p>
+          <p class="text-red-500 text-center mb-4"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
 
-        <form method="POST">
-          <input type="text" name="email" placeholder="Enter Email" value="<?= htmlspecialchars($rememberedEmail) ?>" required>
+        <form method="POST" class="space-y-4">
+          <input type="text" name="email" placeholder="Email or Username" 
+                 value="<?= htmlspecialchars($rememberedEmail) ?>"
+                 class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400" required>
 
-          <div class="password-wrapper">
-            <input type="password" id="password" name="password" placeholder="Enter Password" required>
-            <!-- ✅ Replaced 👁 with Font Awesome Eye -->
-            <span class="toggle-password" onclick="togglePassword()">
+          <div class="relative">
+            <input type="password" id="password" name="password" placeholder="Password"
+                   class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400 pr-10" required>
+            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600" onclick="togglePassword()">
               <i id="eyeIcon" class="fa-solid fa-eye"></i>
             </span>
           </div>
 
-          <button type="submit">Log in</button>
+          <button type="submit" class="w-full bg-teal-500 text-white py-3 rounded-md font-bold hover:bg-teal-600 transition-colors">
+            Log In
+          </button>
 
-          <div class="options">
-            <label><input type="checkbox" name="remember" <?= isset($_COOKIE['remember_email']) ? 'checked' : '' ?>> Remember me!</label>
-            <a href="index.php">Just visit!</a>
+          <div class="flex justify-between items-center text-sm text-gray-600">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" name="remember" <?= isset($_COOKIE['remember_email']) ? 'checked' : '' ?> class="h-4 w-4 rounded border-gray-300">
+              Remember me
+            </label>
+            <a href="index.php" class="text-teal-500 font-semibold hover:underline">Just Visit!</a>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Right illustration -->
-    <div class="right-panel">
-      <img src="img/nutritional.png" alt="Nutrition Illustration">
+    <!-- Right panel: Illustration -->
+    <div class="md:w-1/2 flex justify-center items-center p-6 bg-teal-50">
+      <img src="img/nutritional.png" alt="Nutrition Illustration" class="max-w-full h-auto rounded-lg shadow-md">
     </div>
   </div>
 
+  <!-- Password toggle script -->
   <script>
     function togglePassword() {
       const passwordField = document.getElementById('password');
       const eyeIcon = document.getElementById('eyeIcon');
-
-      if (passwordField.type === "password") {
+      if(passwordField.type === "password"){
         passwordField.type = "text";
-        eyeIcon.classList.remove("fa-eye");
-        eyeIcon.classList.add("fa-eye-slash");
+        eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
       } else {
         passwordField.type = "password";
-        eyeIcon.classList.remove("fa-eye-slash");
-        eyeIcon.classList.add("fa-eye");
+        eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
       }
     }
   </script>

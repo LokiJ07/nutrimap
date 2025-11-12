@@ -354,7 +354,7 @@ function toggleSubmit(reportId, action) {
       <td class="actions">
         <a href="view_report.php?id=<?= $r['id'] ?>" class="view"><i class="fa fa-eye"></i> View</a>
         <?php if ($userType === 'BNS'): ?>
-          <?php if ($r['is_submitted'] == 0): ?>
+          <?php if ($r['is_submitted'] == 1): ?>
             <a href="#" class="delete" onclick="toggleSubmit(<?= $r['id'] ?>,'unsubmit')"><i class="fa fa-undo"></i> Unsubmit</a>
           <?php else: ?>
             <a href="report/edit_report.php?id=<?= $r['id'] ?>" class="edit"><i class="fa fa-edit"></i> Edit</a>

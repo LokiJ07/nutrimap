@@ -1,413 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNO NutriMap</title>
-    <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
-    <!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNO NutriMap</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<style>
-  body { margin:0;}
-  #map { height: 640px; }
-
+  <style>
+    body { margin:0; }
+    #map { height: 640px; }
+    #chart-tooltip {
+      position: absolute;
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      max-width: 320px;
+      pointer-events: none;
+    }
+    /* Make tooltip canvas responsive */
 #chart-tooltip {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  max-width: 340px;            /* allows flexibility for smaller screens */
-  background: rgba(255, 255, 255, 0.97);
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  padding: 12px 14px;
-  display: none;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  z-index: 1000;
-  font-family: "Poppins", sans-serif;
-  color: #222;
+  max-width: 320px;
 }
 
-/* Barangay title */
-.tooltip-title {
-  font-weight: 700;
-  font-size: 15px;
-  text-align: center;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-/* Subtext or indicator list */
-.tooltip-subtitle {
-  font-size: 13px;
-  color: #444;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-/* Canvas chart area */
 #chart-tooltip canvas {
-  display: block;
-  width: 240px !important;     /* more centered sizing */
-  height: 190px !important;    /* balanced size for line/bar charts */
-  margin: 0 auto;              /* center canvas inside tooltip */
+  width: 100% !important;
+  height: 150px !important; /* default for desktop */
 }
 
-/* Smooth layout for side-by-side indicator list + chart */
-.tooltip-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-/* Each indicator color + percent pair */
-.tooltip-indicator-line {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-.tooltip-indicator-line span.color-box {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  border: 1px solid #999;
-  margin-right: 5px;
-}
-
-
-
-  #legend-buttons li {
-    padding: 6px 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    font-family: sans-serif;
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #chart-tooltip {
+    max-width: 90vw; /* tooltip almost full screen */
   }
-  #legend-buttons li:last-child { border-bottom: none; }
-  #legend-buttons li:hover { background: #f0f0f0; }
-.space-y-2 li.active {
-  background-color: rgba(0,0,0,0.05);
-  border-radius: 6px;
-  font-weight: 600;
-  transform: scale(1.02);
-}
-.space-y-2 li {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-  .gradient-wrapper {
-    
-    bottom: 0;
-    left: 50%;
-    width: 90%;
-    max-width: 970px;
-    background: white;
-    border: 1px solid #aaa;
-    border-radius: 6px;
-    padding: 9px;
-    text-align: left;
-    font-family: sans-serif;
-   
+  #chart-tooltip canvas {
+    height: 120px !important; /* smaller chart for mobile */
   }
-  .gradient-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    overflow: hidden;
-    height: 20px;
-    margin-bottom: 6px;
-  }
-  .gradient-cell { height: 40px; border-right: 1px solid #aaa; }
-  .gradient-cell:last-child { border-right: none; }
-  .gradient-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-  }
-  .active-gradient-cell {
-  border: 2px solid #000; /* black border */
-  box-shadow: 0 0 5px #000 inset;
-  transform: scale(1.05); /* optional: make it slightly bigger */
-  transition: all 0.2s;
+}
+   .gradient-wrapper {
+  margin-top: 1rem;
 }
 
-  /* Header */
-      .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 24px;
-    color: #333;
-}
-
-.logo img {
-    height: 40px;
-    margin-right: 10px;
-}
-
-.logo .cno-color {
-    color: #00a0a0;
-}
-
-.logo-space {
-    margin-right: 8px;
-}
-
-.nav {
-    display: flex;
-    gap: 30px;
-    align-items: center;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #666;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.nav-link:hover {
-    color: #000;
-}
-
-.home-btn {
-    background-color: #fff;
-    color: #00a0a0 !important;
-}
-
-.login-btn {
-    background-color: #00a0a0;
-    color: #fff !important;
-    border: 1px solid #00a0a0;
-    padding: 10px 25px;
-}
-
-.login-btn:hover {
-    background-color: #007f7f;
-}
-
-/* --- Dropdown Styling --- */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-link {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.dropdown-arrow {
-    transition: transform 0.3s ease;
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-}
-
-.dropdown:hover .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 5px;
-    overflow: hidden;
-    left: 0;
-}
-
-.dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-weight: normal;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-    /* Footer Styles */
-    .footer {
-  background-color: #1f2937; /* gray-800 */
-  color: #d1d5db; /* gray-300 */
-  padding: 2.5rem 0;
-  margin-top: auto;
-  position: relative;
-  z-index: 10;
-}
-
-.footer-container {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.footer-grid {
+.gradient-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(11, 1fr); /* 10 gradient cells + No Data */
+  gap: 2px;
+  max-width: 720px; /* optional: adjust to fit nicely */
 }
 
-@media (min-width: 768px) {
-  .footer-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-  .footer-logo {
-    grid-column: span 2 / span 2;
-  }
+.gradient-cell {
+  height: 25px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: transform 0.1s, outline 0.1s;
 }
 
-.footer-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.gradient-cell:hover {
+  transform: scale(1.1);
 }
 
-.logo-text {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
+.active-gradient-cell {
+  outline: 2px solid #000;
 }
 
-.logo-primary {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00a0a0;
-}
-
-.logo-secondary {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-left: 0.25rem;
-  color: #fff;
-}
-
-.footer-desc {
-  font-size: 0.875rem;
-}
-
-.footer-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 1rem;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-links a {
-  color: #d1d5db;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: #00a0a0;
-}
-
-.footer-bottom {
-  margin-top: 2rem;
-  border-top: 1px solid #374151; /* gray-700 */
-  padding-top: 2rem;
-  text-align: center;
-}
-
-.footer-bottom p {
-  color: #9ca3af; /* gray-400 */
-  font-size: 0.875rem;
-}
-</style>
-<body >
+  </style>
+<body class="flex flex-col min-h-screen">
 
   <!-- HEADER -->
-    <header class="header">
-        <div class="logo">
-          <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo">
-            <span class="cno-color">CNO</span><span class="logo-space"></span><span>NutriMap</span>
-        </div>
-        <nav class="nav">
-            <a href="../index.php" class="nav-link ">Home</a>
-            <a href="map.php" class="nav-link home-btn">Map</a>
-            <div class="dropdown">
-                <a href="pages/about_us/about.php" class="nav-link dropdown-link">About CNO <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></a>
-                <div class="dropdown-content">
-                    <a href="pages/about_us/profile.php">Profile <i class="fas fa-caret-right"></i></a>
-                    <a href="pages/about_us/history.php">History <i class="fas fa-caret-right"></i></a>
-                    <a href="pages/about_us/vision.php">Vision <i class="fas fa-caret-right"></i></a>
-                    <a href="pages/about_us/mission.php">Mission <i class="fas fa-caret-right"></i></a>
-                </div>
-            </div>
-            <a href="pages/contact_us/contact.php" class="nav-link">Contact Us</a>
-            <a href="../login.php" class="nav-link login-btn">Login</a>
-        </nav>
-    </header>
-
-
-    <!-- Main Content Section -->
-  <main class="max-w-7xl mx-auto p-6 bg-white shadow mt-4 mb-28">
-     <div class="bg-gray-200 py-3 px-4">
-    <span class="uppercase tracking-wide text-[#00a0a0] font-semibold">Data</span>
+  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <!-- Logo -->
+  <div class="flex items-center font-bold text-2xl text-gray-700">
+    <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
   </div>
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+
+  <!-- Desktop nav -->
+  <nav class="hidden md:flex items-center space-x-6 font-semibold">
+    <a href="../index.php" class="hover:text-teal-600">Home</a>
+    <a href="map.php" class="text-teal-600">Map</a>
+<!-- Dropdown Parent -->
+<div class="relative">
+  <!-- Toggle Button -->
+  <button id="aboutBtn" class="flex items-center gap-1 font-semibold text-gray-700 hover:text-teal-600 cursor-pointer focus:outline-none">
+    About CNO
+    <svg class="w-4 h-4 transition-transform" id="aboutArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
+    <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
+    <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
+    <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
+    <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
+    <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
+  </div>
+</div>
+
+    <a href="pages/contact_us/contact.php" class="hover:text-teal-600">Contact Us</a>
+    <a href="../login.php" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Login</a>
+  </nav>
+
+  <!-- Mobile Burger -->
+  <div class="md:hidden flex items-center">
+    <button id="burgerBtn" class="text-gray-700 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+ <!-- Mobile menu -->
+<div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-white shadow-md z-20 flex flex-col">
+  <a href="../index.php" class="px-6 py-3 border-b hover:bg-gray-100">Home</a>
+  <a href="map.php" class="px-6 py-3 border-b hover:bg-gray-100">Map</a>
+
+  <!-- Mobile About CNO Dropdown -->
+  <div class="flex flex-col">
+    <button id="mobileAboutBtn" class="flex justify-between items-center px-6 py-3 border-b hover:bg-gray-100 focus:outline-none">
+      About CNO
+      <svg id="mobileAboutArrow" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+      </svg>
+    </button>
+    <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
+      <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
+      <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
+      <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+      <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
+      <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
+    </div>
+  </div>
+
+  <a href="pages/contact_us/contact.php" class="px-6 py-3 border-b hover:bg-gray-100">Contact Us</a>
+  <a href="../login.php" class="px-6 py-3 hover:bg-gray-100">Login</a>
+</div>
+</header>
+
+<!-- SCRIPT HEADER -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  burgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  // Mobile About CNO Dropdown
+  const mobileAboutBtn = document.getElementById('mobileAboutBtn');
+  const mobileAboutDropdown = document.getElementById('mobileAboutDropdown');
+  const mobileAboutArrow = document.getElementById('mobileAboutArrow');
+
+  mobileAboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileAboutDropdown.classList.toggle('hidden');
+    mobileAboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Optional: close dropdown if clicked outside mobile menu
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target)) {
+      mobileAboutDropdown.classList.add('hidden');
+      mobileAboutArrow.classList.remove('rotate-180');
+    }
+  });
+});
+// Dropdown functionality for About CNO
+ const aboutBtn = document.getElementById('aboutBtn');
+  const aboutDropdown = document.getElementById('aboutDropdown');
+  const aboutArrow = document.getElementById('aboutArrow');
+
+  aboutBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent document click
+    aboutDropdown.classList.toggle('hidden');
+    aboutArrow.classList.toggle('rotate-180');
+  });
+
+  // Close dropdown if clicked outside
+  document.addEventListener('click', () => {
+    if(!aboutDropdown.classList.contains('hidden')) {
+      aboutDropdown.classList.add('hidden');
+      aboutArrow.classList.remove('rotate-180');
+    }
+  });
+</script>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-7xl mx-auto px-6 py-6 mt-4 mb-28 bg-white shadow rounded">
+    <div class="bg-gray-200 py-2 px-4 mb-4">
+      <span class="uppercase tracking-wide text-cyan-600 font-semibold">Data</span>
+    </div>
+    
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
       <h1 class="text-lg md:text-xl font-semibold">
         El Salvador Health and Nutrition Map: Share of children who are stunted
       </h1>
-      <div class="flex flex-wrap gap-4 mt-4 md:mt-0">
-        <div id="chart-tooltip">
-  <canvas id="chartCanvas" width="200" height="120"></canvas>
-</div>
+      <div class="flex flex-wrap gap-4 mt-2 md:mt-0 items-center">
+        <div id="chart-tooltip" class="absolute bottom-5 left-5 max-w-[340px]"></div>
         <div>
           <label class="block text-sm font-medium text-gray-600">Select Year</label>
-      <select id="yearFilter" class="mt-1 block w-32 rounded border-gray-300 shadow-sm">
-        <option value="">Loading...</option>
-      </select>
+          <select id="yearFilter" class="mt-1 block w-32 rounded border border-gray-300 shadow-sm"></select>
         </div>
         <div>
-          <!-- Full Barangay list -->
           <label class="block text-sm font-medium text-gray-600">Select Barangay</label>
-          <select id="barangayFilter" class="mt-1 block w-48 rounded border-gray-300 shadow-sm">
+          <select id="barangayFilter" class="mt-1 block w-48 rounded border border-gray-300 shadow-sm">
             <option value="All">All</option>
             <option value="Amoros">Amoros</option>
             <option value="Bolisong">Bolisong</option>
@@ -431,615 +234,78 @@
 
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="flex-1">
-        <div id="map" class="rounded border border-gray-300"></div>
+        <div id="map" class="rounded border border-gray-300 z-0"></div>
       </div>
-
-   <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
-  <h2 class="text-md font-semibold mb-3">Legend</h2>
-  <ul class="space-y-2 text-sm">
-     <li data-field="all" data-label="All Indicators" data-color="#888"><span class="w-4 h-4 mr-2 bg-gray-400 inline-block"></span>All</li>
-    <li data-field="ind9b1_pct" data-label="Severly Underweight" data-color="#8b0202"><span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Severly Underweight</li>
-    <li data-field="ind9b2_pct" data-label="Underweight" data-color="#ce6402"><span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Underweight</li>
-    <li data-field="ind9b3_pct" data-label="Normal" data-color="#338b09"><span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal</li>
-    <li data-field="ind9b4_pct" data-label="Severly Wasted" data-color="#05f5f5"><span class="w-4 h-4 mr-2 bg-cyan-400 inline-block"></span>Severly Wasted</li>
-    <li data-field="ind9b5_pct" data-label="Wasted" data-color="#ffef0e"><span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Wasted</li>
-    <li data-field="ind9b6_pct" data-label="Overweight" data-color="#694c0d"><span class="w-4 h-4 mr-2 bg-yellow-800 inline-block"></span>Overweight</li>
-    <li data-field="ind9b7_pct" data-label="Obese" data-color="#fc3c9c"><span class="w-4 h-4 mr-2 bg-pink-600 inline-block"></span>Obese</li>
-    <li data-field="ind9b8_pct" data-label="Severly Stunted" data-color="#a00686"><span class="w-4 h-4 mr-2 bg-purple-600 inline-block"></span>Severly Stunted</li>
-    <li data-field="ind9b9_pct" data-label="Stunted" data-color="#032c74"><span class="w-4 h-4 mr-2 bg-blue-500 inline-block"></span>Stunted</li>
-  </ul>
-</div>
-
+      <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
+        <h2 class="text-md font-semibold mb-3">Legend</h2>
+        <ul class="space-y-2 text-sm">
+          <li data-field="all" data-label="All Indicators" data-color="#888" class="cursor-pointer"> <span class="w-4 h-4 mr-2 bg-gray-400 inline-block"></span>All</li>
+          <li data-field="ind9b1_pct" data-label="Severly Underweight" data-color="#8b0202" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Severly Underweight</li>
+          <li data-field="ind9b2_pct" data-label="Underweight" data-color="#ce6402" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Underweight</li>
+          <li data-field="ind9b3_pct" data-label="Normal" data-color="#338b09" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal</li>
+          <li data-field="ind9b4_pct" data-label="Severly Wasted" data-color="#05f5f5" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-cyan-400 inline-block"></span>Severly Wasted</li>
+          <li data-field="ind9b5_pct" data-label="Wasted" data-color="#ffef0e" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Wasted</li>
+          <li data-field="ind9b6_pct" data-label="Overweight" data-color="#694c0d" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-yellow-800 inline-block"></span>Overweight</li>
+          <li data-field="ind9b7_pct" data-label="Obese" data-color="#fc3c9c" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-pink-600 inline-block"></span>Obese</li>
+          <li data-field="ind9b8_pct" data-label="Severly Stunted" data-color="#a00686" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-purple-600 inline-block"></span>Severly Stunted</li>
+          <li data-field="ind9b9_pct" data-label="Stunted" data-color="#032c74" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-blue-500 inline-block"></span>Stunted</li>
+        </ul>
+      </div>
     </div>
-      <div class="gradient-wrapper" id="gradient-wrapper">
-    <div class="gradient-grid" id="gradient-grid"></div>
-  
-  </div>
+
+    <div class="gradient-wrapper mt-6" id="gradient-wrapper">
+      <div class="gradient-grid" id="gradient-grid"></div>
+    </div>
   </main>
 
-    <!-- Footer Section -->
-<!-- footer.php -->
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-grid">
-            <!-- Logo and Description -->
-            <div class="footer-logo">
-                <div class="logo-text">
-                   <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
-                    <span class="logo-primary">CNO</span><span class="logo-secondary">NutriMap</span>
-                </div>
-                <p class="footer-desc">
-                    A tool to visualize health and nutrition data for children in El Salvador City.
-                </p>
-            </div>
-                      <!-- Links Column 1 -->
-            <div>
-                <h3 class="footer-title">About Us</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/about_us/mission.php">Our Mission</a></li>
-                    <li><a href="landing_page/pages/about_us/vision.php">Our Vision</a></li>
-                    <li><a href="landing_page/pages/about_us/history.php">History</a></li>
-                </ul>
-            </div>
-            <!-- Links Column 2 -->
-            <div>
-                <h3 class="footer-title">Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/map.php">Map</a></li>
-                    <li><a href="landing_page/pages/contact_us/contact.php">Contact Us</a></li>
-                </ul>
-            </div>
-            <!-- Legal & Support Column -->
-            <div>
-                <h3 class="footer-title">Legal & Support</h3>
-                <ul class="footer-links">
-                    <li><a href="landing_page/pages/legal_and_support/terms.php">Terms of Use</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/privacy.php">Privacy Policy</a></li>
-                    <li><a href="landing_page/pages/legal_and_support/cookies.php">Cookies</a></li>
-                    <li><a href="landing_page/pages/help_and_support/help.php">Help</a></li>
-                    <li><a href="landing_page/pages/help_and_support/faqs.php">FAQs</a></li>
-                </ul>
-            </div>
+  <!-- FOOTER -->
+  <footer class="footer mt-auto bg-gray-800 text-gray-300 py-10 relative z-10">
+    <div class="footer-container max-w-7xl mx-auto px-4">
+      <div class="footer-grid grid gap-8 md:grid-cols-5">
+        <div class="footer-logo md:col-span-2 flex flex-col items-start">
+          <div class="logo-text flex items-center mb-4">
+            <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2 rounded-lg">
+            <span class="logo-primary text-cyan-600 text-xl font-bold">CNO</span>
+            <span class="logo-secondary text-white text-xl font-bold ml-1">NutriMap</span>
+          </div>
+          <p class="footer-desc text-sm">A tool to visualize health and nutrition data for children in El Salvador City.</p>
         </div>
-        <div class="footer-bottom">
-            <p>Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">About Us</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="pages/about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
+            <li><a href="pages/about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
+            <li><a href="pages/about_us/history.php" class="hover:text-cyan-600">History</a></li>
+          </ul>
         </div>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">Quick Links</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="map.php" class="hover:text-cyan-600">Map</a></li>
+            <li><a href="pages/contact_us/contact.php" class="hover:text-cyan-600">Contact Us</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title text-white font-semibold mb-4">Legal & Support</h3>
+          <ul class="footer-links space-y-2">
+            <li><a href="pages/legal_and_support/terms.php" class="hover:text-cyan-600">Terms of Use</a></li>
+            <li><a href="pages/legal_and_support/privacy.php" class="hover:text-cyan-600">Privacy Policy</a></li>
+            <li><a href="pages/legal_and_support/cookies.php" class="hover:text-cyan-600">Cookies</a></li>
+            <li><a href="pages/help_and_support/help.php" class="hover:text-cyan-600">Help</a></li>
+            <li><a href="pages/help_and_support/faqs.php" class="hover:text-cyan-600">FAQs</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom mt-8 border-t border-gray-700 pt-8 text-center text-gray-400 text-sm">
+        <p>Copyright&copy; 2025 CNO NutriMap All Rights Reserved. Developed By NBSC ICS 4th Year Student.</p>
+      </div>
     </div>
-</footer>
-
-    <!-- Dropdown Script -->    
-    <script>
-        const aboutBtn = document.getElementById('about-dropdown-btn');
-        const aboutMenu = document.getElementById('about-dropdown-menu');
-        const aboutIcon = aboutBtn.querySelector('.fa-chevron-down');
-
-        function toggleDropdown(button, menu, icon) {
-            const isMenuVisible = menu.classList.contains('hidden');
-            if (isMenuVisible) {
-                menu.classList.remove('hidden');
-                icon.classList.add('rotate-180');
-            } else {
-                menu.classList.add('hidden');
-                icon.classList.remove('rotate-180');
-            }
-        }
-
-        // Show dropdown on arrow click only
-        aboutIcon.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleDropdown(aboutBtn, aboutMenu, aboutIcon);
-        });
-
-        // Allow About text to navigate to about.php
-        aboutBtn.addEventListener('click', function(e) {
-            if (e.target !== aboutIcon) {
-                // Let the link work normally
-            } else {
-                e.preventDefault();
-            }
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!aboutBtn.contains(event.target) && !aboutMenu.contains(event.target)) {
-                aboutMenu.classList.add('hidden');
-                aboutIcon.classList.remove('rotate-180');
-            }
-        });
- </script>
-    <!-- map script -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>   
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-
-<script>
-// ===================== MAP INITIAL SETUP =====================
-const map = L.map('map', {
-  center: [8.4760268, 124.4809540],
-  zoom: 12,
-  zoomControl: false,
-  dragging: false,
-  scrollWheelZoom: false,
-  doubleClickZoom: false,
-  boxZoom: false,
-  touchZoom: false
-});
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: 'Map data © OpenStreetMap contributors'
-}).addTo(map);
-
-// ===================== VARIABLES =====================
-let geoLayer, geoData;
-let activeField = null, activeColor = null, activeLabel = null;
-let activeYear = 'All';
-let miniChart = null;
-let activeGradientRange = null;
-const legendItems = Array.from(document.querySelectorAll('#legend-buttons li'));
-
-// ===================== LOAD GEOJSON DATA =====================
-fetch('../landing_page/get_map_data.php')
-  .then(r => r.json())
-  .then(data => {
-    geoData = data;
-
-    // Year dropdown
-    const years = [...new Set(geoData.features.map(f => f.properties.YEAR).filter(y => y && y !== ''))].sort((a,b)=>b-a);
-    const yearSelect = document.getElementById('yearFilter');
-    yearSelect.innerHTML='';
-    const allOpt = document.createElement('option');
-    allOpt.value='All';
-    allOpt.textContent='All Years';
-    yearSelect.appendChild(allOpt);
-    years.forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y;
-      opt.textContent = y;
-      yearSelect.appendChild(opt);
-    });
-
-    activeYear = 'All';
-    yearSelect.value = 'All';
-    drawLayer(activeYear);
-
-    yearSelect.addEventListener('change', e => {
-      activeYear = e.target.value;
-      drawLayer(activeYear);
-    });
-  })
-  .catch(err => console.error('Error loading map data:', err));
-
-// ===================== DRAW LAYER =====================
-function drawLayer(selectedYear) {
-  if(!geoData) return;
-  if(!selectedYear) selectedYear = activeYear;
-  if(geoLayer) map.removeLayer(geoLayer);
-
-  let mergedFeatures = [];
-
-  if(selectedYear === 'All') {
-    // Use latest year per barangay
-    const barangayMap = new Map();
-    geoData.features.forEach(f => {
-      const b = f.properties.BARANGAY?.toUpperCase();
-      const year = parseInt(f.properties.YEAR || 0);
-      if(!barangayMap.has(b) || year > (barangayMap.get(b).properties.YEAR || 0)) {
-        barangayMap.set(b, f);
-      }
-    });
-    mergedFeatures = Array.from(barangayMap.values());
-  } else {
-    mergedFeatures = geoData.features.filter(f => f.properties.YEAR == selectedYear);
-  }
-
-  // Add missing barangays (no data)
-  const barangayWithData = new Set(mergedFeatures.map(f => f.properties.BARANGAY?.toUpperCase()));
-  const allBarangays = geoData.features.map(f => f.properties.BARANGAY?.toUpperCase());
-  [...new Set(allBarangays)].forEach(b => {
-    if(!barangayWithData.has(b)) {
-      const base = geoData.features.find(f => f.properties.BARANGAY?.toUpperCase() === b);
-      if(base){
-        const clone = JSON.parse(JSON.stringify(base));
-        clone.properties.NO_DATA = true;
-        mergedFeatures.push(clone);
-      }
-    }
-  });
-
-  const finalData = { type: "FeatureCollection", features: mergedFeatures };
-  geoLayer = L.geoJSON(finalData, { style: styleFeature, onEachFeature: featureHandler }).addTo(map);
-}
-
-// ===================== STYLING =====================
-function styleFeature(feature){
-  const props = feature.properties;
-
-  // Transparent base but visible boundary for missing data
-  if(props.NO_DATA) {
-    return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
-  }
-
-  if(activeField && activeColor){
-    const val = props[activeField.toUpperCase()] ?? 0;
-    return { color:'#333', weight:1, fillOpacity:0.8, fillColor:getGradientColor(activeColor, val) };
-  }
-
-  // Default mixed coloring for “All Indicators”
-  let r=0,g=0,b=0,total=0;
-  legendItems.forEach(li => {
-      if(li.dataset.field === 'all') return; 
-      const val = props[li.dataset.field.toUpperCase()] ?? 0;
-      const rgb = hexToRgb(li.dataset.color);
-      r += rgb.r*val;
-      g += rgb.g*val;
-      b += rgb.b*val;
-      total += val;
-  });
-  if(total===0) return { color:'#444', weight:1, fillOpacity:0, fillColor:'transparent', dashArray:'2,2' };
-  return { color:'#333', weight:1, fillOpacity:0.8, fillColor:`rgb(${Math.round(r/total)},${Math.round(g/total)},${Math.round(b/total)})` };
-}
-
-// ===================== TOOLTIP + CHART =====================
-function featureHandler(feature, layer) {
-  const tooltip = document.getElementById('chart-tooltip');
-
-  layer.on({
-    mouseover(e) {
-      tooltip.style.display = 'block';
-      tooltip.style.opacity = 1;
-      tooltip.innerHTML = '';
-
-      const barangayName = feature.properties.BARANGAY || 'Unknown';
-      let labels = [], datasets = [];
-      const indicators = legendItems.filter(li => li.dataset.field !== 'all');
-
-      // HEADER
-      const title = document.createElement('div');
-      title.className = 'tooltip-title';
-      title.textContent = barangayName;
-      tooltip.appendChild(title);
-
-      // SINGLE INDICATOR
-      if (activeField) {
-        const legendLabel = activeLabel || activeField;
-        let value = 0;
-
-        if (activeYear === 'All') {
-          // All years for this barangay
-          const allYears = [...new Set(
-            geoData.features
-              .filter(f => f.properties.BARANGAY === barangayName)
-              .map(f => f.properties.YEAR)
-          )].sort((a,b) => a - b);
-
-          labels = allYears;
-
-          const values = allYears.map(y => {
-            const f = geoData.features.find(ff =>
-              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
-            );
-            return f ? Number(f.properties[activeField.toUpperCase()] ?? null) : null;
-          });
-
-          value = values.filter(v => v !== null).pop() ?? 0;
-
-          datasets.push({
-            label: legendLabel,
-            data: values,
-            borderColor: activeColor,
-            backgroundColor: activeColor,
-            tension: 0.3,
-            borderWidth: 2,
-            fill: false,
-            spanGaps: true,
-            pointRadius: 3
-          });
-
-        } else {
-          // SPECIFIC YEAR: show only that year
-          labels = [activeYear];
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          value = f ? Number(f.properties[activeField.toUpperCase()] ?? 0) : 0;
-
-          datasets.push({
-            label: legendLabel,
-            data: [value],
-            borderColor: activeColor,
-            backgroundColor: activeColor,
-            borderWidth: 1
-          });
-        }
-
-        // Tooltip color + percentage
-        const legendDiv = document.createElement('div');
-        legendDiv.className = 'tooltip-indicator-line';
-        legendDiv.innerHTML = `
-          <span class="color-box" style="background:${activeColor};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-          <strong>${value}%</strong>
-        `;
-        tooltip.appendChild(legendDiv);
-
-        // Chart canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 200;
-        tooltip.appendChild(canvas);
-
-        if (miniChart) miniChart.destroy();
-        miniChart = new Chart(canvas, {
-          type: activeYear === 'All' ? 'line' : 'bar',
-          data: { labels, datasets },
-          options: {
-            responsive: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: { enabled: false },
-              datalabels: { display: false }
-            },
-            scales: {
-              x: { display: activeYear === 'All' },
-              y: { display: false, min: 0, max: 100 }
-            }
-          },
-          plugins: [ChartDataLabels]
-        });
-
-        return;
-      }
-
-      // ALL INDICATORS
-      const flexWrapper = document.createElement('div');
-      flexWrapper.className = 'tooltip-flex';
-      flexWrapper.style.display = 'flex';
-      flexWrapper.style.gap = '10px';
-      tooltip.appendChild(flexWrapper);
-
-      const indicatorsDiv = document.createElement('div');
-      indicatorsDiv.style.flex = '1';
-      indicatorsDiv.style.fontSize = '13px';
-      flexWrapper.appendChild(indicatorsDiv);
-
-      const chartWrapper = document.createElement('div');
-      chartWrapper.style.flex = '1';
-      flexWrapper.appendChild(chartWrapper);
-
-      if (activeYear === 'All') {
-        const allYears = [...new Set(
-          geoData.features
-            .filter(f => f.properties.BARANGAY === barangayName)
-            .map(f => f.properties.YEAR)
-        )].sort((a,b) => a - b);
-
-        labels = allYears;
-
-        indicators.forEach(li => {
-          const field = li.dataset.field.toUpperCase();
-          const color = li.dataset.color;
-
-          const values = allYears.map(y => {
-            const f = geoData.features.find(ff =>
-              ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(y)
-            );
-            return f ? Number(f.properties[field] ?? null) : null;
-          });
-
-          const latestVal = values.filter(v => v !== null).pop() ?? 0;
-
-          datasets.push({
-            label: li.dataset.label,
-            data: values,
-            borderColor: color,
-            backgroundColor: color,
-            tension: 0.3,
-            borderWidth: 2,
-            fill: false,
-            spanGaps: true,
-            pointRadius: 3
-          });
-
-          const line = document.createElement('div');
-          line.className = 'tooltip-indicator-line';
-          line.style.display = 'flex';
-          line.style.alignItems = 'center';
-          line.style.marginBottom = '6px';
-          line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-            <span>${latestVal}%</span>
-          `;
-          indicatorsDiv.appendChild(line);
-        });
-
-      } else {
-        // SPECIFIC YEAR: only show values for that year
-        labels = indicators.map(li => li.dataset.label);
-        const values = indicators.map(li => {
-          const f = geoData.features.find(ff =>
-            ff.properties.BARANGAY === barangayName && String(ff.properties.YEAR) === String(activeYear)
-          );
-          return f ? Number(f.properties[li.dataset.field.toUpperCase()] ?? 0) : 0;
-        });
-        const colors = indicators.map(li => li.dataset.color);
-
-        datasets.push({
-          label: 'Percentage',
-          data: values,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 1
-        });
-
-        indicators.forEach((li, i) => {
-          const val = values[i];
-          const color = li.dataset.color;
-          const line = document.createElement('div');
-          line.className = 'tooltip-indicator-line';
-          line.style.display = 'flex';
-          line.style.alignItems = 'center';
-          line.style.marginBottom = '6px';
-          line.innerHTML = `
-            <span class="color-box" style="background:${color};width:12px;height:12px;display:inline-block;margin-right:8px;border:1px solid #333;"></span>
-            <span>${val}%</span>
-          `;
-          indicatorsDiv.appendChild(line);
-        });
-      }
-
-      // Chart canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = 260;
-      canvas.height = 200;
-      chartWrapper.appendChild(canvas);
-
-      if (miniChart) miniChart.destroy();
-      miniChart = new Chart(canvas, {
-        type: activeYear === 'All' ? 'line' : 'bar',
-        data: { labels, datasets },
-        options: {
-          responsive: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: false },
-            datalabels: { display: false }
-          },
-          scales: {
-            x: { display: activeYear === 'All' },
-            y: { display: false, min: 0, max: 100 }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    },
-
-    mouseout(e) {
-      tooltip.style.opacity = 0;
-      tooltip.style.display = 'none';
-      tooltip.innerHTML = '';
-      if (miniChart) miniChart.destroy();
-    }
-  });
-}
-
-// ===================== LEGEND CLICK =====================
-legendItems.forEach(item => {
-  item.addEventListener('click', () => {
-    legendItems.forEach(li => li.classList.remove('active'));
-    item.classList.add('active');
-
-    const field = item.dataset.field;
-    activeField = field === 'all' ? null : field;
-    activeLabel = item.dataset.label;
-    activeColor = field === 'all' ? '#888' : item.dataset.color;
-
-    if (geoLayer) geoLayer.setStyle(styleFeature);
-    if (activeColor && field !== 'all') updateGradientScale(activeColor);
-    else document.getElementById('gradient-grid').innerHTML = '';
-  });
-});
-
-// ===================== BARANGAY FILTER =====================
-document.getElementById('barangayFilter').addEventListener('change', function(){
-  const selected = this.value.toLowerCase();
-  geoLayer.eachLayer(layer => {
-    const name = layer.feature.properties.BARANGAY?.toLowerCase();
-    layer.setStyle({
-      ...styleFeature(layer.feature),
-      opacity: (selected==='all'||selected===name)?1:0.3,
-      fillOpacity: (selected==='all'||selected===name)?0.7:0.1
-    });
-  });
-});
-
-// ===================== HELPERS =====================
-function hexToRgb(hex){ const c=parseInt(hex.slice(1),16); return {r:(c>>16)&255,g:(c>>8)&255,b:c&255}; }
-function getGradientColor(baseColor, value){
-  if(value==null) return '#999';
-  const ratio = Math.min(1, value/100);
-  const rgb = hexToRgb(baseColor);
-  const start = {r:190, g:190, b:180};
-  const r = Math.round(start.r + (rgb.r - start.r) * ratio);
-  const g = Math.round(start.g + (rgb.g - start.g) * ratio);
-  const b = Math.round(start.b + (rgb.b - start.b) * ratio);
-  return `rgb(${r},${g},${b})`;
-}
-
-// ===================== GRADIENT SCALE =====================
-function updateGradientScale(baseColor){
-  const grid = document.getElementById('gradient-grid');
-  if(!grid) return; 
-  grid.innerHTML='';
-
-  // store the currently clicked gradient cell index
-  let activeCellIndex = null;
-
-  for(let i=0;i<10;i++){
-    const minVal = i*10;      
-    const maxVal = (i+1)*10;  
-    const val=(i+1)*10;
-    const cell=document.createElement('div');
-    cell.className='gradient-cell';
-    cell.style.background = getGradientColor(baseColor,val);
-    cell.title = `${minVal}% - ${maxVal}%`; 
-
-    cell.addEventListener('mouseover', () => {
-      cell.classList.add('active-gradient-cell');
-      activeGradientRange = {min:minVal, max:maxVal};
-      filterMapByGradient();
-    });
-
-    cell.addEventListener('mouseout', () => {
-  cell.classList.remove('active-gradient-cell');
-  activeGradientRange = null;
-
-  // restore all layers to normal style
-  if (geoLayer) {
-    geoLayer.eachLayer(layer => {
-      layer.setStyle(styleFeature(layer.feature));
-    });
-  }
-});
-
-
-    cell.addEventListener('click', () => {
-      // remove previous active
-      if(activeCellIndex !== null && grid.children[activeCellIndex]){
-        grid.children[activeCellIndex].classList.remove('active-gradient-cell');
-      }
-      activeCellIndex = i;
-      cell.classList.add('active-gradient-cell');
-      activeGradientRange = {min:minVal, max:maxVal};
-      filterMapByGradient();
-    });
-
-    grid.appendChild(cell);
-  }
-
-  // Add "No Data" transparent cell
-  const noDataCell = document.createElement('div');
-  noDataCell.className='gradient-cell';
-  noDataCell.style.background = 'transparent';
-  noDataCell.style.border = '1px dashed #333';
-  noDataCell.title = 'No Data';
-  grid.appendChild(noDataCell);
-}
-
-// ===================== FILTER BY GRADIENT =====================
-function filterMapByGradient(){
-  if(!geoLayer) return;
-  geoLayer.eachLayer(layer => {
-    if(!activeField) return layer.setStyle(styleFeature(layer.feature));
-    const val = Number(layer.feature.properties[activeField.toUpperCase()] ?? 0);
-    const inRange = activeGradientRange && val >= activeGradientRange.min && val <= activeGradientRange.max;
-    layer.setStyle({
-      ...styleFeature(layer.feature),
-      fillOpacity: inRange ? 0.8 : 0.1,
-      opacity: inRange ? 1 : 0.3
-    });
-  });
-}
-</script>
-
-
+  </footer>
 </body>
 </html>
+
+  <!-- SCRIPTS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="js/map.js"></script>

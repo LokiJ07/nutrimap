@@ -259,7 +259,7 @@ for($i=1;$i<=9;$i++): ?>
 </tr>
 <?php endforeach; ?>
 <tr><td class="ind">Household with:</td><td class="number-cell"><div>No.</div><div>%</div></td></tr>
-<?php foreach(['a'=>'Vegetable garden','b'=>'Livestock/poultry','c'=>'Combination vegetable garden & livestock/poultry','d'=>'Fishponds','e'=>'No garden'] as $c=>$lbl): ?>
+<?php foreach(['a'=>'Vegetable garden','b'=>'Livestock/poultry','c'=>'Fishponds','d'=>'No garden'] as $c=>$lbl): ?>
 <tr class="indent">
   <td class="ind"><?=$lbl?></td>
   <td class="number-cell">
