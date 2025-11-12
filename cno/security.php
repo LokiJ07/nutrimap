@@ -2,8 +2,7 @@
 session_start();
 require '../db/config.php';
 
-// ✅ Only CNO
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
@@ -80,6 +79,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
         }
     }
 }
+
+// ✅ Helper functions to parse friendly browser and OS names
+function getBrowserName($ua) {
+    if (strpos($ua, 'Firefox') !== false) return 'Firefox';
+    if (strpos($ua, 'Edg') !== false) return 'Edge';
+    if (strpos($ua, 'Chrome') !== false) return 'Chrome';
+    if (strpos($ua, 'Safari') !== false && strpos($ua, 'Chrome') === false) return 'Safari';
+    if (strpos($ua, 'Opera') !== false || strpos($ua, 'OPR') !== false) return 'Opera';
+    return 'Unknown';
+}
+
+function getOSName($ua) {
+    if (strpos($ua, 'Windows') !== false) return 'Windows';
+    if (strpos($ua, 'Macintosh') !== false) return 'Mac';
+    if (strpos($ua, 'Linux') !== false) return 'Linux';
+    if (strpos($ua, 'iPhone') !== false) return 'iPhone';
+    if (strpos($ua, 'Android') !== false) return 'Android';
+    return 'Unknown';
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -92,87 +110,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f5f5f5; }
     .layout { display:flex; height:100vh; flex-direction:column; }
     .body-layout { flex:1; display:flex; }
-
-    /* Sidebar */
-    .sidebar {
-      width:220px; background:#fff; padding:20px;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-      display:flex; flex-direction:column; gap:15px;
-    }
+    .sidebar { width:220px; background:#fff; padding:20px; box-shadow:2px 0 8px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:15px; }
     .sidebar h3 { margin:0 0 10px; font-size:18px; }
-    .sidebar a {
-      display:flex; align-items:center; gap:10px;
-      text-decoration:none; color:#000; font-size:15px;
-      padding:8px; border-radius:4px;
-      transition:background 0.2s;
-    }
-    .sidebar a.active, .sidebar a:hover {
-      background:#00AEEF; color:#fff;
-    }
-
-    /* Content */
+    .sidebar a { display:flex; align-items:center; gap:10px; text-decoration:none; color:#000; font-size:15px; padding:8px; border-radius:4px; transition:background 0.2s; }
+    .sidebar a.active, .sidebar a:hover { background:#00AEEF; color:#fff; }
     .content { flex:1; padding:15px; display:flex; flex-direction:column; }
-    .card {
-      background:#fff; padding:20px;
-      border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);
-      display:none;
-    }
+    .card { background:#fff; padding:20px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:none; }
     .card.active { display:block; }
     .card h2 { margin:0 0 10px; font-size:18px; }
-
-    /* Device Buttons */
-    .device-btn {
-      display:flex; justify-content:space-between; align-items:center;
-      background:#f9f9f9; border:1px solid #ccc; border-radius:5px;
-      padding:12px 14px; margin-bottom:8px;
-      cursor:pointer; transition:background 0.2s;
-    }
+    .device-btn { display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border:1px solid #ccc; border-radius:5px; padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:background 0.2s; }
     .device-btn:hover { background:#eaeaea; }
     .device-name { font-weight:bold; font-size:15px; }
     .device-time { font-size:13px; color:#555; }
-
-    /* Modal (renamed to avoid conflict) */
-    .security-modal {
-      display:none;
-      position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.5);
-      justify-content:center; align-items:center;
-      z-index:9999;
-    }
-    .security-modal-content {
-      background:#fff; border-radius:8px;
-      width:350px; padding:20px; text-align:center;
-      box-shadow:0 4px 10px rgba(0,0,0,0.3);
-    }
+    .security-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999; }
+    .security-modal-content { background:#fff; border-radius:8px; width:350px; padding:20px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
     .security-modal-content h3 { margin-bottom:10px; }
     .security-modal-content p { margin:8px 0; font-size:14px; }
-    .security-modal-content button {
-      margin-top:12px;
-      background:#dc3545; color:#fff; border:none;
-      padding:8px 12px; border-radius:4px;
-      cursor:pointer;
-    }
-    .security-close-btn {
-      margin-top:10px; background:#6c757d;
-      color:#fff; padding:8px 12px; border:none;
-      border-radius:4px; cursor:pointer;
-    }
-
-    /* Password Form */
+    .security-modal-content button { margin-top:12px; background:#dc3545; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
+    .security-close-btn { margin-top:10px; background:#6c757d; color:#fff; padding:8px 12px; border:none; border-radius:4px; cursor:pointer; }
     .password-form { display:flex; flex-direction:column; gap:15px; margin-top:10px; }
-    .password-form input {
-      width:97%; padding:12px 15px; font-size:15px;
-      border:1px solid #ccc; border-radius:8px; outline:none;
-    }
-    .password-form input:focus {
-      border-color:#00AEEF; box-shadow:0 0 5px rgba(0,174,239,0.4);
-    }
-    .btn-submit {
-      padding:12px; background:#00AEEF; color:#fff;
-      font-weight:bold; border:none; border-radius:8px;
-      cursor:pointer; transition:background 0.2s, transform 0.1s;
-    }
+    .password-form input { width:97%; padding:12px 15px; font-size:15px; border:1px solid #ccc; border-radius:8px; outline:none; }
+    .password-form input:focus { border-color:#00AEEF; box-shadow:0 0 5px rgba(0,174,239,0.4); }
+    .btn-submit { padding:12px; background:#00AEEF; color:#fff; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s, transform 0.1s; }
     .btn-submit:hover { background:#0195a0; transform:translateY(-1px); }
     .password-message { margin-top:10px; font-size:14px; color:green; }
     .password-message.error { color:red; }
@@ -198,16 +157,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
           <p>These are the devices where your account is logged in.</p>
 
           <?php if (count($logins) > 0): ?>
-            <?php foreach ($logins as $login): 
-              $deviceName = strtok($login['browser'], '/'); 
+            <?php foreach ($logins as $login):
+              $browser = getBrowserName($login['browser']);
+              $os = getOSName($login['browser']);
               $isCurrent = $login['session_id'] === $current_session;
+              $deviceLabel = "$browser on $os";
             ?>
-              <div class="device-btn" 
-                   data-id="<?= $login['id'] ?>" 
-                   data-current="<?= $isCurrent ? '1':'0' ?>" 
-                   data-login="<?= htmlspecialchars($login['login_time']) ?>" 
+              <div class="device-btn"
+                   data-id="<?= $login['id'] ?>"
+                   data-current="<?= $isCurrent ? '1' : '0' ?>"
+                   data-login="<?= htmlspecialchars($login['login_time']) ?>"
                    data-ip="<?= htmlspecialchars($login['ip_address']) ?>">
-                <span class="device-name"><?= htmlspecialchars($deviceName) ?><?= $isCurrent ? " (This device)" : "" ?></span>
+                <span class="device-name"><?= htmlspecialchars($deviceLabel) ?><?= $isCurrent ? " (This device)" : "" ?></span>
                 <span class="device-time"><?= date('M j, g:i a', strtotime($login['login_time'])) ?></span>
               </div>
             <?php endforeach; ?>
@@ -238,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     </div>
   </div>
 
-  <!-- 🔒 Security Modal (renamed) -->
+  <!-- 🔒 Security Modal -->
   <div class="security-modal" id="securityLogModal">
     <div class="security-modal-content">
       <h3>Log Info</h3>
@@ -249,7 +210,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     </div>
   </div>
 
-  <!-- ✅ Clean JS (renamed to avoid conflicts) -->
   <script>
   (() => {
     const modal = document.getElementById("securityLogModal");
@@ -259,7 +219,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     let selectedId = null;
     let isCurrentDevice = false;
 
-    // Show modal when device is clicked
     document.querySelectorAll(".device-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         selectedId = btn.dataset.id;
@@ -271,18 +230,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
       });
     });
 
-    // Close modal
     function closeSecurityModal() { modal.style.display = "none"; }
     window.closeSecurityModal = closeSecurityModal;
 
-    // Logout another device
     logoutBtn.addEventListener("click", () => {
       if (confirm("Are you sure you want to log out this device?")) {
         window.location.href = "force_logout.php?id=" + selectedId;
       }
     });
 
-    // Switch between cards
     document.querySelectorAll('.menu-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault();
@@ -293,7 +249,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
       });
     });
 
-    // Keep "Change Password" open after submission
     <?php if (!empty($show_change_password) && $show_change_password): ?>
       document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
       document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
