@@ -80,6 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     }
 }
 ?>
+<?php if (isset($_SESSION['flash_message'])): ?>
+  <div style="padding:10px; background:#d4edda; color:#155724; border-radius:5px; margin-bottom:10px;">
+    <?= htmlspecialchars($_SESSION['flash_message']); ?>
+  </div>
+  <?php unset($_SESSION['flash_message']); ?>
+<?php endif; ?>
+
 <!doctype html>
 <html lang="en">
 <head>

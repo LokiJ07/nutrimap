@@ -43,34 +43,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['username'] = $_SESSION['pending_username'];
             }
                
-                  // ✅ Save device to login_history (if not already saved)
-            $session_id = session_id();
-            $browser = $_SERVER['HTTP_USER_AGENT'];
-            $ip = $_SERVER['REMOTE_ADDR'];
+      // ✅ Save device to login_history (if not already saved)
+$session_id = session_id();
+$userAgent = $_SERVER['HTTP_USER_AGENT'];
+$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 
-            // Check if device already exists
-            $checkStmt = $pdo->prepare("
-                SELECT id FROM login_history
-                WHERE user_id = ? AND browser = ? AND ip_address = ?
-                LIMIT 1
-            ");
-            $checkStmt->execute([$user_id, $browser, $ip]);
-            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$existing) {
-                // Insert only if not already saved
-                $insertStmt = $pdo->prepare("
-                    INSERT INTO login_history (user_id, session_id, browser, ip_address)
-                    VALUES (?, ?, ?, ?)
-                ");
-                $insertStmt->execute([$user_id, $session_id, $browser, $ip]);
-            } else {
-                // Update session_id if user logs in again on same device
-                $updateStmt = $pdo->prepare("
-                    UPDATE login_history SET session_id = ? WHERE id = ?
-                ");
-                $updateStmt->execute([$session_id, $existing['id']]);
-            }
+// 🔹 Helper functions for friendly browser and OS names
+function getBrowser($ua) {
+    if (strpos($ua, 'Firefox') !== false) return 'Firefox';
+    if (strpos($ua, 'Edg') !== false) return 'Edge';
+    if (strpos($ua, 'Chrome') !== false) return 'Chrome';
+    if (strpos($ua, 'Safari') !== false) return 'Safari';
+    if (strpos($ua, 'Opera') !== false || strpos($ua, 'OPR') !== false) return 'Opera';
+    return 'Unknown';
+}
+
+function getOS($ua) {
+    if (strpos($ua, 'Windows') !== false) return 'Windows';
+    if (strpos($ua, 'Macintosh') !== false) return 'Mac';
+    if (strpos($ua, 'Linux') !== false) return 'Linux';
+    if (strpos($ua, 'iPhone') !== false) return 'iPhone';
+    if (strpos($ua, 'Android') !== false) return 'Android';
+    return 'Unknown';
+}
+
+// 🔹 Compose friendly device name
+$browser = getBrowser($userAgent) . ' on ' . getOS($userAgent);
+
+// Check if device already exists
+$checkStmt = $pdo->prepare("
+    SELECT id FROM login_history
+    WHERE user_id = ? AND browser = ? AND ip_address = ?
+    LIMIT 1
+");
+$checkStmt->execute([$user_id, $browser, $ip]);
+$existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$existing) {
+    // Insert only if not already saved
+    $insertStmt = $pdo->prepare("
+        INSERT INTO login_history (user_id, session_id, browser, ip_address)
+        VALUES (?, ?, ?, ?)
+    ");
+    $insertStmt->execute([$user_id, $session_id, $browser, $ip]);
+} else {
+    // Update session_id if user logs in again on same device
+    $updateStmt = $pdo->prepare("
+        UPDATE login_history SET session_id = ? WHERE id = ?
+    ");
+    $updateStmt->execute([$session_id, $existing['id']]);
+}
 
             // ✅ clear pending values
             unset(
