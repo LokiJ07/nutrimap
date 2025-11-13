@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNO NutriMap - About CNO</title>
+  <title>CNO NutriMap | About CNO</title>
   <link rel="icon" type="image/png" href="../../img/CNO_Logo.png">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>

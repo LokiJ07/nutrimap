@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CNO NutriMap - Login</title>
+  <title>CNO NutriMap | Login</title>
   <link rel="icon" type="image/png" href="img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Tailwind CSS CDN -->
