@@ -121,7 +121,7 @@ $pdf = new MYPDF('P','mm','A4',true,'UTF-8',false);
 $pdf->reportYear = $selectedYear;
 $pdf->SetCreator('Nutrimap');
 $pdf->SetAuthor('CNO');
-$pdf->SetTitle('Consolidated Barangay Situation Analysis');
+$pdf->SetTitle('CNO | Export Consolidated Barangay Situational Analysis');
 $pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
