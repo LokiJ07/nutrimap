@@ -171,7 +171,8 @@ foreach ($cnoUsers as $cnoId) {
   <html lang="en">
   <head>
   <meta charset="UTF-8">
-  <title>Add Report — CNO NutriMap</title>
+  <title>BNS | Add Report</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <meta name="viewport" content="width=device-width,initial-scale=1">
  <link rel="stylesheet" href="css/add_report.css">

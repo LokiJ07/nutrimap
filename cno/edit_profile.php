@@ -218,7 +218,6 @@ body {
 </head>
 <body>
   <div class="layout">
-    <?php include 'header.php'; ?>
     <div class="page-title">Edit Profile</div>
 
     <div class="body-layout">

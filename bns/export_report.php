@@ -178,6 +178,10 @@ $pdf->barangayLogo = $barangay_logo;
 $pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
+$pdf->SetCreator('Nutrimap');
+$pdf->SetAuthor('BNS');
+$pdf->SetTitle('BNS | Export Barangay Situational Analysis');
+
 
 // ---------- Page 1 ----------
 $pdf->AddPage();
