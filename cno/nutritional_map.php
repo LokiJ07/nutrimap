@@ -13,7 +13,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNO NutriMap</title>
+    <title>CNO | NutriMap</title>
+    <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
     <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />

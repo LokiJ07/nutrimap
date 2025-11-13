@@ -119,50 +119,82 @@
   <main class="flex-grow flex flex-col items-center p-5 lg:p-10">
     <h1 class="text-3xl lg:text-4xl font-bold mb-8 text-center">Our History</h1>
 
-    <!-- Timeline -->
-    <div class="relative w-full max-w-4xl">
-      <!-- Vertical line for large screens -->
-      <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gray-300 transform -translate-x-1/2"></div>
+        <!-- ===== Timeline Section ===== -->
+    <div class="relative my-16">
+      <!-- vertical line -->
+      <div class="absolute left-1/2 transform -translate-x-1/2 bg-[#00bfa6] w-1 h-full rounded-lg hidden md:block"></div>
 
       <!-- Timeline items -->
-      <div class="flex flex-col md:grid md:grid-cols-9 md:gap-4">
+      <div class="space-y-12">
         <!-- Item 1 -->
-        <div class="md:col-start-1 md:col-end-5 md:mb-8 flex justify-end">
-          <div class="bg-white p-5 rounded-lg shadow relative w-full md:w-80">
-            <h3 class="text-teal-600 font-bold text-lg mb-2">The Humble Beginnings (2015-2020)</h3>
-            <p class="text-gray-600 leading-relaxed">The City Nutrition Office (CNO) began its journey with a small, dedicated team of passionate individuals. Their primary goal was to address malnutrition and promote healthier lifestyles within the community of El Salvador. Through grassroots efforts and a commitment to serving the public, they laid the foundation for what would become a cornerstone of public health.</p>
-            <span class="hidden md:block absolute left-full top-5 w-4 h-4 bg-teal-600 rounded-full border-4 border-white -translate-x-1/2"></span>
+        <div class="relative md:w-1/2 md:pr-10 md:text-right md:ml-0">
+            <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">2016 - Initial Establishment</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              The CNO was lodged at the City Health Office (CHO), occupying a shared room with PopCom (2 staff) and Nutrition (CNAO & 2 staff). 
+              Space was limited and visibility for the nutrition program was low.
+            </p>
           </div>
         </div>
 
         <!-- Item 2 -->
-        <div class="md:col-start-6 md:col-end-10 md:mb-8 flex justify-start">
-          <div class="bg-white p-5 rounded-lg shadow relative w-full md:w-80">
-            <h3 class="text-teal-600 font-bold text-lg mb-2">Growth and Expansion (2020-2024)</h3>
-            <p class="text-gray-600 leading-relaxed">During this period, the CNO expanded its reach by implementing numerous new health programs and conducting extensive community-based research. We collaborated with various local and international partners, which significantly bolstered our capacity to combat malnutrition. Our efforts began to show measurable improvements in the community's overall nutritional status.</p>
-            <span class="hidden md:block absolute -left-5 top-5 w-4 h-4 bg-teal-600 rounded-full border-4 border-white"></span>
+        <div class="relative md:w-1/2 md:pl-10 md:ml-auto">
+          <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">2018 - Request for a Separate Office</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              CNAO requested Dr. Tangcalagan of CHO for a dedicated office. Nutrition staff were then transferred 
+              to Laboratory Room 1 (Admin) to address operational needs.
+            </p>
           </div>
         </div>
 
         <!-- Item 3 -->
-        <div class="md:col-start-1 md:col-end-5 md:mb-8 flex justify-end">
-          <div class="bg-white p-5 rounded-lg shadow relative w-full md:w-80">
-            <h3 class="text-teal-600 font-bold text-lg mb-2">The NutriMap Revolution (2025)</h3>
-            <p class="text-gray-600 leading-relaxed">A pivotal moment in our history came with the establishment of the NutriMap program. This innovative tool revolutionized how we collect and analyze nutritional data. By providing real-time insights, NutriMap allowed us to target our interventions more effectively and monitor the long-term impact of our work with unprecedented precision.</p>
-            <span class="hidden md:block absolute left-full top-5 w-4 h-4 bg-teal-600 rounded-full border-4 border-white -translate-x-1/2"></span>
+        <div class="relative md:w-1/2 md:pr-10 md:text-right md:ml-0">
+          <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">2021 - Space Challenges</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              Laboratory operations required the current nutrition office. CNAO lobbied the Local Chief Executive (LCE) 
+              to transfer the Nutrition Office to the vacated Tourism Office to ensure proper space and recognition.
+            </p>
           </div>
         </div>
 
         <!-- Item 4 -->
-        <div class="md:col-start-6 md:col-end-10 md:mb-8 flex justify-start">
-          <div class="bg-white p-5 rounded-lg shadow relative w-full md:w-80">
-            <h3 class="text-teal-600 font-bold text-lg mb-2">Looking to the Future (2025 and Beyond)</h3>
-            <p class="text-gray-600 leading-relaxed">Our commitment to continuous improvement and community engagement remains at the heart of everything we do. We are immensely proud of our past achievements and are excited for the future as we continue to work toward a healthier and more nourished El Salvador. The NutriMap program is just the beginning of our journey to empower communities with better nutritional health.</p>
-            <span class="hidden md:block absolute -left-5 top-5 w-4 h-4 bg-teal-600 rounded-full border-4 border-white"></span>
+        <div class="relative md:w-1/2 md:pl-10 md:ml-auto">
+            <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">1st Attempt - Verbal Lobbying</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              In January 2021, CNAO Clapano visited the Mayor to verbally request a separate office. 
+              This initial effort helped bring attention to the need, and the office was temporarily moved to the Tourism Office.
+            </p>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="relative md:w-1/2 md:pr-10 md:text-right md:ml-0">
+          <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">2nd Attempt - Written Request</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              On February 21, 2021, CNAO Clapano submitted a written request to Mayor Lignes for a dedicated Nutrition Office. 
+              With the Mayor’s approval, the request was forwarded to the City Engineering Office for a Program of Works, 
+              with an approved budget of 1.6 million pesos, marking a major milestone in institutional recognition of the nutrition program.
+            </p>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="relative md:w-1/2 md:pl-10 md:ml-auto">
+            <div class="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-2xl transition">
+            <h3 class="text-[#00bfa6] text-xl font-semibold mb-3">Today and Beyond</h3>
+            <p class="text-gray-700 leading-relaxed text-justify">
+              The City Nutrition Office now continues its mission with proper facilities, integrating technology and data-driven 
+              solutions to provide sustainable nutrition programs for the community.
+            </p>
           </div>
         </div>
       </div>
     </div>
+  </div>
   </main>
 
   <!-- FOOTER -->

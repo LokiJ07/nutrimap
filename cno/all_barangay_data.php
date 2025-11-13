@@ -65,7 +65,8 @@ foreach ($barangayOptions as $barangay) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CNO - Health and Nutrition Data</title>
+<title>CNO | Health and Nutrition Data</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">

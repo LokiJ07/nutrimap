@@ -60,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Create Account - CNO NutriMap</title>
+<title>CNO | Create Account</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <style>
     body{
         margin:0;

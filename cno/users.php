@@ -58,7 +58,8 @@ $inactiveUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta charset="UTF-8">
-<title>User Management</title>
+<title>CNO | User Management</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <style>
 body {
     font-family: Arial, sans-serif;
