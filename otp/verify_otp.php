@@ -60,11 +60,9 @@ function getBrowser($ua) {
 }
 
 function getOS($ua) {
-    if (strpos($ua, 'Windows') !== false) return 'Windows';
-    if (strpos($ua, 'Macintosh') !== false) return 'Mac';
-    if (strpos($ua, 'Linux') !== false) return 'Linux';
-    if (strpos($ua, 'iPhone') !== false) return 'iPhone';
-    if (strpos($ua, 'Android') !== false) return 'Android';
+    $ua = strtolower($ua);
+    if (strpos($ua, 'windows') !== false) return 'Windows';
+    if (strpos($ua, 'android') !== false || strpos($ua, 'iphone') !== false || strpos($ua, 'mobile') !== false) return 'Phone';
     return 'Unknown';
 }
 
