@@ -102,7 +102,13 @@
       </a>
     </div>
   </main>
-
+<section class="w-full max-w-5xl mx-auto bg-gray-100 rounded-2xl shadow-md mt-10 mb-20 sm:p-12 text-center">
+    <h2 class="text-2xl sm:text-3xl font-bold text-teal-600 mb-4">Empowering Nutrition Awareness</h2>
+    <p class="text-gray-600 text-base sm:text-lg leading-relaxed">
+      The City Nutrition Office of El Salvador, Misamis Oriental, is committed to promoting a healthier community
+      through education, data-driven decisions, and continuous collaboration with local partners and stakeholders.
+    </p>
+  </section>
   <!-- FOOTER -->
   <footer class="bg-gray-800 text-gray-300 py-10 mt-10">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-8">

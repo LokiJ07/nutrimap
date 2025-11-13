@@ -120,7 +120,7 @@
     <h1 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-800">Our Vision</h1>
     <div class="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full text-gray-700 text-justify">
       <p class="text-lg leading-relaxed">
-        To be a city where every citizen, from the youngest to the oldest, has access to adequate nutrition and the knowledge to make healthy food choices. We envision a community free from malnutrition and food-related illnesses, where a healthy lifestyle is a way of life.
+        Healthy Tagnipan-ons through Committed, People-Centered and Excellent Nutrition Services.
       </p>
     </div>
   </main>

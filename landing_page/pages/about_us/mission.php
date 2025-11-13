@@ -119,7 +119,7 @@
     <h1 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-800">Our Mission</h1>
     <div class="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full text-gray-700 text-justify">
       <p class="text-lg leading-relaxed">
-        Our mission is to proactively implement sustainable nutrition programs and policies that empower individuals and families to achieve optimal health. We are committed to collaborating with communities, stakeholders, and government agencies to ensure food security, promote healthy eating habits, and reduce the prevalence of malnutrition across all sectors of the city.
+        Safeguard the nutrition integrity and well-being of Tagnipan-ons through pro-active nutrition program implementation.
       </p>
     </div>
   </main>

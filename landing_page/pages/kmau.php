@@ -122,7 +122,7 @@
         <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
           <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Mission</h2>
           <p class="text-gray-700 text-justify">
-            To serve as the primary advocate for a well-nourished community by implementing evidence-based nutritional programs, and by empowering families to take charge of their health through education, resources, and continuous support.
+            Safeguard the nutrition integrity and well-being of Tagnipan-ons through pro-active nutrition program implementation.
           </p>
         </div>
 
@@ -130,7 +130,15 @@
         <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
           <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Vision</h2>
           <p class="text-gray-700 text-justify">
-            A malnutrition-free El Salvador City where every citizen, regardless of age or background, has access to adequate and nutritious food, enabling them to reach their full potential and contribute to the city's progress.
+           Healthy Tagnipan-ons through Committed, People-Centered and Excellent Nutrition Services.
+          </p>
+        </div>
+
+        <!-- Goal -->
+        <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
+          <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Goal</h2>
+          <p class="text-gray-700 text-justify">
+           Improve and sustain at a low public health significance on malnutrition among all age groups.
           </p>
         </div>
 
