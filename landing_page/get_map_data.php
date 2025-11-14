@@ -24,16 +24,39 @@ $sql = "SELECT
 $stmt = $pdo->query($sql);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Group data by barangay and year
+// 3. Define merged indicators
+$mergedIndicators = [
+    'UNDERWEIGHT' => ['IND9B1_PCT', 'IND9B2_PCT'],
+    'NORMAL' => ['IND9B3_PCT'],
+    'WASTED' => ['IND9B4_PCT', 'IND9B5_PCT'],
+    'OVERWEIGHT_OBESE' => ['IND9B6_PCT', 'IND9B7_PCT'],
+    'STUNTED' => ['IND9B8_PCT', 'IND9B9_PCT']
+];
+
+// 4. Group data by barangay and year
 $lookup = [];
 foreach ($data as $row) {
     $b = strtoupper(trim($row['barangay']));
     $y = $row['year'];
     if (!isset($lookup[$b])) $lookup[$b] = [];
-    $lookup[$b][$y] = $row;
+    
+    // Convert keys to uppercase for consistency
+    $rowUpper = [];
+    foreach ($row as $k => $v) $rowUpper[strtoupper($k)] = $v;
+    
+    // Compute merged values
+    foreach ($mergedIndicators as $mergedKey => $fields) {
+        $sum = 0;
+        foreach ($fields as $f) {
+            if (isset($rowUpper[$f])) $sum += floatval($rowUpper[$f]);
+        }
+        $rowUpper[$mergedKey] = $sum;
+    }
+
+    $lookup[$b][$y] = $rowUpper;
 }
 
-// 4. Create new GeoJSON features — one per (barangay, year)
+// 5. Create new GeoJSON features — one per (barangay, year)
 $newFeatures = [];
 foreach ($geojson['features'] as $feature) {
     $bName = strtoupper(trim($feature['properties']['BARANGAY']));
@@ -41,8 +64,8 @@ foreach ($geojson['features'] as $feature) {
         foreach ($lookup[$bName] as $year => $vals) {
             $newFeature = $feature; // copy geometry
             foreach ($vals as $key => $val) {
-                if ($key !== 'barangay') {
-                    $newFeature['properties'][strtoupper($key)] = $val;
+                if ($key !== 'BARANGAY') {
+                    $newFeature['properties'][$key] = $val;
                 }
             }
             $newFeature['properties']['YEAR'] = $year;
@@ -55,9 +78,9 @@ foreach ($geojson['features'] as $feature) {
     }
 }
 
-// 5. Replace original features
+// 6. Replace original features
 $geojson['features'] = $newFeatures;
 
-// 6. Output
+// 7. Output
 echo json_encode($geojson);
 ?>

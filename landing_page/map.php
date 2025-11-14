@@ -10,38 +10,74 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
   <style>
-    body { margin:0; }
-    #map { height: 640px; }
-    #chart-tooltip {
-      position: absolute;
-      z-index: 1000;
-      background: rgba(255,255,255,0.95);
-      padding: 8px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      max-width: 320px;
-      pointer-events: none;
-    }
-    /* Make tooltip canvas responsive */
-#chart-tooltip {
-  max-width: 320px;
+   body { margin:0; }
+
+/* MAP */
+#map { 
+  height: 640px; 
 }
 
+/* MAP & CHART CONTAINER FLIP */
+#mapContainer, #chartContainer {
+  transition: transform 0.6s;
+  backface-visibility: hidden;
+}
+
+#mapContainer.flipped {
+  transform: rotateY(180deg);
+  display: none;
+}
+
+#chartContainer.flipped {
+  transform: rotateY(0deg);
+  display: block;
+}
+
+/* FULL CHART */
+#chartContainer {
+  display: none;
+  width: 100%;
+  max-width: 800px;   /* desktop width */
+  height: 500px;      /* desktop height */
+  margin: auto;
+}
+
+/* TOOLTIP + MINI CHART */
+#chart-tooltip {
+  position: absolute;
+  z-index: 1000;
+  background: rgba(255,255,255,0.95);
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  max-width: 320px;
+  pointer-events: none;
+}
+
+/* Tooltip canvas responsive */
 #chart-tooltip canvas {
   width: 100% !important;
-  height: 150px !important; /* default for desktop */
+  height: 150px !important; /* desktop */
 }
 
-/* Mobile adjustments */
+/* MOBILE ADJUSTMENTS */
 @media (max-width: 768px) {
-  #chart-tooltip {
-    max-width: 90vw; /* tooltip almost full screen */
+  #chartContainer {
+    max-width: 90vw;  /* chart almost full width */
+    height: 300px;    /* smaller chart height */
   }
+
+  #chart-tooltip {
+    max-width: 90vw;  /* tooltip almost full screen */
+  }
+
   #chart-tooltip canvas {
-    height: 120px !important; /* smaller chart for mobile */
+    height: 120px !important; /* smaller tooltip chart */
   }
 }
-   .gradient-wrapper {
+
+/* GRADIENT SCALE */
+.gradient-wrapper {
   margin-top: 1rem;
 }
 
@@ -49,7 +85,7 @@
   display: grid;
   grid-template-columns: repeat(11, 1fr); /* 10 gradient cells + No Data */
   gap: 2px;
-  max-width: 720px; /* optional: adjust to fit nicely */
+  max-width: 720px;
 }
 
 .gradient-cell {
@@ -67,7 +103,6 @@
 .active-gradient-cell {
   outline: 2px solid #000;
 }
-
   </style>
 <body class="flex flex-col min-h-screen">
 
@@ -97,7 +132,6 @@
   <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
     <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
     <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-    <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
     <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
     <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
   </div>
@@ -132,7 +166,6 @@
     <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
       <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
       <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-      <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
       <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
       <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
     </div>
@@ -234,22 +267,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="flex-1">
-        <div id="map" class="rounded border border-gray-300 z-0"></div>
+       <div id="mapContainer">
+  <div id="map" class="rounded border border-gray-300 z-0"></div>
+</div>
+<div id="chartContainer" class="hidden">
+  <canvas id="fullChart" width="800" height="500"></canvas>
+</div>
       </div>
       <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
         <h2 class="text-md font-semibold mb-3">Legend</h2>
-        <ul class="space-y-2 text-sm">
-          <li data-field="all" data-label="All Indicators" data-color="#888" class="cursor-pointer"> <span class="w-4 h-4 mr-2 bg-gray-400 inline-block"></span>All</li>
-          <li data-field="ind9b1_pct" data-label="Severly Underweight" data-color="#8b0202" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Severly Underweight</li>
-          <li data-field="ind9b2_pct" data-label="Underweight" data-color="#ce6402" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Underweight</li>
-          <li data-field="ind9b3_pct" data-label="Normal" data-color="#338b09" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal</li>
-          <li data-field="ind9b4_pct" data-label="Severly Wasted" data-color="#05f5f5" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-cyan-400 inline-block"></span>Severly Wasted</li>
-          <li data-field="ind9b5_pct" data-label="Wasted" data-color="#ffef0e" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Wasted</li>
-          <li data-field="ind9b6_pct" data-label="Overweight" data-color="#694c0d" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-yellow-800 inline-block"></span>Overweight</li>
-          <li data-field="ind9b7_pct" data-label="Obese" data-color="#fc3c9c" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-pink-600 inline-block"></span>Obese</li>
-          <li data-field="ind9b8_pct" data-label="Severly Stunted" data-color="#a00686" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-purple-600 inline-block"></span>Severly Stunted</li>
-          <li data-field="ind9b9_pct" data-label="Stunted" data-color="#032c74" class="cursor-pointer"><span class="w-4 h-4 mr-2 bg-blue-500 inline-block"></span>Stunted</li>
-        </ul>
+       <ul class="space-y-2 text-sm">
+  <li data-field="all" data-label="All Indicators" data-color="#888" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-gray-400 inline-block"></span>All
+  </li>
+  <li data-field="UNDERWEIGHT" data-label="Underweight" data-color="#FFFF00" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-yellow-400 inline-block"></span>Underweight
+  </li>
+   <li data-field="WASTED" data-label="Wasted" data-color="#FFA500" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Wasted
+  </li>
+  <li data-field="NORMAL" data-label="Normal" data-color="#008000" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal
+  </li>
+
+  <li data-field="OVERWEIGHT_OBESE" data-label="Overweight/Obese" data-color="#0000FF" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-blue-500  inline-block"></span>Overweight/Obese
+  </li>
+  <li data-field="STUNTED" data-label="Stunted" data-color="#FF0000" class="cursor-pointer">
+    <span class="w-4 h-4 mr-2 bg-red-600 inline-block"></span>Stunted
+  </li>
+</ul>
+
       </div>
     </div>
 
@@ -279,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <ul class="footer-links space-y-2">
             <li><a href="pages/about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
             <li><a href="pages/about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="pages/about_us/history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>

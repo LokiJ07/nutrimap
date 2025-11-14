@@ -38,7 +38,6 @@
   <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
     <a href="../about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
     <a href="../about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-    <a href="../about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
     <a href="../about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
     <a href="../about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
   </div>
@@ -73,7 +72,6 @@
     <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
       <a href="../about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
       <a href="../about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-      <a href="../about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
       <a href="../about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
       <a href="../about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
     </div>
@@ -182,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <ul class="footer-links space-y-2">
             <li><a href="../about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
             <li><a href="../about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="../about_us/history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>
