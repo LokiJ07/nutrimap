@@ -10,6 +10,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     exit();
 }
 $userId = $_SESSION['user_id'];
+$currentSession = session_id();
+
+// 🔹 Check if current session is still valid in login_history
+$stmt = $pdo->prepare("SELECT id FROM login_history WHERE user_id = ? AND session_id = ?");
+$stmt->execute([$userId, $currentSession]);
+$sessionExists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$sessionExists) {
+    // ❌ Session no longer valid → force logout
+    session_unset();
+    session_destroy();
+    header("Location: ../login.php?message=Session expired or logged in elsewhere");
+    exit();
+}
 
 // ✅ Total reports
 $totalStmt = $pdo->prepare("
@@ -68,7 +82,7 @@ $stmt = $pdo->prepare("
     FROM reports r
     JOIN users u ON r.user_id = u.id
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = :userId
+    WHERE r.user_id = :userId AND r.status = 'Approved'
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -299,7 +313,11 @@ thead {
 
       <!-- ✅ Reports Table -->
       <div class="table-container">
-        <h3>My Reports</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center;  padding: 10px 5px; background: white; color: #000000ff; border-radius: 8px 8px 0 0; font-size: large;">
+  <span style="font-weight: bold;">My Approved Reports</span>
+  <a href="report_history.php" style="color: #000f96ff; text-decoration: none; font-size: 14px;">View All</a>
+</div>
+
            <div class="table-wrapper">
         <table id="reportsTable">
           <thead>

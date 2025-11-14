@@ -94,7 +94,7 @@
     <!-- Text Content -->
     <div class="relative z-10 px-8 md:px-16 lg:px-24 max-w-4xl text-left">
       <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
-        Welcome to <br><span class="text-teal-400">City Nutrition Office</span>
+        Welcome to <br><span class="text-teal-400">NutriMap</span>
       </h1>
       <p class="text-lg md:text-xl mb-6">El Salvador, Misamis Oriental</p>
       <a href="pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md">

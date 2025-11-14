@@ -7,6 +7,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     header("Location: ../login.php");
     exit();
 }
+$userId = $_SESSION['user_id'];
+$currentSession = session_id();
+
+// 🔹 Check if current session is still valid in login_history
+$stmt = $pdo->prepare("SELECT id FROM login_history WHERE user_id = ? AND session_id = ?");
+$stmt->execute([$userId, $currentSession]);
+$sessionExists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$sessionExists) {
+    // ❌ Session no longer valid → force logout
+    session_unset();
+    session_destroy();
+    header("Location: ../login.php?message=Session expired or logged in elsewhere");
+    exit();
+}
 
 // ✅ User stats
 $totalUsers = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -45,7 +60,7 @@ $stmt = $pdo->prepare("
         r.report_date
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    JOIN users u ON r.user_id = u.id
+    JOIN users u ON r.user_id = u.id AND r.status = 'Approved'
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -183,7 +198,8 @@ thead {background:#009688;color:#fff;}
 
       <!-- ✅ Reports Table -->
       <div class="table-container">
-        <h3>All Reports</h3>
+        <h3 style="display: inline-block; margin: 0;">All Approved Reports</h3>
+        <a href="report_history.php" style="float: right; text-decoration: none; color: blue;">View All</a>
         <table id="reportsTable">
           <thead>
             <tr>

@@ -1,11 +1,11 @@
 <?php
 session_start();
 require '../db/config.php';
-require 'mailer.php'; 
+require 'mailer.php';
 
 if (!isset($_SESSION['pending_user_id'])) {
     header("Location: login.php");
-    exit;
+    exit();
 }
 
 $error = '';
@@ -13,16 +13,14 @@ $user_id = $_SESSION['pending_user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['resend'])) {
-        // ✅ Generate new OTP for Resend
         $otp = rand(100000, 999999);
         $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
-        $stmt = $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)");
-        $stmt->execute([$user_id, $otp, $expires]);
+        $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)")
+            ->execute([$user_id, $otp, $expires]);
 
-        // Send OTP
         sendOTP($_SESSION['pending_user_email'], $otp);
-        $_SESSION['otp_message'] = "A new OTP has been sent to your email.";
+        $_SESSION['otp_message'] = "A new OTP has been sent.";
     } else {
         $otp = trim($_POST['otp']);
 
@@ -31,92 +29,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $code = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($code && $code['otp_code'] === $otp && strtotime($code['expires_at']) > time()) {
-            // ✅ OTP verified → finalize login session
-            $_SESSION['user_id']   = $user_id;
+            // OTP verified → login
+            $_SESSION['user_id'] = $user_id;
             $_SESSION['user_type'] = $_SESSION['pending_user_type'];
             $_SESSION['first_name'] = $_SESSION['pending_first_name'];
-            $_SESSION['email']     = $_SESSION['pending_user_email'];
-            $_SESSION['barangay']  = $_SESSION['pending_barangay']; // ✅ barangay saved
+            $_SESSION['email'] = $_SESSION['pending_user_email'];
+            $_SESSION['barangay'] = $_SESSION['pending_barangay'];
 
-            // optional: save username if needed
-            if (isset($_SESSION['pending_username'])) {
-                $_SESSION['username'] = $_SESSION['pending_username'];
+            // Device/browser logging
+            $userAgent = $_SERVER['HTTP_USER_AGENT'];
+            $ip = $_SERVER['REMOTE_ADDR'];
+            $session_id = session_id();
+            $device_token = bin2hex(random_bytes(16));
+
+            function getBrowser($ua) {
+                if (strpos($ua, 'Firefox') !== false) return 'Firefox';
+                if (strpos($ua, 'Edg') !== false) return 'Edge';
+                if (strpos($ua, 'Chrome') !== false) return 'Chrome';
+                if (strpos($ua, 'Safari') !== false) return 'Safari';
+                if (strpos($ua, 'Opera') !== false || strpos($ua, 'OPR') !== false) return 'Opera';
+                return 'Unknown';
             }
-               
-      // ✅ Save device to login_history (if not already saved)
-$session_id = session_id();
-$userAgent = $_SERVER['HTTP_USER_AGENT'];
-$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 
+            function getOS($ua) {
+                $ua = strtolower($ua);
+                if (strpos($ua, 'windows') !== false) return 'Windows';
+                if (strpos($ua, 'android') !== false || strpos($ua, 'iphone') !== false || strpos($ua, 'mobile') !== false) return 'Phone';
+                return 'Unknown';
+            }
 
-// 🔹 Helper functions for friendly browser and OS names
-function getBrowser($ua) {
-    if (strpos($ua, 'Firefox') !== false) return 'Firefox';
-    if (strpos($ua, 'Edg') !== false) return 'Edge';
-    if (strpos($ua, 'Chrome') !== false) return 'Chrome';
-    if (strpos($ua, 'Safari') !== false) return 'Safari';
-    if (strpos($ua, 'Opera') !== false || strpos($ua, 'OPR') !== false) return 'Opera';
-    return 'Unknown';
-}
+            $browser = getBrowser($userAgent) . ' on ' . getOS($userAgent);
 
-function getOS($ua) {
-    $ua = strtolower($ua);
-    if (strpos($ua, 'windows') !== false) return 'Windows';
-    if (strpos($ua, 'android') !== false || strpos($ua, 'iphone') !== false || strpos($ua, 'mobile') !== false) return 'Phone';
-    return 'Unknown';
-}
+            $checkStmt = $pdo->prepare("SELECT id FROM login_history WHERE user_id = ? AND session_id = ?");
+            $checkStmt->execute([$user_id, $session_id]);
+            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-// 🔹 Compose friendly device name
-$browser = getBrowser($userAgent) . ' on ' . getOS($userAgent);
+            if (!$existing) {
+                $insertStmt = $pdo->prepare("
+                    INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token, login_time)
+                    VALUES (?, ?, ?, ?, ?, NOW())
+                ");
+                $insertStmt->execute([$user_id, $session_id, $browser, $ip, $device_token]);
+            } else {
+                $updateStmt = $pdo->prepare("
+                    UPDATE login_history SET browser = ?, ip_address = ?, device_token = ?, login_time = NOW()
+                    WHERE id = ?
+                ");
+                $updateStmt->execute([$browser, $ip, $device_token, $existing['id']]);
+            }
 
-// Generate secure device token
-$device_token = bin2hex(random_bytes(16)); // e.g. "f23a5c1d8b7e4e1b..."
+            $_SESSION['device_token'] = $device_token;
 
-// Check if device already exists
-$checkStmt = $pdo->prepare("
-    SELECT id FROM login_history
-    WHERE user_id = ? AND browser = ? AND ip_address = ?
-    LIMIT 1
-");
-$checkStmt->execute([$user_id, $browser, $ip]);
-$existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$existing) {
-    // Insert new device record with device token
-    $insertStmt = $pdo->prepare("
-        INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-    $insertStmt->execute([$user_id, $session_id, $browser, $ip, $device_token]);
-} else {
-    // Update device token and session id (refresh trust)
-    $updateStmt = $pdo->prepare("
-        UPDATE login_history SET session_id = ?, device_token = ? WHERE id = ?
-    ");
-    $updateStmt->execute([$session_id, $device_token, $existing['id']]);
-}
-
-// Store this token in session for reference (optional)
-$_SESSION['device_token'] = $device_token;
-
-
-            // ✅ clear pending values
             unset(
-                $_SESSION['pending_user_id'], 
-                $_SESSION['pending_user_type'], 
-                $_SESSION['pending_first_name'], 
+                $_SESSION['pending_user_id'],
+                $_SESSION['pending_user_type'],
+                $_SESSION['pending_first_name'],
                 $_SESSION['pending_user_email'],
                 $_SESSION['pending_barangay'],
-                $_SESSION['pending_username']
+                $_SESSION['pending_device_token']
             );
 
-            // ✅ redirect based on role
             if ($_SESSION['user_type'] === 'CNO') {
                 header("Location: ../cno/home.php");
             } else {
                 header("Location: ../bns/home.php");
             }
-            exit;
+            exit();
         } else {
             $error = "Invalid or expired OTP!";
         }
@@ -124,35 +102,39 @@ $_SESSION['device_token'] = $device_token;
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verify OTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="margin:0; font-family: Arial, sans-serif; background:#fff; display:flex; justify-content:center; align-items:center; height:100vh;">
-  <div style="background:#f9f9f9; padding:30px; border-radius:10px; width:300px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
-    <h2 style="margin-bottom:15px;">Enter OTP</h2>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-sm">
+    <h2 class="text-2xl font-semibold text-center mb-6">Enter OTP</h2>
+
     <?php if (isset($_SESSION['otp_message'])): ?>
-      <p style="color:green;"><?php echo $_SESSION['otp_message']; ?></p>
+      <p class="text-green-600 mb-4 text-center"><?php echo $_SESSION['otp_message']; ?></p>
       <?php unset($_SESSION['otp_message']); ?>
     <?php endif; ?>
+
     <?php if ($error): ?>
-      <p style="color:red;"><?php echo $error; ?></p>
+      <p class="text-red-600 mb-4 text-center"><?php echo $error; ?></p>
     <?php endif; ?>
 
-    <form method="POST">
+    <form method="POST" class="space-y-4">
       <input type="text" name="otp" maxlength="6" placeholder="Enter OTP"
-             style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:5px; text-align:center; font-size:16px;" required>
-      <button type="submit" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:5px; font-size:15px; cursor:pointer;">
+             class="w-full p-3 border border-gray-300 rounded text-center text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+      <button type="submit" 
+              class="w-full bg-green-600 text-white p-3 rounded hover:bg-green-700 transition-colors">
         Verify
       </button>
     </form>
 
-    <!-- ✅ Resend OTP button -->
-    <form method="POST" style="margin-top:15px;">
-      <button type="submit" name="resend" style="width:100%; padding:10px; background:#007BFF; color:white; border:none; border-radius:5px; font-size:15px; cursor:pointer;">
+    <form method="POST" class="mt-4">
+      <button type="submit" name="resend" 
+              class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition-colors">
         Resend OTP
       </button>
     </form>

@@ -256,6 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="gradient-wrapper mt-6" id="gradient-wrapper">
       <div class="gradient-grid" id="gradient-grid"></div>
     </div>
+    <h2 class="p-4">
+    <span class="font-bold">Data Source:</span> 
+    <span>Operation Timbang Plus CY 2025</span>
+</h2>
   </main>
 
   <!-- FOOTER -->
