@@ -82,7 +82,7 @@ $stmt = $pdo->prepare("
     FROM reports r
     JOIN users u ON r.user_id = u.id
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = :userId AND r.status = 'Approved'
+    WHERE r.user_id = :userId AND r.status = 'Pending'
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -126,28 +126,15 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 230px;
-  background: #f9f9f9;
-  border-right: 1px solid #ccc;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
+    width:230px;background:#f9f9f9;border-right:1px solid #ccc;padding:15px;display:flex;flex-direction:column;
+    height:100px; /* Fix height */
 }
-.myreports-header {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-.searchbox {
-  margin-bottom: 10px;
-}
-.searchbox input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+.sidebar h3 { font-size:16px; margin-bottom:10px; color:#009688; font-weight:600; }
+.sidebar input { width:210px; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px; }
+.sidebar ul { list-style:none; padding:0; margin:0;}
+.sidebar li { padding:6px 0; cursor:pointer; color:#333; }
+.sidebar li:hover { color:#009688; }
+.sidebar .showmore { font-size:14px; color:#009688; cursor:pointer; text-decoration:underline; border:none; background:none; padding:5px 0; }
 
 /* Main content */
 .content {
@@ -278,10 +265,37 @@ thead {
   <div class="body-layout">
     <!-- ✅ Sidebar -->
     <aside class="sidebar">
-      <div class="myreports-header">Search My Reports</div>
-      <div class="searchbox">
-        <input type="text" id="sidebarSearch" placeholder="Search my reports...">
-      </div>
+      <h3>Approved Reports</h3>
+      <input type="text" placeholder="Search..." id="sidebarSearch">
+
+      <ul id="sidebarList">
+        <?php
+      $approvedReportsListStmt = $pdo->prepare("
+    SELECT r.id, b.title, u.username
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    JOIN users u ON r.user_id = u.id
+    WHERE r.status = 'Approved'
+    ORDER BY r.report_date DESC, r.report_time DESC
+    LIMIT 5
+");
+        $approvedReportsListStmt->execute();
+        $approvedReportsList = $approvedReportsListStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if(!empty($approvedReportsList)):
+          foreach($approvedReportsList as $a): ?>
+            <li onclick="window.location.href='view_report.php?id=<?= $a['id'] ?>'">
+              <?= htmlspecialchars($a['username']) ?>
+              ---
+              <?= htmlspecialchars($a['title']) ?>
+            </li>
+          <?php endforeach;
+        else: ?>
+          <li style="color:#999;">No approved reports</li>
+        <?php endif; ?>
+      </ul>
+
+      <button class="showmore" onclick="window.location.href='report_history.php'">Show more</button>
     </aside>
 
     <!-- ✅ Main Content -->
@@ -315,7 +329,7 @@ thead {
       <div class="table-container">
         <div style="display: flex; justify-content: space-between; align-items: center;  padding: 10px 5px; background: white; color: #000000ff; border-radius: 8px 8px 0 0; font-size: large;">
   <span style="font-weight: bold;">My Approved Reports</span>
-  <a href="report_history.php" style="color: #000f96ff; text-decoration: none; font-size: 14px;">View All</a>
+  <a href="reports.php" style="color: #000f96ff; text-decoration: none; font-size: 14px;">View All</a>
 </div>
 
            <div class="table-wrapper">
@@ -373,13 +387,13 @@ thead {
 </div>
 
 <script>
-// ✅ Sidebar search filters the table
+// ✅ Sidebar search filters approved reports in sidebar
 document.getElementById("sidebarSearch").addEventListener("keyup", function() {
-  let filter = this.value.toLowerCase();
-  let rows = document.querySelectorAll("#reportsTable tbody tr");
-  rows.forEach(row => {
-    let text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
+  const filter = this.value.toLowerCase();
+  const items = document.querySelectorAll("#sidebarList li");
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(filter) || filter === "" ? "" : "none";
   });
 });
 </script>

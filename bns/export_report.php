@@ -143,7 +143,7 @@ class MYPDF extends TCPDF {
 
         // Barangay Logo
         if($this->barangayLogo){
-            $this->Image(__DIR__ . '/../logos/barangays/' . $this->barangayLogo, 110, 8, 20);
+            $this->Image(__DIR__ . '/../logos/barangay/' . $this->barangayLogo, 110, 8, 20);
         }
 
         // Other Logos
@@ -175,13 +175,12 @@ $pdf = new MYPDF('P','mm','A4',true,'UTF-8',false);
 $pdf->reportYear = $selectedYear;
 $pdf->barangayName = $barangay_name;
 $pdf->barangayLogo = $barangay_logo;
+$pdf->SetCreator('Nutrimap');
+$pdf->SetAuthor('CNO');
+$pdf->SetTitle('CNO | Export Barangay Situational Analysis');
 $pdf->SetMargins(12, 50, 12);
 $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
-$pdf->SetCreator('Nutrimap');
-$pdf->SetAuthor('BNS');
-$pdf->SetTitle('BNS | Export Barangay Situational Analysis');
-
 
 // ---------- Page 1 ----------
 $pdf->AddPage();

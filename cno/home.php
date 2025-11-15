@@ -44,10 +44,10 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-$totalRows = $pdo->query("SELECT COUNT(*) FROM reports")->fetchColumn();
+$totalRows = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Pending'")->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-// ✅ Reports for main table
+// ✅ Reports for main table (Only Pending Reports)
 $stmt = $pdo->prepare("
     SELECT 
         r.id,
@@ -60,7 +60,8 @@ $stmt = $pdo->prepare("
         r.report_date
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    JOIN users u ON r.user_id = u.id AND r.status = 'Approved'
+    JOIN users u ON r.user_id = u.id
+    WHERE r.status = 'Pending'
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -78,56 +79,34 @@ $allReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
+body {font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;padding:0;}
 .layout {display:flex;height:100vh;flex-direction:column;}
 .body-layout {display:flex;flex:1;}
+
+/* Sidebar */
 .sidebar {
     width:230px;background:#f9f9f9;border-right:1px solid #ccc;padding:15px;display:flex;flex-direction:column;
+    height:100px; /* Fix height */
 }
-.myreports-header {font-weight:bold;margin-bottom:10px;}
-.searchbox {margin-bottom:10px;}
-.searchbox input {width:100%;box-sizing:border-box;padding:6px 10px;font-size:14px;border:1px solid #ccc;border-radius:4px;}
-.content {flex:1;padding:10px;overflow-y:auto;}
+.sidebar h3 { font-size:16px; margin-bottom:10px; color:#009688; font-weight:600; }
+.sidebar input { width:210px; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px; }
+.sidebar ul { list-style:none; padding:0; margin:0;} 
+.sidebar li { padding:6px 0; cursor:pointer; color:#333; }
+.sidebar li:hover { color:#009688; }
+.sidebar .showmore { font-size:14px; color:#009688; cursor:pointer; text-decoration:underline; border:none; background:none; padding:5px 0; }
 
 /* Cards */
 .dashboard-cards {display:flex;gap:20px;margin-bottom:10px;}
-.card {
-    flex:1;display:flex;align-items:center;gap:15px;
-    padding:20px;border-radius:8px;color:#fff;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
+.card {flex:1;display:flex;align-items:center;gap:15px;padding:20px;border-radius:8px;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 .card .icon {font-size:30px;}
 .card-users {background:#064e3b;}
 .card-reports {background:#0c4a6e;}
 .card-barangays {background:#115e59;}
-.card-barangays button {
-    margin-top:8px;background:#fff;color:#115e59;
-    border:none;padding:6px 10px;border-radius:4px;cursor:pointer;
-}
-.card-users button {
-    margin-top:0px;background:#fff;color:#115e59;
-    border:none;padding:6px 10px;border-radius:4px;cursor:pointer;
-}
+.card-barangays button, .card-users button {margin-top:0px;background:#fff;color:#115e59;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;}
+
 /* Table */
-/* === SAME CLEAN FIXES AS BNS DASHBOARD === */
-.content {
-  flex: 1;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto; /* allow scroll for table + pagination */
-}
-
-/* The table area adapts naturally to screen height */
-.table-container {
-  flex: 1;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
+.content {flex:1;padding:10px;display:flex;flex-direction:column;overflow:auto;}
+.table-container {flex:1;background:#fff;border-radius:8px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);overflow:auto;}
 table {width:100%;border-collapse:collapse;font-size:14px;}
 th,td {padding:10px;text-align:left;border-bottom:1px solid #ddd;}
 thead {background:#009688;color:#fff;}
@@ -138,18 +117,8 @@ thead {background:#009688;color:#fff;}
 .user-avatar {width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle;object-fit:cover;}
 .btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
 .btn-view {background:#3498db;}
-.pagination {
-  margin-top: 12px;
-  margin-bottom: 5px;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  position: relative; /* prevents overlap */
-}
-.pagination span {
-  padding: 6px 10px;
-  color: #888;
-}
+.pagination {margin-top:12px;margin-bottom:5px;display:flex;justify-content:center;gap:6px;position:relative;}
+.pagination span {padding:6px 10px;color:#888;}
 .pagination a {padding:6px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;}
 .pagination a.active {background:#009688;color:#fff;}
 </style>
@@ -157,14 +126,41 @@ thead {background:#009688;color:#fff;}
 <body>
 <div class="layout">
   <?php include 'header.php'; ?>
-  <?php include 'sidebar.php'; ?>
+
   <div class="body-layout">
     <!-- ✅ Sidebar -->
     <aside class="sidebar">
-      <div class="myreports-header">Search Reports</div>
-      <div class="searchbox">
-        <input type="text" id="sidebarSearch" placeholder="Search all reports...">
-      </div>
+      <h3>Approved Reports</h3>
+      <input type="text" placeholder="Search..." id="sidebarSearch">
+
+      <ul id="sidebarList">
+        <?php
+      $approvedReportsListStmt = $pdo->prepare("
+    SELECT r.id, b.title, u.username
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    JOIN users u ON r.user_id = u.id
+    WHERE r.status = 'Approved'
+    ORDER BY r.report_date DESC, r.report_time DESC
+    LIMIT 5
+");
+        $approvedReportsListStmt->execute();
+        $approvedReportsList = $approvedReportsListStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if(!empty($approvedReportsList)):
+          foreach($approvedReportsList as $a): ?>
+            <li onclick="window.location.href='view_report.php?id=<?= $a['id'] ?>'">
+              <?= htmlspecialchars($a['username']) ?>
+              ---
+              <?= htmlspecialchars($a['title']) ?>
+            </li>
+          <?php endforeach;
+        else: ?>
+          <li style="color:#999;">No approved reports</li>
+        <?php endif; ?>
+      </ul>
+
+      <button class="showmore" onclick="window.location.href='report_history.php'">Show more</button>
     </aside>
 
     <!-- ✅ Main Content -->
@@ -172,34 +168,39 @@ thead {background:#009688;color:#fff;}
       <h2>Dashboard</h2>
       <div class="dashboard-cards">
         <div class="card card-users">
-  <!-- ✅ Make icon clickable -->
-  <div onclick="window.location.href='users.php'" style="cursor:pointer; font-size:32px; color: #06adb3ff;">
-    <i class="fa fa-users"></i>
-  </div>
-  <div>
-    <h3>Total Users: <?= $totalUsers ?></h3>
-    <p>CNO: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
-  </div>
-</div>
-        <div class="card card-reports">
-          <div  onclick="window.location.href='cno_reports.php'" style="cursor:pointer; font-size:32px; color: #e0e0e0ff;"><i class="fa fa-file-alt"></i></div>
+          <div onclick="window.location.href='users.php'" style="cursor:pointer; font-size:32px; color: #06adb3ff;">
+            <i class="fa fa-users"></i>
+          </div>
           <div>
-            <h3>Total Reports: <?= $totalReports ?></h3>
-           <p>Approved: <?= $approvedReports ?> | Pending: <?= $pendingReports ?> | <span >Rejected: <?= $rejectedReports ?></span></p>
+            <h3>Total Users: <?= $totalUsers ?></h3>
+            <p>CNO: <?= $totalAdmins ?> | BNS: <?= $totalBNS ?></p>
           </div>
         </div>
+
+        <div class="card card-reports">
+          <div onclick="window.location.href='cno_reports.php'" style="cursor:pointer; font-size:32px; color:#e0e0e0ff;">
+            <i class="fa fa-file-alt"></i>
+          </div>
+          <div>
+            <h3>Total Reports: <?= $totalReports ?></h3>
+            <p>Approved: <?= $approvedReports ?> | Pending: <?= $pendingReports ?> | Rejected: <?= $rejectedReports ?></p>
+          </div>
+        </div>
+
         <div class="card card-barangays">
-          <div  onclick="window.location.href='nutritional_map.php'" style="cursor:pointer; font-size:32px; color: #071d10ff;"><i class="fa fa-map-marker-alt"></i></div>
+          <div onclick="window.location.href='nutritional_map.php'" style="cursor:pointer; font-size:32px; color:#071d10ff;">
+            <i class="fa fa-map-marker-alt"></i>
+          </div>
           <div>
             <h3>Total Barangays: <?= $totalBarangays ?></h3>
           </div>
         </div>
       </div>
 
-      <!-- ✅ Reports Table -->
+      <!-- ✅ Reports Table (Pending Only) -->
       <div class="table-container">
-        <h3 style="display: inline-block; margin: 0;">All Approved Reports</h3>
-        <a href="report_history.php" style="float: right; text-decoration: none; color: blue;">View All</a>
+        <h3 style="display:inline-block;margin:0;">Pending Reports</h3>
+        <a href="cno_reports.php" style="float:right;text-decoration:none;color:blue;">View All</a>
         <table id="reportsTable">
           <thead>
             <tr>
@@ -213,8 +214,8 @@ thead {background:#009688;color:#fff;}
             </tr>
           </thead>
           <tbody>
-          <?php if ($allReports): ?>
-            <?php foreach ($allReports as $r): ?>
+          <?php if($allReports): ?>
+            <?php foreach($allReports as $r): ?>
             <tr>
               <td>
                 <?php if (!empty($r['profile_pic']) && file_exists("../uploads/".$r['profile_pic'])): ?>
@@ -233,7 +234,7 @@ thead {background:#009688;color:#fff;}
             </tr>
             <?php endforeach; ?>
           <?php else: ?>
-            <tr><td colspan="7" style="text-align:center;color:#888;">No reports found</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:#888;">No pending reports</td></tr>
           <?php endif; ?>
           </tbody>
         </table>
@@ -244,43 +245,15 @@ thead {background:#009688;color:#fff;}
   $maxLinks = 5;
   $start = max(1, $page - floor($maxLinks / 2));
   $end = min($totalPages, $start + $maxLinks - 1);
-
-  // Adjust start if near the end
-  if ($end - $start < $maxLinks - 1) {
-      $start = max(1, $end - $maxLinks + 1);
-  }
+  if ($end - $start < $maxLinks - 1) { $start = max(1, $end - $maxLinks + 1); }
 ?>
-
-<!-- Prev -->
-<?php if ($page > 1): ?>
-  <a href="?page=<?= $page-1 ?>">Prev</a>
-<?php else: ?>
-  <a class="disabled">Prev</a>
-<?php endif; ?>
-
-<!-- First page + ellipsis -->
-<?php if ($start > 1): ?>
-  <a href="?page=1">1</a>
-  <?php if ($start > 2): ?><span>...</span><?php endif; ?>
-<?php endif; ?>
-
-<!-- Page numbers -->
-<?php for ($i = $start; $i <= $end; $i++): ?>
-  <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+<?php if ($page > 1): ?><a href="?page=<?= $page-1 ?>">Prev</a><?php else: ?><a class="disabled">Prev</a><?php endif; ?>
+<?php if ($start > 1): ?><a href="?page=1">1</a><?php if ($start > 2): ?><span>...</span><?php endif; ?><?php endif; ?>
+<?php for ($i=$start;$i<=$end;$i++): ?>
+<a href="?page=<?= $i ?>" class="<?= $i==$page?'active':'' ?>"><?= $i ?></a>
 <?php endfor; ?>
-
-<!-- Last page + ellipsis -->
-<?php if ($end < $totalPages): ?>
-  <?php if ($end < $totalPages - 1): ?><span>...</span><?php endif; ?>
-  <a href="?page=<?= $totalPages ?>"><?= $totalPages ?></a>
-<?php endif; ?>
-
-<!-- Next -->
-<?php if ($page < $totalPages): ?>
-  <a href="?page=<?= $page+1 ?>">Next</a>
-<?php else: ?>
-  <a class="disabled">Next</a>
-<?php endif; ?>
+<?php if ($end<$totalPages): ?><?php if ($end<$totalPages-1): ?><span>...</span><?php endif; ?><a href="?page=<?= $totalPages ?>"><?= $totalPages ?></a><?php endif; ?>
+<?php if ($page<$totalPages): ?><a href="?page=<?= $page+1 ?>">Next</a><?php else: ?><a class="disabled">Next</a><?php endif; ?>
 </div>
 
       </div>
@@ -289,13 +262,13 @@ thead {background:#009688;color:#fff;}
 </div>
 
 <script>
-// ✅ Sidebar search filters the table
+// ✅ Sidebar search filters approved reports in sidebar
 document.getElementById("sidebarSearch").addEventListener("keyup", function() {
-  let filter = this.value.toLowerCase();
-  let rows = document.querySelectorAll("#reportsTable tbody tr");
-  rows.forEach(row => {
-    let text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
+  const filter = this.value.toLowerCase();
+  const items = document.querySelectorAll("#sidebarList li");
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(filter) || filter === "" ? "" : "none";
   });
 });
 </script>
