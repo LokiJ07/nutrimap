@@ -5,7 +5,7 @@ require_once '../../otp/mailer.php'; // ✅ include mailer
 
 // ✅ Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
