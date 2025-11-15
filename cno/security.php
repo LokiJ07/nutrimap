@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
 <head>
   <meta charset="utf-8">
   <title>CNO | Security</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>

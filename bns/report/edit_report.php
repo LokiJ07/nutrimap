@@ -604,7 +604,7 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
 
         <?php if ($can_edit): ?>
         <div class="button-group">
-            <button type="submit" class="button-save">Save Changes</button> 
+            <button type="submit" class="button-save">Update</button> 
         </div>
         <?php endif; ?>
             <div class="page-number">Page 3</div>

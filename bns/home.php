@@ -10,20 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     exit();
 }
 $userId = $_SESSION['user_id'];
-$currentSession = session_id();
-
-// 🔹 Check if current session is still valid in login_history
-$stmt = $pdo->prepare("SELECT id FROM login_history WHERE user_id = ? AND session_id = ?");
-$stmt->execute([$userId, $currentSession]);
-$sessionExists = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$sessionExists) {
-    // ❌ Session no longer valid → force logout
-    session_unset();
-    session_destroy();
-    header("Location: ../login.php?message=Session expired or logged in elsewhere");
-    exit();
-}
 
 // ✅ Total reports
 $totalStmt = $pdo->prepare("
@@ -103,12 +89,12 @@ $myReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body {
+  body {
   font-family: Arial, Helvetica, sans-serif;
   background: #f5f5f5;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* ❌ Prevent body scroll */
+  height: 100vh;
 }
 
 /* Overall Layout */
@@ -118,20 +104,26 @@ body {
   height: 100vh;
 }
 
+/* Header + Body split */
 .body-layout {
   display: flex;
   flex: 1;
-  overflow: hidden; /* ✅ Prevent internal scroll */
+  overflow: hidden; /* main container doesn't scroll */
 }
 
 /* Sidebar */
 .sidebar {
-    width:230px;background:#f9f9f9;border-right:1px solid #ccc;padding:15px;display:flex;flex-direction:column;
-    height:100px; /* Fix height */
+  width: 230px;
+  background: #f9f9f9;
+  border-right: 1px solid #ccc;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* sidebar scroll if content overflows */
 }
 .sidebar h3 { font-size:16px; margin-bottom:10px; color:#009688; font-weight:600; }
 .sidebar input { width:210px; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px; }
-.sidebar ul { list-style:none; padding:0; margin:0;}
+.sidebar ul { list-style:none; padding:0; margin:0; }
 .sidebar li { padding:6px 0; cursor:pointer; color:#333; }
 .sidebar li:hover { color:#009688; }
 .sidebar .showmore { font-size:14px; color:#009688; cursor:pointer; text-decoration:underline; border:none; background:none; padding:5px 0; }
@@ -142,7 +134,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 15px;
-  overflow: hidden; /* ✅ Prevent main scroll */
+  overflow: hidden; /* prevent main container scrolling */
 }
 
 /* Cards Section */
@@ -162,15 +154,36 @@ body {
   color: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
-.card .icon {
-  font-size: 30px;
-}
+.card .icon { font-size: 30px; }
 .card-total { background: #003d3c; }
 .card-approved { background: #006d6a; }
 .card-pending { background: #009688; }
 .card-rejected { background: #f44336; }
 
 /* Table Section */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #ffffff;
+  border-radius: 8px 8px 0 0;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table-header a {
+  text-decoration: none;
+  font-size: 14px;
+  color: #000f96ff;
+  font-weight: normal;
+}
+
+.table-header a:hover {
+  text-decoration: underline;
+}
+
 .table-container {
   background: #fff;
   border-radius: 8px;
@@ -178,7 +191,7 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden; /* ✅ Keeps clean edge */
+  overflow: hidden;
 }
 .table-container h3 {
   padding: 10px 15px;
@@ -190,7 +203,7 @@ body {
 }
 .table-wrapper {
   flex: 1;
-  overflow-y: auto; /* ✅ Only the table scrolls if too long */
+  overflow-y: auto; /* only table scrolls */
 }
 table {
   width: 100%;
@@ -202,10 +215,7 @@ th, td {
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
-thead {
-  background: #009688;
-  color: #fff;
-}
+thead { background: #009688; color: #fff; }
 .status-badge {
   padding: 2px 8px;
   border-radius: 12px;
@@ -227,25 +237,24 @@ thead {
 }
 .btn-view { background: #3498db; }
 
+/* Pagination */
 .pagination {
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  border-top: 1px solid #eee;
-  background: #fafafa;
+  margin-top:12px;
+  margin-bottom:5px;
+  display:flex;
+  justify-content:center;
+  gap:6px;
 }
+.pagination span { padding:6px 10px; color:#888; }
 .pagination a {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  text-decoration: none;
-  color: #333;
+  padding:6px 12px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  text-decoration:none;
+  color:#333;
 }
-.pagination a.active {
-  background: #009688;
-  color: #fff;
-}
+.pagination a.active { background:#009688; color:#fff; }
+.pagination a.disabled { pointer-events:none; opacity:0.5; }
 
 .user-avatar {
   width: 28px;
@@ -323,15 +332,12 @@ thead {
     <div><h3>Rejected: <?= $rejectedReports ?></h3></div>
   </div>
 </div>
-
-
       <!-- ✅ Reports Table -->
       <div class="table-container">
-        <div style="display: flex; justify-content: space-between; align-items: center;  padding: 10px 5px; background: white; color: #000000ff; border-radius: 8px 8px 0 0; font-size: large;">
-  <span style="font-weight: bold;">My Approved Reports</span>
-  <a href="reports.php" style="color: #000f96ff; text-decoration: none; font-size: 14px;">View All</a>
+        <div class="table-header">
+  <span>Pending Reports</span>
+  <a href="reports.php">View All</a>
 </div>
-
            <div class="table-wrapper">
         <table id="reportsTable">
           <thead>
@@ -369,17 +375,21 @@ thead {
         </table>
 
         <!-- ✅ Pagination -->
-        <div class="pagination">
-          <?php if ($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>">Prev</a>
-          <?php endif; ?>
-          <?php for ($i=1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-          <?php endfor; ?>
-          <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page+1 ?>">Next</a>
-          <?php endif; ?>
-        </div>
+         <div class="pagination">
+<?php
+  $maxLinks = 5;
+  $start = max(1, $page - floor($maxLinks / 2));
+  $end = min($totalPages, $start + $maxLinks - 1);
+  if ($end - $start < $maxLinks - 1) { $start = max(1, $end - $maxLinks + 1); }
+?>
+<?php if ($page > 1): ?><a href="?page=<?= $page-1 ?>">Prev</a><?php else: ?><a class="disabled">Prev</a><?php endif; ?>
+<?php if ($start > 1): ?><a href="?page=1">1</a><?php if ($start > 2): ?><span>...</span><?php endif; ?><?php endif; ?>
+<?php for ($i=$start;$i<=$end;$i++): ?>
+<a href="?page=<?= $i ?>" class="<?= $i==$page?'active':'' ?>"><?= $i ?></a>
+<?php endfor; ?>
+<?php if ($end<$totalPages): ?><?php if ($end<$totalPages-1): ?><span>...</span><?php endif; ?><a href="?page=<?= $totalPages ?>"><?= $totalPages ?></a><?php endif; ?>
+<?php if ($page<$totalPages): ?><a href="?page=<?= $page+1 ?>">Next</a><?php else: ?><a class="disabled">Next</a><?php endif; ?>
+</div>
       </div>
       </div>
     </main>

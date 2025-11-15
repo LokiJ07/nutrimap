@@ -573,7 +573,7 @@ function copyTitle() {
         </table>
 
         <div class="button-group">
-            <button type="submit" class="button-save">Updates</button>
+            <button type="submit" class="button-save">Update</button>
         </div>
 
         <div class="page-number">Page 3</div>
