@@ -226,17 +226,30 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
   <!-- MAIN CONTENT -->
-  <main class="flex-1 max-w-7xl mx-auto px-6 py-6 mt-4 mb-28 bg-white shadow rounded">
+  <main class="flex-1 max-w-7xl mx-auto px-6 pt-2 pb-6 mb-28 bg-white">
     <div class="bg-gray-200 py-2 px-4 mb-4">
       <span class="uppercase tracking-wide text-cyan-600 font-semibold">Data</span>
     </div>
     
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
       <h1 class="text-lg md:text-xl font-semibold">
-        El Salvador Health and Nutrition Map: Share of children who are stunted
+        El Salvador Health and Nutrition Map: Share of children who are 0-50 months old measured during OPT Plus
       </h1>
       <div class="flex flex-wrap gap-4 mt-2 md:mt-0 items-center">
         <div id="chart-tooltip" class="absolute bottom-5 left-5 max-w-[340px]"></div>
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6">
+      <div class="flex-1">
+       <div id="mapContainer">
+  <div id="map" class="rounded border border-gray-300 z-0"></div>
+</div>
+<div id="chartContainer" class="hidden">
+  <canvas id="fullChart" width="800" height="500"></canvas>
+</div>
+      </div>
+      <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
         <div>
           <label class="block text-sm font-medium text-gray-600">Select Year</label>
           <select id="yearFilter" class="mt-1 block w-32 rounded border border-gray-300 shadow-sm"></select>
@@ -262,19 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <option value="Cogon">Cogon</option>
           </select>
         </div>
-      </div>
-    </div>
-
-    <div class="flex flex-col lg:flex-row gap-6">
-      <div class="flex-1">
-       <div id="mapContainer">
-  <div id="map" class="rounded border border-gray-300 z-0"></div>
-</div>
-<div id="chartContainer" class="hidden">
-  <canvas id="fullChart" width="800" height="500"></canvas>
-</div>
-      </div>
-      <div id="legend-buttons" class="w-full lg:w-60 bg-gray-50 border border-gray-300 rounded p-4">
         <h2 class="text-md font-semibold mb-3">Legend</h2>
        <ul class="space-y-2 text-sm">
   <li data-field="all" data-label="All Indicators" data-color="#888" class="cursor-pointer">
