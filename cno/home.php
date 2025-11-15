@@ -15,10 +15,60 @@ $totalAdmins = $pdo->query("SELECT COUNT(*) FROM users WHERE user_type='CNO'")->
 $totalBNS = $pdo->query("SELECT COUNT(*) FROM users WHERE user_type='BNS'")->fetchColumn();
 
 // ✅ Report stats
-$totalReports = $pdo->query("SELECT COUNT(*) FROM reports")->fetchColumn();
-$approvedReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Approved'")->fetchColumn();
-$pendingReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Pending'")->fetchColumn();
-$rejectedReports = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Rejected'")->fetchColumn();
+// ✅ Total reports (all, excluding archived/deleted)
+$totalStmt = $pdo->query("
+    SELECT COUNT(*) 
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND (a.is_archived = 1 OR a.is_deleted = 1)
+    )
+");
+$totalReports = $totalStmt->fetchColumn();
+
+// ✅ Approved reports
+$approvedStmt = $pdo->query("
+    SELECT COUNT(*) 
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE r.status = 'Approved'
+    AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND (a.is_archived = 1 OR a.is_deleted = 1)
+    )
+");
+$approvedReports = $approvedStmt->fetchColumn();
+
+// ✅ Pending reports
+$pendingStmt = $pdo->query("
+    SELECT COUNT(*) 
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE r.status = 'Pending'
+    AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND (a.is_archived = 1 OR a.is_deleted = 1)
+    )
+");
+$pendingReports = $pendingStmt->fetchColumn();
+
+// ✅ Rejected reports
+$rejectedStmt = $pdo->query("
+    SELECT COUNT(*) 
+    FROM reports r
+    JOIN bns_reports b ON r.id = b.report_id
+    WHERE r.status = 'Rejected'
+    AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND (a.is_archived = 1 OR a.is_deleted = 1)
+    )
+");
+$rejectedReports = $rejectedStmt->fetchColumn();
 
 // ✅ Barangay stats
 $totalBarangaysStmt = $pdo->query("SELECT COUNT(DISTINCT barangay) FROM users WHERE barangay NOT IN ('CNO') AND barangay != ''");
@@ -33,21 +83,17 @@ $offset = ($page - 1) * $limit;
 $totalRows = $pdo->query("SELECT COUNT(*) FROM reports WHERE status='Pending'")->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-// ✅ Reports for main table (Only Pending Reports)
+// ✅ Reports for main table
 $stmt = $pdo->prepare("
-    SELECT 
-        r.id,
-        CONCAT(u.first_name, ' ', u.last_name) AS full_name,
-        u.profile_pic,
-        b.title,
-        u.barangay,
-        r.status,
-        r.report_time,
-        r.report_date
+    SELECT r.id, u.profile_pic, u.username AS full_name, u.barangay, b.title, r.status, r.report_time, r.report_date
     FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
     JOIN users u ON r.user_id = u.id
-    WHERE r.status = 'Pending'
+    JOIN bns_reports b ON r.id = b.report_id
+    LEFT JOIN report_archives a 
+        ON r.id = a.report_id 
+        AND (a.is_deleted = 0 OR a.is_deleted IS NULL)
+        AND (a.is_archived = 0 OR a.is_archived IS NULL)
+    WHERE r.status IN ('Pending','Rejected')
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -245,12 +291,17 @@ thead { background: #009688; color: #fff; }
 
       <ul id="sidebarList">
         <?php
-      $approvedReportsListStmt = $pdo->prepare("
+$approvedReportsListStmt = $pdo->prepare("
     SELECT r.id, b.title, u.username
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
     JOIN users u ON r.user_id = u.id
     WHERE r.status = 'Approved'
+      AND r.id NOT IN (
+          SELECT report_id
+          FROM report_archives
+          WHERE is_archived = 1 OR is_deleted = 1
+      )
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT 5
 ");
@@ -310,7 +361,7 @@ thead { background: #009688; color: #fff; }
       <!-- ✅ Reports Table (Pending Only) -->
       <div class="table-container">
         <div class="table-header">
-          <span>All Pending Reports</span>
+          <span>Reports</span>
           <a href="cno_reports.php">View All</a>
         </div>
         <table id="reportsTable">

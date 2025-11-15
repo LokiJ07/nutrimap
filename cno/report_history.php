@@ -50,7 +50,7 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
         }
     }
 
-    header("Location: barangay_data.php?msg=Report archived successfully");
+    header("Location: report_history.php?msg=Report archived successfully");
     exit();
 }
 
@@ -216,7 +216,7 @@ unset($report);
                       <div><?= $datetime ?></div>
                       <a href="view_report.php?id=<?= $row['id'] ?>" class="export-link">View</a>
                       <a href="export_barangay.php?id=<?= $row['id'] ?>" class="export-link"><i class="fa fa-file-export"></i> Export</a>
-                      <a href="barangay_data.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
+                      <a href="report_history.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
                         <i class="fa fa-archive"></i> Archive
                       </a>
                     </div>

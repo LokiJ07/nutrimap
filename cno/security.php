@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $
     }
 
     .password-form .form-group input {
-      width: 100%;
+      width: 1005px;
       padding: 12px 15px;
       font-size: 15px;
       border: 1px solid #ccc;

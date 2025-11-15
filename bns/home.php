@@ -26,7 +26,13 @@ $approvedStmt = $pdo->prepare("
     SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Approved'
+    WHERE r.user_id = ? 
+      AND r.status = 'Approved'
+      AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND a.is_archived = 1
+    )
 ");
 $approvedStmt->execute([$userId]);
 $approvedReports = $approvedStmt->fetchColumn();
@@ -36,7 +42,13 @@ $pendingStmt = $pdo->prepare("
     SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Pending'
+    WHERE r.user_id = ? 
+      AND r.status = 'Pending'
+      AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND a.is_archived = 1
+    )
 ");
 $pendingStmt->execute([$userId]);
 $pendingReports = $pendingStmt->fetchColumn();
@@ -46,7 +58,13 @@ $rejectedStmt = $pdo->prepare("
     SELECT COUNT(*) 
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Rejected'
+    WHERE r.user_id = ? 
+      AND r.status = 'Rejected'
+      AND NOT EXISTS (
+        SELECT 1 FROM report_archives a
+        WHERE a.report_id = r.id 
+        AND a.is_archived = 1
+    )
 ");
 $rejectedStmt->execute([$userId]);
 $rejectedReports = $rejectedStmt->fetchColumn();
@@ -68,7 +86,9 @@ $stmt = $pdo->prepare("
     FROM reports r
     JOIN users u ON r.user_id = u.id
     JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = :userId AND r.status = 'Pending'
+    LEFT JOIN report_archives a ON r.id = a.report_id AND (a.is_deleted = 0 OR a.is_deleted IS NULL) AND (a.is_archived = 0 OR a.is_archived IS NULL)
+    WHERE r.user_id = :userId 
+      AND (r.status = 'Pending' OR r.status = 'Rejected')
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
 ");
@@ -279,12 +299,17 @@ thead { background: #009688; color: #fff; }
 
       <ul id="sidebarList">
         <?php
-      $approvedReportsListStmt = $pdo->prepare("
+$approvedReportsListStmt = $pdo->prepare("
     SELECT r.id, b.title, u.username
     FROM reports r
     JOIN bns_reports b ON r.id = b.report_id
     JOIN users u ON r.user_id = u.id
     WHERE r.status = 'Approved'
+      AND r.id NOT IN (
+          SELECT report_id
+          FROM report_archives
+          WHERE is_archived = 1 OR is_deleted = 1
+      )
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT 5
 ");
@@ -335,7 +360,7 @@ thead { background: #009688; color: #fff; }
       <!-- ✅ Reports Table -->
       <div class="table-container">
         <div class="table-header">
-  <span>Pending Reports</span>
+  <span>Reports</span>
   <a href="reports.php">View All</a>
 </div>
            <div class="table-wrapper">
