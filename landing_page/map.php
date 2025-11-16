@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-  <style>
-   body { margin:0; }
+<style>
+  body { margin: 0; }
 
 /* MAP */
 #map { 
@@ -37,44 +37,56 @@
 #chartContainer {
   display: none;
   width: 100%;
-  max-width: 800px;   /* desktop width */
+  max-width: 700px;   /* desktop width */
   height: 500px;      /* desktop height */
   margin: auto;
 }
-
-/* TOOLTIP + MINI CHART */
+@media (max-width: 768px) {
+  #chartContainer {
+    width: 340px;  /* mobile width */
+    height: 300px;    /* mobile height */
+  }
+}
+/* TOOLTIP + MINI CHART — FIXED TOP-LEFT */
 #chart-tooltip {
   position: absolute;
+  top: 200px;
+  left: 80px;
   z-index: 1000;
   background: rgba(255,255,255,0.95);
   padding: 8px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  max-width: 320px;
+  max-width: 500px;
+  max-height: 350px;
+  overflow-y: auto;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* Tooltip canvas responsive */
+/* Let the chart wrapper control size */
 #chart-tooltip canvas {
-  width: 100% !important;
-  height: 150px !important; /* desktop */
+  width: 100% !important;  /* fill wrapper width */
+  height: 100% !important; /* fill wrapper height */
 }
 
 /* MOBILE ADJUSTMENTS */
 @media (max-width: 768px) {
-  #chartContainer {
-    max-width: 90vw;  /* chart almost full width */
-    height: 300px;    /* smaller chart height */
-  }
-
   #chart-tooltip {
-    max-width: 90vw;  /* tooltip almost full screen */
-  }
-
-  #chart-tooltip canvas {
-    height: 120px !important; /* smaller tooltip chart */
+    position: fixed;
+    bottom: 30px;
+    left: 10px; /* smaller left padding */
+    right: 10px; /* allow width to expand */
+    max-width: calc(100vh - 20px);
+    max-height: 160px;       /* smaller max height */
   }
 }
+
+  #chart-tooltip canvas {
+    height: auto !important;
+  }
 
 /* GRADIENT SCALE */
 .gradient-wrapper {
@@ -103,12 +115,13 @@
 .active-gradient-cell {
   outline: 2px solid #000;
 }
+
 #legend-buttons li.active {
   font-weight: bold;
   transform: scale(1.05);
 }
 
-  </style>
+</style>
 <body class="flex flex-col min-h-screen">
 
   <!-- HEADER -->
