@@ -21,6 +21,15 @@ if (!$user) {
   die("User not found");
 }
 
+// --- Sorting ---
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'new'; // default New → Old
+$orderSQL = '';
+if ($sort === 'new') {
+    $orderSQL = " ORDER BY r.report_date DESC, r.report_time DESC ";
+} elseif ($sort === 'az') {
+    $orderSQL = " ORDER BY b.title ASC ";
+}
+
 $barangay = $user['barangay'];
 $userType = $user['user_type'];
 
@@ -30,7 +39,7 @@ $stmtApproved = $pdo->prepare("
   FROM reports r
   LEFT JOIN report_archives ra ON r.id = ra.report_id AND ra.is_archived = 1
   WHERE r.user_id = ? AND r.status = 'Approved' AND ra.id IS NULL
-  ORDER BY r.report_date DESC
+  $orderSQL
 ");
 $stmtApproved->execute([$userId]);
 $approvedReports = $stmtApproved->fetchAll(PDO::FETCH_ASSOC);
@@ -157,11 +166,11 @@ $fixedTitle = "Barangay Situational Analysis";
         <h3 class="section-title">Barangay Data</h3>
           </div>
           <div class="toolbar-right">
-            <label for="sort">Sort by:</label>
-            <select id="sort">
-              <option value="new">New → Old</option>
-              <option value="az">A → Z</option>
-            </select>
+            <label for="sortSelect">Sort by:</label>
+<select id="sortSelect" name="sort">
+  <option value="new" <?= ($sort === 'new') ? 'selected' : '' ?>>New → Old</option>
+  <option value="az" <?= ($sort === 'az') ? 'selected' : '' ?>>A → Z</option>
+</select>
             <a class="add-btn" href="add_report.php"><i class="fa fa-plus"></i> Add Report</a>
           </div>
         </div>
@@ -192,3 +201,11 @@ $fixedTitle = "Barangay Situational Analysis";
   </div>
 </body>
 </html>
+<script>
+  document.getElementById('sortSelect ').addEventListener('change', function() {
+    const selectedSort = this.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('sort', selectedSort);
+    window.location.href = currentUrl.toString();
+  });
+</script>

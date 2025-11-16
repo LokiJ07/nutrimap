@@ -78,6 +78,14 @@ $searchSQL = '';
 if ($search !== '') {
     $searchSQL = " AND b.title LIKE :search ";
 }
+// --- Sorting ---
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'new'; // default New → Old
+$orderSQL = '';
+if ($sort === 'new') {
+    $orderSQL = " ORDER BY r.report_date DESC, r.report_time DESC ";
+} elseif ($sort === 'az') {
+    $orderSQL = " ORDER BY b.title ASC ";
+}
 
 /* ✅ Fetch reports */
 if ($userType === 'BNS') {
@@ -99,7 +107,7 @@ if ($userType === 'BNS') {
       AND (a.is_archived = 0 OR a.is_archived IS NULL)
       AND b.report_id IS NOT NULL     -- ✅ Only show reports with BNS data
       $searchSQL
-    ORDER BY r.report_date DESC, r.report_time DESC
+      $orderSQL
     LIMIT :limit OFFSET :offset
 ");
 } else {
@@ -120,7 +128,7 @@ if ($userType === 'BNS') {
           AND (a.is_deleted = 0 OR a.is_deleted IS NULL)
           AND (a.is_archived = 0 OR a.is_archived IS NULL)
           $searchSQL
-        ORDER BY r.report_date DESC, r.report_time DESC
+          $orderSQL
         LIMIT :limit OFFSET :offset
     ");
 }
@@ -289,11 +297,11 @@ function toggleSubmit(reportId, action) {
 
   </div>
   <div class="toolbar-right">
-    <label for="sort">Sort by:</label>
-    <select id="sort">
-      <option value="new">New → Old</option>
-      <option value="az">A → Z</option>
-    </select>
+   <label for="sortSelect">Sort by:</label>
+<select id="sortSelect" name="sort">
+  <option value="new" <?= ($sort === 'new') ? 'selected' : '' ?>>New → Old</option>
+  <option value="az" <?= ($sort === 'az') ? 'selected' : '' ?>>A → Z</option>
+</select>
     <a class="add-btn" href="add_report.php"><i class="fa fa-plus"></i> Add Report</a>
   </div>
 </div>
@@ -385,6 +393,17 @@ document.getElementById('reportSearch').addEventListener('keyup', function() {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(filter) ? '' : 'none';
     });
+});
+
+document.getElementById('sortSelect').addEventListener('change', function() {
+    const sortValue = this.value;
+    const searchValue = document.getElementById('reportSearch').value;
+    // reload page with sort and search preserved
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', sortValue);
+    params.set('search', searchValue);
+    params.set('page', 1); // reset to page 1
+    window.location.search = params.toString();
 });
 </script>
 </body>

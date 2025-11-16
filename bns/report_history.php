@@ -62,6 +62,15 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
     exit();
 }
 
+// --- Sorting ---
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'new'; // default New → Old
+$orderSQL = '';
+if ($sort === 'new') {
+    $orderSQL = " ORDER BY r.report_date DESC, r.report_time DESC ";
+} elseif ($sort === 'az') {
+    $orderSQL = " ORDER BY b.title ASC ";
+}
+
 // --- Fetch approved reports for this user only (exclude archived) ---
 $stmt = $pdo->prepare("
     SELECT r.*, u.username, b.title 
@@ -74,7 +83,7 @@ $stmt = $pdo->prepare("
           SELECT report_id FROM report_archives 
           WHERE user_id = :uid2 AND user_type = :utype AND is_archived = 1
       )
-    ORDER BY r.report_date DESC, r.report_time DESC
+      $orderSQL
     LIMIT :limit OFFSET :offset
 ");
 $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
@@ -170,11 +179,11 @@ $totalPages = ceil($totalReports / $limit);
             <input type="text" id="reportSearch" placeholder="Search">
           </div>
           <div class="toolbar-right">
-            <label for="sort">Sort by:</label>
-            <select id="sort">
-              <option value="new">New → Old</option>
-              <option value="az">A → Z</option>
-            </select>
+        <label for="sortSelect">Sort by:</label>
+<select id="sortSelect" name="sort">
+  <option value="new" <?= ($sort === 'new') ? 'selected' : '' ?>>New → Old</option>
+  <option value="az" <?= ($sort === 'az') ? 'selected' : '' ?>>A → Z</option>
+</select>
             <a class="add-btn" href="add_report.php"><i class="fa fa-plus"></i> Add Report</a>
           </div>
         </div>
@@ -237,6 +246,17 @@ document.getElementById('reportSearch').addEventListener('keyup', function() {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(filter) ? '' : 'none';
     });
+});
+
+document.getElementById('sortSelect').addEventListener('change', function() {
+    const sortValue = this.value;
+    const searchValue = document.getElementById('reportSearch').value;
+    // reload page with sort and search preserved
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', sortValue);
+    params.set('search', searchValue);
+    params.set('page', 1); // reset to page 1
+    window.location.search = params.toString();
 });
 </script>
 
