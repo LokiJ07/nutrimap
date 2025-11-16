@@ -145,6 +145,16 @@
   </div>
 </div>
 
+<!-- Notification Detail Modal -->
+<div id="notifModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:8px; width:400px; max-width:90%; position:relative;">
+    <span id="closeNotifModal" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">&times;</span>
+    <h3 id="notifModalHeader" style="margin-bottom:15px;">Status</h3>
+    <p id="notifModalMessage" style="white-space:pre-wrap;"></p>
+  </div>
+</div>
+
+
 <script>
 // Side menu logic
 document.getElementById('menuBtn').addEventListener('click', async () => {
@@ -270,15 +280,34 @@ async function fetchUnreadCount() {
   } catch(e){console.error(e);}
 }
 
-let lastToastMessage="";
-function playNotificationEffect(msg="New notification received!") {
-  if(msg===lastToastMessage) return;
-  lastToastMessage=msg;
-  try{notificationSound.currentTime=0;notificationSound.play().catch(()=>{});}catch(e){}
-  bell.classList.add('pulse'); setTimeout(()=>bell.classList.remove('pulse'),1000);
-  showToast(msg);
-  setTimeout(()=>{lastToastMessage="";},8000);
+function playNotificationEffect() {
+  // Always show the same fixed message
+  try { 
+    notificationSound.currentTime = 0; 
+    notificationSound.play().catch(()=>{}); 
+  } catch(e){}
+
+  bell.classList.add('pulse');
+  setTimeout(()=>bell.classList.remove('pulse'),1000);
+
+  const toast = document.createElement('div');
+  toast.innerText = "You Receive new Notification"; // fixed text
+  toast.style.cssText = "background:#333;color:#fff;padding:10px 16px;border-radius:8px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.5s, transform 0.5s;transform:translateY(-20px)";
+  
+  toastContainer.appendChild(toast);
+
+  setTimeout(()=>{
+    toast.style.opacity='1'; 
+    toast.style.transform='translateY(0)';
+  },100);
+
+  setTimeout(()=>{
+    toast.style.opacity='0'; 
+    toast.style.transform='translateY(-20px)'; 
+    setTimeout(()=>toast.remove(),500);
+  },4000);
 }
+
 function showToast(msg) {
   const toast=document.createElement('div');
   toast.innerText=`🔔 ${msg}`;
@@ -298,7 +327,7 @@ async function fetchNotifications() {
       const tr=document.createElement('tr'); tr.style.cursor='pointer';
       if(!n.read) tr.style.fontWeight='bold';
       tr.innerHTML=`<td>${n.message}</td><td>${n.date}</td><td>${n.read?'Read':'New'}</td>`;
-      tr.onclick=()=>markAsRead(n.id);
+      tr.onclick = () => openNotificationModal(n);
       tbody.appendChild(tr);
     });
     const effectiveTotal = showUnreadOnly?totalUnread:totalNotifications;
@@ -315,6 +344,35 @@ async function fetchNotifications() {
 
 btnPrev.addEventListener('click',()=>{if(currentPage>1){currentPage--;fetchNotifications();}});
 btnNext.addEventListener('click',()=>{const effectiveTotal = showUnreadOnly?totalUnread:totalNotifications;if((currentPage*pageSize)<effectiveTotal){currentPage++;fetchNotifications();}});
+
+function openNotificationModal(notification) {
+  // Show modal
+  const modal = document.getElementById('notifModal');
+  const header = document.getElementById('notifModalHeader');
+  const message = document.getElementById('notifModalMessage');
+
+  // Set header based on status
+  header.innerText = notification.status === 'Approved' ? 'Approved' : 'Rejected';
+  message.innerText = notification.message;
+
+  modal.style.display = 'flex';
+
+  // Mark notification as read
+  if (!notification.read) markAsRead(notification.id);
+}
+
+// Close modal
+document.getElementById('closeNotifModal').onclick = () => {
+  document.getElementById('notifModal').style.display = 'none';
+};
+
+// Also close modal if clicking outside content
+document.getElementById('notifModal').addEventListener('click', (e) => {
+  if(e.target === document.getElementById('notifModal')) {
+    document.getElementById('notifModal').style.display = 'none';
+  }
+});
+
 
 // Bell click: show sidebar
 bell.addEventListener('click',()=>{
