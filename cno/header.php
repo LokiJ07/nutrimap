@@ -1,5 +1,5 @@
 <?php
-// header.php
+// header.php for CNO
 ?>
 <style>
 /* Header bar */
@@ -110,7 +110,6 @@
   animation: bellPulse 0.8s ease;
 }
 
-
 /* Container for dynamic side menu */
 #sidemenu-container {
   position: fixed;
@@ -122,16 +121,55 @@
   z-index: 2000;
 }
 
-/* Modal overlay styles */
-.modal {
+/* ===== Notification Sidebar (right side) ===== */
+#notifSidebar {
   position: fixed;
-  z-index: 3000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.4);
+  top: 0;
+  right: -400px; /* hidden by default */
+  width: 380px;
+  height: 100%;
+  background: #fff;
+  border-left: 1px solid #ccc;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  padding: 15px;
+  overflow-y: auto;
+  transition: right 0.3s ease;
   display: flex;
+  flex-direction: column;
+}
+
+#notifSidebar.open { right: 0; }
+
+#notifSidebarHeader {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+#closeNotifSidebar {
+  font-size: 26px;
+  cursor: pointer;
+}
+
+#notifSidebar table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#notifSidebar th, #notifSidebar td {
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  text-align: left;
+}
+
+#notifSidebar button {
+  padding: 6px 12px;
+  margin: 0 2px;
+  cursor: pointer;
 }
 </style>
 
@@ -154,38 +192,34 @@
 
 <div id="sidemenu-container"></div>
 
-<!-- Notification Modal -->
-<div id="notificationModal" class="modal" style="display:none;">
-  <div class="modal-content" style="width: 80%; max-width: 600px; margin: 10% auto; background: #fff; padding: 20px; border-radius: 8px; position: relative;">
-    <span class="close" id="closeNotificationModal" style="position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer;">&times;</span>
+<!-- Notification Sidebar -->
+<div id="notifSidebar">
+  <div id="notifSidebarHeader">
     <h2>Notifications</h2>
-    <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
-      <button id="markAllReadBtn" style="padding: 6px 12px;">Mark All as Read</button>
-      <button id="filterUnreadBtn" style="padding: 6px 12px;">Show Unread</button>
-      <button id="showAllBtn" style="padding: 6px 12px; display:none;">Show All</button>
-    </div>
-    <table id="notificationTable" style="width: 100%; border-collapse: collapse;">
-      <thead>
-        <tr>
-          <th style="border-bottom: 1px solid #ccc; padding: 8px;">Message</th>
-          <th style="border-bottom: 1px solid #ccc; padding: 8px;">Date</th>
-          <th style="border-bottom: 1px solid #ccc; padding: 8px;">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Notifications will be dynamically inserted here -->
-      </tbody>
-    </table>
-    <!-- Pagination controls -->
-    <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
-      <button id="prevPage" style="padding: 6px 12px;">Previous</button>
-      <button id="nextPage" style="padding: 6px 12px;">Next</button>
-    </div>
+    <span id="closeNotifSidebar">&times;</span>
+  </div>
+  <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+    <button id="markAllReadBtn">Mark All as Read</button>
+    <button id="filterUnreadBtn">Show Unread</button>
+    <button id="showAllBtn" style="display:none;">Show All</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Message</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+    <button id="prevPage">Previous</button>
+    <button id="nextPage">Next</button>
   </div>
 </div>
 
 <script>
-  
 // Side menu logic (unchanged from previous)
 document.getElementById('menuBtn').addEventListener('click', async () => {
   const container = document.getElementById('sidemenu-container');
@@ -249,9 +283,7 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
   const menu = document.getElementById('sideMenu');
   if (menu) menu.classList.add('open');
 });
-
-
-// Notification System
+// ===== Notification Sidebar Logic =====
 let currentPage = 1;
 const pageSize = 5;
 let totalNotifications = 0;
@@ -259,16 +291,16 @@ let totalUnread = 0;
 let showUnreadOnly = false;
 let lastAlertedId = 0;
 let initialized = false;
-const basePath = 'notification/'; // ✅ correct relative folder
+const basePath = 'notification/';
 const notificationSound = new Audio(basePath + 'notification.wav');
 const badge = document.getElementById('notificationBadge');
-const modal = document.getElementById('notificationModal');
 const bell = document.getElementById('bellBtn');
-const closeModal = document.getElementById('closeNotificationModal');
+const notifSidebar = document.getElementById('notifSidebar');
+const closeNotifSidebar = document.getElementById('closeNotifSidebar');
 const btnPrev = document.getElementById('prevPage');
 const btnNext = document.getElementById('nextPage');
 
-// 🟩 Create toast container
+// Toast container
 let toastContainer = document.getElementById('toastContainer');
 if (!toastContainer) {
   toastContainer = document.createElement('div');
@@ -281,7 +313,7 @@ if (!toastContainer) {
   document.body.appendChild(toastContainer);
 }
 
-// 🟩 Unlock sound on first click
+// Unlock sound
 document.addEventListener('click', () => {
   notificationSound.muted = true;
   notificationSound.play().then(() => {
@@ -297,198 +329,99 @@ function updateBadge(count) {
 
 async function fetchUnreadCount() {
   try {
-    const response = await fetch(basePath + 'get_notifications_cno.php?count_unread=1');
-    const data = await response.json();
+    const res = await fetch(basePath + 'get_notifications_cno.php?count_unread=1');
+    const data = await res.json();
     updateBadge(data.totalUnread);
-  } catch (err) {
-    console.error('Error fetching unread count:', err);
-  }
+  } catch (e) { console.error(e); }
 }
 
 let lastToastMessage = "";
+function playNotificationEffect(msg = "New notification received!") {
+  if (msg === lastToastMessage) return;
+  lastToastMessage = msg;
 
-function playNotificationEffect(message = "New notification received!") {
-  if (message === lastToastMessage) return;
-  lastToastMessage = message;
-
-  try {
-    notificationSound.currentTime = 0;
-    notificationSound.play().catch(e => console.warn('Sound blocked:', e));
-  } catch (e) {
-    console.warn('Sound failed:', e);
-  }
+  try { notificationSound.currentTime = 0; notificationSound.play().catch(()=>{}); } catch(e){}
 
   bell.classList.add('pulse');
-  setTimeout(() => bell.classList.remove('pulse'), 1000);
+  setTimeout(()=>bell.classList.remove('pulse'),1000);
 
-  showToast(message);
-  setTimeout(() => { lastToastMessage = ""; }, 8000);
-}
-
-function showToast(message) {
   const toast = document.createElement('div');
-  toast.innerText = `🔔 ${message}`;
-  toast.style.background = '#333';
-  toast.style.color = '#fff';
-  toast.style.padding = '10px 16px';
-  toast.style.borderRadius = '8px';
-  toast.style.marginTop = '8px';
-  toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-  toast.style.opacity = '0';
-  toast.style.transition = 'opacity 0.5s, transform 0.5s';
-  toast.style.transform = 'translateY(-20px)';
+  toast.innerText = `🔔 ${msg}`;
+  toast.style.cssText="background:#333;color:#fff;padding:10px 16px;border-radius:8px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.5s, transform 0.5s;transform:translateY(-20px)";
   toastContainer.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateY(0)';
-  }, 100);
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(-20px)';
-    setTimeout(() => toast.remove(), 500);
-  }, 4000);
+  setTimeout(()=>{toast.style.opacity='1'; toast.style.transform='translateY(0)';},100);
+  setTimeout(()=>{toast.style.opacity='0'; toast.style.transform='translateY(-20px)'; setTimeout(()=>toast.remove(),500);},4000);
+  setTimeout(()=>{lastToastMessage="";},8000);
 }
 
 let isLiveUpdate = false;
-
 async function fetchNotifications() {
   try {
-    const response = await fetch(
-      basePath + `get_notifications_cno.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`
-    );
-    const data = await response.json();
+    const res = await fetch(basePath + `get_notifications_cno.php?page=${currentPage}&size=${pageSize}${showUnreadOnly?'&unread_only=1':''}`);
+    const data = await res.json();
     totalNotifications = data.totalCount;
     totalUnread = data.totalUnread;
 
-    const tbody = document.querySelector('#notificationTable tbody');
+    const tbody = notifSidebar.querySelector('tbody');
     tbody.innerHTML = '';
-
-    data.notifications.forEach(notif => {
+    data.notifications.forEach(n=>{
       const tr = document.createElement('tr');
       tr.style.cursor = 'pointer';
-      if (!notif.read_status) tr.style.fontWeight = 'bold';
-      tr.innerHTML = `
-        <td>${notif.message}</td>
-        <td>${notif.date}</td>
-        <td>${notif.read_status ? 'Read' : 'New'}</td>
-      `;
-      tr.onclick = () => markAsRead(notif.id);
+      if(!n.read_status) tr.style.fontWeight='bold';
+      tr.innerHTML = `<td>${n.message}</td><td>${n.date}</td><td>${n.read_status?'Read':'New'}</td>`;
+      tr.onclick=()=>markAsRead(n.id);
       tbody.appendChild(tr);
     });
 
     const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
     btnPrev.disabled = currentPage <= 1;
-    btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
+    btnNext.disabled = (currentPage*pageSize) >= effectiveTotal;
 
-    if (data.notifications.length > 0) {
-      const newest = data.notifications[0];
-      if (initialized && isLiveUpdate && newest.id > lastAlertedId) {
-        playNotificationEffect(newest.message);
-      }
-      lastAlertedId = Math.max(lastAlertedId, newest.id);
+    if(data.notifications.length>0){
+      const newest=data.notifications[0];
+      if(initialized && isLiveUpdate && newest.id>lastAlertedId) playNotificationEffect(newest.message);
+      lastAlertedId=Math.max(lastAlertedId,newest.id);
     }
-
-    if (!initialized) initialized = true;
-    isLiveUpdate = false;
-  } catch (err) {
-    console.error('Error fetching notifications:', err);
-  }
+    if(!initialized) initialized=true; isLiveUpdate=false;
+  } catch(e){console.error(e);}
 }
 
-btnPrev.addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage--;
-    fetchNotifications();
-  }
+btnPrev.addEventListener('click',()=>{if(currentPage>1){currentPage--; fetchNotifications();}});
+btnNext.addEventListener('click',()=>{if((currentPage*pageSize)<(showUnreadOnly?totalUnread:totalNotifications)){currentPage++; fetchNotifications();}});
+
+bell.addEventListener('click',()=>{
+  currentPage=1; fetchNotifications(); fetchUnreadCount();
+  notifSidebar.classList.add('open');
 });
 
-btnNext.addEventListener('click', () => {
-  const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
-  if ((currentPage * pageSize) < effectiveTotal) {
-    currentPage++;
-    fetchNotifications();
-  }
-});
+closeNotifSidebar.onclick = ()=>notifSidebar.classList.remove('open');
 
-bell.addEventListener('click', () => {
-  currentPage = 1;
-  fetchNotifications();
-  modal.style.display = 'flex';
-  fetchUnreadCount();
-});
-
-closeModal.onclick = () => modal.style.display = 'none';
-window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-
-async function markAsRead(id) {
-  try {
-    const response = await fetch(basePath + 'mark_as_read_cno.php', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `id=${id}`,
-    });
-    const result = await response.json();
-    if (result.status === 'success') {
-      fetchNotifications();
-      fetchUnreadCount();
-    }
-  } catch (err) {
-    console.error('Error marking as read:', err);
-  }
+// Mark as read
+async function markAsRead(id){
+  try{
+    const res=await fetch(basePath+'mark_as_read_cno.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`id=${id}`});
+    const result=await res.json();
+    if(result.status==='success'){fetchNotifications(); fetchUnreadCount();}
+  } catch(e){console.error(e);}
 }
 
-// 🟦 SSE live update
+// SSE
 let eventSource;
-function initSSE() {
-  if (eventSource) eventSource.close();
-  eventSource = new EventSource(basePath + 'notifications_stream_cno.php');
-  eventSource.onmessage = function() {
-    isLiveUpdate = true;
-    fetchUnreadCount();
-    fetchNotifications();
-  };
-  eventSource.onerror = function() {
-    console.log('SSE connection lost, reconnecting...');
-    setTimeout(initSSE, 3000);
-  };
+function initSSE(){
+  if(eventSource) eventSource.close();
+  eventSource=new EventSource(basePath+'notifications_stream_cno.php');
+  eventSource.onmessage=function(){isLiveUpdate=true; fetchUnreadCount(); fetchNotifications();}
+  eventSource.onerror=function(){console.log('SSE lost, reconnecting...'); setTimeout(initSSE,3000);}
 }
+initSSE();
 
-function initializeNotifications() {
-  fetchUnreadCount();
-  fetchNotifications();
-  initSSE();
-}
-initializeNotifications();
-
-// 🟧 Mark all as read
-document.getElementById('markAllReadBtn').addEventListener('click', async () => {
-  try {
-    const response = await fetch(basePath + 'mark_as_read_cno.php', { method: 'POST' });
-    const result = await response.json();
-    if (result.status === 'success') {
-      fetchNotifications();
-      fetchUnreadCount();
-    }
-  } catch (err) {
-    console.error('Error marking all as read:', err);
-  }
+// Mark all / filter
+document.getElementById('markAllReadBtn').addEventListener('click', async ()=>{
+  try{ const res=await fetch(basePath+'mark_as_read_cno.php',{method:'POST'}); const d=await res.json(); if(d.status==='success'){fetchNotifications(); fetchUnreadCount();} }catch(e){console.error(e);}
 });
+document.getElementById('filterUnreadBtn').addEventListener('click',()=>{showUnreadOnly=true; document.getElementById('showAllBtn').style.display='inline-block'; document.getElementById('filterUnreadBtn').style.display='none'; currentPage=1; fetchNotifications();});
+document.getElementById('showAllBtn').addEventListener('click',()=>{showUnreadOnly=false; document.getElementById('showAllBtn').style.display='none'; document.getElementById('filterUnreadBtn').style.display='inline-block'; currentPage=1; fetchNotifications();});
 
-document.getElementById('filterUnreadBtn').addEventListener('click', () => {
-  showUnreadOnly = true;
-  document.getElementById('showAllBtn').style.display = 'inline-block';
-  document.getElementById('filterUnreadBtn').style.display = 'none';
-  currentPage = 1;
-  fetchNotifications();
-});
-
-document.getElementById('showAllBtn').addEventListener('click', () => {
-  showUnreadOnly = false;
-  document.getElementById('showAllBtn').style.display = 'none';
-  document.getElementById('filterUnreadBtn').style.display = 'inline-block';
-  currentPage = 1;
-  fetchNotifications();
-});
+// Initialize
+fetchUnreadCount(); fetchNotifications();
 </script>

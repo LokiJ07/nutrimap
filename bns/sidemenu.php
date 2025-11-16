@@ -100,7 +100,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 
 <div id="sideMenu">
   <div class="sideMenu-header">
-    <h2>CNO</h2>
+    <h2>BNS</h2>
     <span class="close-btn">&times;</span>
   </div>
 
