@@ -63,6 +63,12 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 .menu-links li:hover { background: #f0f0f0; color: #009688; }
 .menu-links i { margin-right: 12px; font-size: 18px; color: #666; }
 
+/* Active page highlight */
+.menu-links li.active,
+#settingsMenu li.active { background-color: #00AEEF; color: #fff; }
+.menu-links li.active i,
+#settingsMenu li.active i { color: #fff; }
+
 .divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
 .sideMenu-footer { margin-top: auto; padding: 0 20px 15px 20px; }
@@ -148,9 +154,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Settings dropdown toggle
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsMenu = document.getElementById('settingsMenu');
+
+  const menuItems = document.querySelectorAll('.menu-links li[data-url]');
+  const settingsItems = document.querySelectorAll('#settingsMenu li[data-url]');
+
+  const currentPage = window.location.pathname.split("/").pop();
+
+  menuItems.forEach(li => {
+    if (li.getAttribute('data-url') === currentPage) li.classList.add('active');
+  });
+
+  settingsItems.forEach(li => {
+    if (li.getAttribute('data-url') === currentPage) {
+      li.classList.add('active');
+      settingsBtn.classList.add('open');
+      settingsMenu.style.display = 'flex';
+    }
+  });
+
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       settingsBtn.classList.toggle('open');

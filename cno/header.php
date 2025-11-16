@@ -220,69 +220,64 @@
 </div>
 
 <script>
-// Side menu logic (unchanged from previous)
 document.getElementById('menuBtn').addEventListener('click', async () => {
-  const container = document.getElementById('sidemenu-container');
+    const container = document.getElementById('sidemenu-container');
 
-  if (!container.innerHTML.trim()) {
-    const response = await fetch('sidebar.php');
-    const html = await response.text();
-    container.innerHTML = html;
+    if (!container.innerHTML.trim()) {
+        const response = await fetch('sidebar.php');
+        const html = await response.text();
+        container.innerHTML = html;
 
-    const menu = document.getElementById('sideMenu');
-    if (!menu) return;
+        const menu = document.getElementById('sideMenu');
+        if (!menu) return;
 
-    const closeBtn = menu.querySelector('.close-btn');
-    if (closeBtn) closeBtn.addEventListener('click', () => menu.classList.remove('open'));
+        // close button
+        const closeBtn = menu.querySelector('.close-btn');
+        if (closeBtn) closeBtn.addEventListener('click', () => menu.classList.remove('open'));
 
-    const menuItems = menu.querySelectorAll('.menu-links li[data-url]');
-    menuItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const url = item.getAttribute('data-url');
-        if (url) window.location.href = url;
-        menu.classList.remove('open');
-      });
-    });
-
-    const footerLinks = menu.querySelectorAll('.footer-links > a');
-    footerLinks.forEach(link => {
-      link.addEventListener('click', () => menu.classList.remove('open'));
-    });
-
-    const profileBtn = menu.querySelector('#userProfileBtn');
-    if (profileBtn) {
-      profileBtn.addEventListener('click', () => {
-        window.location.href = 'profile.php';
-        menu.classList.remove('open');
-      });
-    }
-
-    const settingsBtn = menu.querySelector('#settingsBtn');
-    const settingsMenu = menu.querySelector('#settingsMenu');
-    if (settingsBtn && settingsMenu) {
-      settingsBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
-      });
-      document.addEventListener('click', (e) => {
-        if (!settingsBtn.contains(e.target) && !settingsMenu.contains(e.target)) {
-          settingsMenu.style.display = 'none';
-        }
-      });
-      const settingsItems = settingsMenu.querySelectorAll('li[data-url]');
-      settingsItems.forEach(item => {
-        item.addEventListener('click', () => {
-          const url = item.getAttribute('data-url');
-          if (url) window.location.href = url;
-          menu.classList.remove('open');
+        // menu clicks
+        const menuItems = menu.querySelectorAll('.menu-links li[data-url]');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                window.location.href = item.getAttribute('data-url');
+                menu.classList.remove('open');
+            });
         });
-      });
-    }
-  }
 
-  const menu = document.getElementById('sideMenu');
-  if (menu) menu.classList.add('open');
+        // settings
+        const settingsBtn = menu.querySelector('#settingsBtn');
+        const settingsMenu = menu.querySelector('#settingsMenu');
+
+        if (settingsBtn && settingsMenu) {
+            settingsBtn.addEventListener('click', e => {
+                e.preventDefault();
+                settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        // ACTIVE PAGE HIGHLIGHT FIX
+        const currentPage = window.location.pathname.split('/').pop();
+
+        menuItems.forEach(li => {
+            if (li.getAttribute('data-url') === currentPage) {
+                li.classList.add('active');
+            }
+        });
+
+        const settingsItems = settingsMenu.querySelectorAll('li[data-url]');
+        settingsItems.forEach(li => {
+            if (li.getAttribute('data-url') === currentPage) {
+                li.classList.add('active');
+                settingsBtn.classList.add('open');
+                settingsMenu.style.display = 'block';
+            }
+        });
+    }
+
+    // Open sidebar after loading
+    document.getElementById('sideMenu').classList.add('open');
 });
+
 // ===== Notification Sidebar Logic =====
 let currentPage = 1;
 const pageSize = 5;
