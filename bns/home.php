@@ -290,7 +290,6 @@ thead { background: #009688; color: #fff; }
 <body>
 <div class="layout">
   <?php include 'header.php'; ?>
-  <?php include 'sidemenu.php'; ?>
   <div class="body-layout">
     <!-- ✅ Sidebar -->
     <aside class="sidebar">

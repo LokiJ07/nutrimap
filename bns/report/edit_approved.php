@@ -156,7 +156,7 @@ function copyTitle() {
                        value="<?= isset($row['title']) ? htmlspecialchars($row['title']) : '' ?>">
             </div>
         </div>
-        <a href="../report_history.php" class="button-cancel top-right-button">Cancel</a>
+        <a href="javascript:history.go(-2)" class="button-cancel top-right-button">Cancel</a>
     </div>
 
     <!-- PAGE 1 -->

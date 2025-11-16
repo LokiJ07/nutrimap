@@ -2,9 +2,9 @@
 session_start();
 require '../db/config.php';
 
-  // ✅ Require login
-  if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
-    header("Location: ../login.php");
+// ✅ Require login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -14,13 +14,14 @@ function logActivity($pdo, $user_id, $action) {
     $stmt->execute([$user_id, $action]);
 }
 
-// Validate report ID
-$reportId = $_GET['id'] ?? 0;
-if (!is_numeric($reportId) || $reportId <= 0) {
-    die("Invalid report ID");
+// ✅ Validate report ID from URL
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die("❌ Missing or invalid report ID in URL");
 }
 
-// Fetch report and BNS data
+$reportId = intval($_GET['id']);
+
+// ✅ Fetch report + BNS data
 $stmt = $pdo->prepare("
     SELECT r.*, b.*, u.barangay AS user_barangay 
     FROM reports r 
@@ -32,11 +33,11 @@ $stmt->execute(['id' => $reportId]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$row) {
-    die("Report not found");
+    die("❌ Report not found");
 }
 
-// Check if BNS data exists
-$has_bns = !empty($row['id']);
+// ✅ Check if BNS data exists properly
+$has_bns = !empty($row['report_id']); // ✅ FIXED
 
 // ✅ Function to map barangay name to logo
 function getBarangayLogo($barangay) {
@@ -54,7 +55,7 @@ function getBarangayLogo($barangay) {
         'poblacion' => 'Poblacion.png',
         'quibonbon' => 'Quibonbon.png',
         'sambulawan' => 'Sambulawan.png',
-        'calongonan' => 'Calongonan.png',
+        'san francisco de asis' => 'San_Francisco_de_Asis.png',
         'sinaloc' => 'Sinaloc.png',
         'taytay' => 'Taytay.png',
         'ulaliman' => 'Ulaliman.png'
@@ -63,7 +64,6 @@ function getBarangayLogo($barangay) {
     $key = strtolower(trim($barangay ?? ''));
     $file = $map[$key] ?? 'default.png';
 
-    // Check if file exists
     $path = __DIR__ . '/../logos/barangays/' . $file;
     if (!file_exists($path)) {
         $file = 'default.png';
@@ -72,23 +72,22 @@ function getBarangayLogo($barangay) {
     return $file;
 }
 
-// ✅ Determine barangay logo
-$barangay_name = $has_bns ? ($row['barangay'] ?? $row['user_barangay']) : '';
+// ✅ Determine Barangay Logo
+$barangay_name = $row['barangay'] ?? $row['user_barangay'] ?? '';
 $barangay_logo = getBarangayLogo($barangay_name);
 
-// ✅ Log activity: viewing the report
-if (isset($_SESSION['user_id'])) {
+// ✅ Log activity
+if (!empty($_SESSION['user_id'])) {
     $reportTitle = $row['title'] ?? "Untitled Report";
     logActivity($pdo, $_SESSION['user_id'], "Viewed report (ID: $reportId, Title: $reportTitle)");
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BNS | Edit BNS Report</title>
+<title>View BNS Report — CNO NutriMap</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -132,8 +131,8 @@ function copyTitle() {
 </head>
 <body>
 <div class="layout">
-<?php include 'header.php'; ?>
-<?php include 'sidemenu.php'; ?>
+
+
 <div class="body-layout">
 <div class="container">
 
@@ -143,7 +142,6 @@ function copyTitle() {
 </div>
 <?php endif; ?>
 
-<!-- Single Form for All Pages -->
 <form action="update_report.php" method="post" onsubmit="copyTitle()">
     <input type="hidden" name="report_id" value="<?= $reportId ?>">
     <input type="hidden" id="hidden-title" name="title">
@@ -158,7 +156,7 @@ function copyTitle() {
                        value="<?= isset($row['title']) ? htmlspecialchars($row['title']) : '' ?>">
             </div>
         </div>
-        <a href="report_history.php" class="button-cancel top-right-button">Cancel</a>
+        <a href="javascript:history.back()" class="button-cancel top-right-button">Cancel</a>
     </div>
 
     <!-- PAGE 1 -->
@@ -193,30 +191,49 @@ function copyTitle() {
     <tr><td>1. Total Population</td>
         <td><input type="number" name="ind1" value="<?= $has_bns ? htmlspecialchars($row['ind1']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>2. Number of households</td>
+    <tr class="indent"><td>Male</td>
+        <td><input type="number" name="ind_male" value="<?= $has_bns ? htmlspecialchars($row['ind_male']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr class="indent"><td>Female</td>
+        <td><input type="number" name="ind_female" value="<?= $has_bns ? htmlspecialchars($row['ind_female']) : '' ?>" style="width:100px;"></td>
+    </tr>
+
+    <tr><td>2. Total Number of Households</td>
         <td><input type="number" name="ind2" value="<?= $has_bns ? htmlspecialchars($row['ind2']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>3. Total number of families</td>
+    <tr><td>3. Total Number of Family</td>
         <td><input type="number" name="ind3" value="<?= $has_bns ? htmlspecialchars($row['ind3']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>4. Total number of women who are:</td><td></td></tr>
-    <tr class="indent"><td>a. Pregnant</td>
-        <td><input type="number" name="ind4a" value="<?= $has_bns ? htmlspecialchars($row['ind4a']) : '' ?>" style="width:100px;"></td>
+    <tr><td>4. Total Number of HHs More Than 5 Below Members</td>
+        <td><input type="number" name="ind4" value="<?= $has_bns ? htmlspecialchars($row['ind4']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr class="indent"><td>b. Lactating</td>
-        <td><input type="number" name="ind4b" value="<?= $has_bns ? htmlspecialchars($row['ind4b']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>5. Households with preschool children (0-59 months)</td>
+    <tr><td>5. Total Number of HHs more Than 5 Above Members</td>
         <td><input type="number" name="ind5" value="<?= $has_bns ? htmlspecialchars($row['ind5']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>6. Actual population of preschool children (0-59 months)</td>
-        <td><input type="number" name="ind6" value="<?= $has_bns ? htmlspecialchars($row['ind6']) : '' ?>" style="width:100px;"></td>
+
+
+
+    <tr><td>6. Total Number of Women Who Are:</td><td></td></tr>
+    <tr class="indent"><td>a. Pregnant</td>
+        <td><input type="number" name="ind6a" value="<?= $has_bns ? htmlspecialchars($row['ind6a']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>7. Total number of preschool children 0-50 months old measured during OPT Plus</td><td></td></tr>
-    <tr><td>a. Percent (%) measured coverage (OPT Plus)</td>
-        <td><input type="text" name="ind7a" value="<?= $has_bns ? htmlspecialchars($row['ind7a']) : '' ?>" style="width:100px;"></td>
+    <tr class="indent"><td>b. Lactating</td>
+        <td><input type="number" name="ind6b" value="<?= $has_bns ? htmlspecialchars($row['ind6b']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>b. Preschool children by Nutritional Status</td>
+
+    <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td>
+        <td><input type="number" name="ind7" value="<?= $has_bns ? htmlspecialchars($row['ind7']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>8. Actual Population of Preschool Children 0-59 Months</td>
+        <td><input type="number" name="ind8" value="<?= $has_bns ? htmlspecialchars($row['ind8']) : '' ?>" style="width:100px;"></td>
+    </tr>
+        <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td>
+        <td><input type="number" name="ind9" value="<?= $has_bns ? htmlspecialchars($row['ind9']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>a. Percent (%) Measured Coverage (OPT Plus)</td>
+        <td><input type="text" name="ind9a" value="<?= $has_bns ? htmlspecialchars($row['ind9a']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>b. Number and Percent (%) of Preschool Children According to Nutritional Status</td>
         <td class="number-cell"><div>No.</div><div>%</div></td>
     </tr>
     <?php 
@@ -225,50 +242,34 @@ function copyTitle() {
     <tr class="indent">
         <td><?= $i.') '.$nutri[$i-1] ?></td>
         <td class="number-cell">
-            <div><input type="number" name="ind7b<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind7b{$i}_no"]) : '' ?>" style="width:70px;"></div>
-            <div><input type="text" name="ind7b<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind7b{$i}_pct"]) : '' ?>" style="width:70px;"></div>
+            <div><input type="number" name="ind9b<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_no"]) : '' ?>" style="width:70px;"></div>
+            <div><input type="text" name="ind9b<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_pct"]) : '' ?>" style="width:70px;"></div>
         </td>
     </tr>
     <?php endfor; ?>
-    <tr><td>8. Infants 0-5 months old</td>
-        <td><input type="number" name="ind8" value="<?= $has_bns ? htmlspecialchars($row['ind8']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>9. Infants 6-11 months old</td>
-        <td><input type="number" name="ind9" value="<?= $has_bns ? htmlspecialchars($row['ind9']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>10. Preschool children 0-23 months old</td>
+
+    <tr><td>10. Total Number of Infants 0-5 Months Old</td>
         <td><input type="number" name="ind10" value="<?= $has_bns ? htmlspecialchars($row['ind10']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>11. Preschool children 12-59 months old</td>
+    <tr><td>11. Total Number of Infants 6-11 Months Old</td>
         <td><input type="number" name="ind11" value="<?= $has_bns ? htmlspecialchars($row['ind11']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>12. Preschool children 24-59 months old</td>
+    <tr><td>12. Total Number of Preschool Children 0-23 Months Old</td>
         <td><input type="number" name="ind12" value="<?= $has_bns ? htmlspecialchars($row['ind12']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>13. Families with wasted/severely wasted preschool children</td>
+    <tr><td>13. Total Number of Preschool Children 12-59 Months Old</td>
         <td><input type="number" name="ind13" value="<?= $has_bns ? htmlspecialchars($row['ind13']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>14. Families with stunted/severely stunted preschool children</td>
+    <tr><td>14. Total Number of Preschool Children 24-59 Months Old</td>
         <td><input type="number" name="ind14" value="<?= $has_bns ? htmlspecialchars($row['ind14']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr>
-        <td>15. Total number of Educational Institution</td>
-        <td class="number-cell"><div>Public</div><div>Private</div></td>
+    <tr><td>15. Total Number of Families With Wasted and Severely Wasted Preschool Children</td>
+        <td><input type="number" name="ind15" value="<?= $has_bns ? htmlspecialchars($row['ind15']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr>
-        <td>a. Day Care Centers (Public/Private)</td>
-        <td class="number-cell">
-            <div><input type="number" name="ind15a_public" value="<?= $has_bns ? htmlspecialchars($row['ind15a_public']) : '' ?>" style="width:70px;"></div>
-            <div><input type="number" name="ind15a_private" value="<?= $has_bns ? htmlspecialchars($row['ind15a_private']) : '' ?>" style="width:70px;"></div>
-        </td>
+    <tr><td>16. Total Number of Families With Stunted and Severely Stunted Preschool Children</td>
+        <td><input type="number" name="ind16" value="<?= $has_bns ? htmlspecialchars($row['ind16']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr>
-        <td>b. Elementary Schools (Public/Private)</td>
-        <td class="number-cell">
-            <div><input type="number" name="ind15b_public" value="<?= $has_bns ? htmlspecialchars($row['ind15b_public']) : '' ?>" style="width:70px;"></div>
-            <div><input type="number" name="ind15b_private" value="<?= $has_bns ? htmlspecialchars($row['ind15b_private']) : '' ?>" style="width:70px;"></div>
-        </td>
-    </tr>
+
         </tbody>
         </table>
         <div class="page-number">Page 1</div>
@@ -277,78 +278,87 @@ function copyTitle() {
     <!-- PAGE 2 -->
     <div class="document">
         <table>
+            <colgroup>
+    <col style="width: auto;">
+    <col style="width: 180px;"> 
+  </colgroup>
         <tbody>
- <tr><td>16. Kindergarten Enrolled</td>
-        <td><input type="number" name="ind16" value="<?= $has_bns ? htmlspecialchars($row['ind16']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>17. School children (Grades 1-6)</td>
-        <td><input type="number" name="ind17" value="<?= $has_bns ? htmlspecialchars($row['ind17']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>18. School children weighed (K-Gr. 6)</td>
-        <td><input type="number" name="ind18" value="<?= $has_bns ? htmlspecialchars($row['ind18']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>19. % coverage measured</td>
-        <td><input type="text" name="ind19" value="<?= $has_bns ? htmlspecialchars($row['ind19']) : '' ?>" style="width:100px;"></td>
+
+    <tr>
+        <td>17. Total Bumber of Educational Institutions(Pub./Priv.)</td>
+        <td class="number-cell"><div>Public</div><div>Private</div></td>
     </tr>
     <tr>
-      <td>20. School children by Nutritional Status</td>
+        <td>a. Day Care Centers (Public/Private)</td>
+        <td class="number-cell">
+            <div><input type="number" name="ind17a_public" value="<?= $has_bns ? htmlspecialchars($row['ind17a_public']) : '' ?>" style="width:70px;"></div>
+            <div><input type="number" name="ind17a_private" value="<?= $has_bns ? htmlspecialchars($row['ind17a_private']) : '' ?>" style="width:70px;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>b. Elementary Schools (Public/Private)</td>
+        <td class="number-cell">
+            <div><input type="number" name="ind17b_public" value="<?= $has_bns ? htmlspecialchars($row['ind17b_public']) : '' ?>" style="width:70px;"></div>
+            <div><input type="number" name="ind17b_private" value="<?= $has_bns ? htmlspecialchars($row['ind17b_private']) : '' ?>" style="width:70px;"></div>
+        </td>
+    </tr>
+
+ <tr><td>18. Total Number of Children Enrolled in Kindergarten</td>
+        <td><input type="number" name="ind18" value="<?= $has_bns ? htmlspecialchars($row['ind18']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>19. Total Number of School Children (grades 1-6)</td>
+        <td><input type="number" name="ind19" value="<?= $has_bns ? htmlspecialchars($row['ind19']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>20. Total Number of School Children Weighed at Start of School Year</td>
+        <td><input type="number" name="ind20" value="<?= $has_bns ? htmlspecialchars($row['ind20']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>21. Percentage (%) Coverage of School Children Measured</td>
+        <td><input type="text" name="ind21" value="<?= $has_bns ? htmlspecialchars($row['ind21']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr>
+      <td>22. Number and Percent (%) of School Children According to Nutritional Status Body Mas Index</td>
       <td class="number-cell"><div>No.</div><div>%</div></td>
     </tr>
     <?php 
-    $nutri20 = ['a. Severely Wasted','b. Wasted','c. Normal','d. Overweight','e. Obese'];
+    $nutri20 = ['a. Severely Wasted','b. Wasted','c. Severly Stunted','d. Stunted','e. Normal ','f. Overweight','g. Obese'];
     foreach($nutri20 as $key => $label): 
         $letter = chr(97 + $key); // a,b,c...
     ?>
     <tr class="indent">
         <td><?= $label ?></td>
         <td class="number-cell">
-            <div><input type="number" name="ind20<?= $letter ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind20{$letter}_no"]) : '' ?>" style="width:70px;"></div>
-            <div><input type="text" name="ind20<?= $letter ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind20{$letter}_pct"]) : '' ?>" style="width:70px;"></div>
+            <div><input type="number" name="ind22<?= $letter ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind22{$letter}_no"]) : '' ?>" style="width:70px;"></div>
+            <div><input type="text" name="ind22<?= $letter ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind22{$letter}_pct"]) : '' ?>" style="width:70px;"></div>
         </td>
     </tr>
     <?php endforeach; ?>
 
-    <tr><td>21. Exclusively breastfed 0-5 months</td>
-        <td><input type="number" name="ind21" value="<?= $has_bns ? htmlspecialchars($row['ind21']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>22. Complementary foods at 6 months</td>
-        <td><input type="number" name="ind22" value="<?= $has_bns ? htmlspecialchars($row['ind22']) : '' ?>" style="width:100px;"></td>
-    </tr>
-    <tr><td>23. Households with wasted school children</td>
+    <tr><td>23. 0-5 Months Old Children Exclusively Breastfeed</td>
         <td><input type="number" name="ind23" value="<?= $has_bns ? htmlspecialchars($row['ind23']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>24. School children dewormed</td>
+    <tr><td>24. Households with Severely Wasted School Children</td>
         <td><input type="number" name="ind24" value="<?= $has_bns ? htmlspecialchars($row['ind24']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>25. Fully immunized children</td>
+    <tr><td>25. School Children Dewormed at the Start of the School Year</td>
         <td><input type="number" name="ind25" value="<?= $has_bns ? htmlspecialchars($row['ind25']) : '' ?>" style="width:100px;"></td>
     </tr>
+    <tr><td>26. Fully Immunized Children(FIC)</td>
+        <td><input type="number" name="ind26" value="<?= $has_bns ? htmlspecialchars($row['ind26']) : '' ?>" style="width:100px;"></td>
+    </tr>
 
     <tr>
-      <td>26. Toilet facility by type</td>
+      <td>27. Households, by Type of Toilet Facility</td>
       <td class="number-cell"><div>No.</div><div>%</div></td>
     </tr>
     <?php 
-    $toilet = ['a. Water-sealed','b. Antipolo','c. Open Pit/Shared','d. No Toilet'];
+    $toilet = [      
+      'a. Water-sealed toilet',
+      'b. Antipolo (Unsanitary Toilet)',
+      'c. Open Pit',
+      'd. Shared',
+      'e. No Toilet'];
     $i='a';
     foreach($toilet as $label): ?>
-    <tr class="indent">
-      <td><?= $label ?></td>
-      <td class="number-cell">
-        <div><input type="number" name="ind26<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind26{$i}_no"]) : '' ?>" style="width:70px;"></div>
-        <div><input type="text" name="ind26<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind26{$i}_pct"]) : '' ?>" style="width:70px;"></div>
-      </td>
-    </tr>
-    <?php $i++; endforeach; ?>
-
-    <tr>
-      <td>27. Garbage disposal by type:</td>
-      <td class="number-cell"><div>No.</div><div>%</div></td>
-    </tr>
-    <?php 
-    $garbage = ['a. Barangay/City garbage','b. Own compost pit','c. Burning','d. Dumping'];
-    $i='a';
-    foreach($garbage as $label): ?>
     <tr class="indent">
       <td><?= $label ?></td>
       <td class="number-cell">
@@ -359,13 +369,17 @@ function copyTitle() {
     <?php $i++; endforeach; ?>
 
     <tr>
-      <td>28. Water source by type:</td>
+      <td>28. Households, by Type of Garbage Disposal:</td>
       <td class="number-cell"><div>No.</div><div>%</div></td>
     </tr>
     <?php 
-    $water = ['a. Pipe water system','b. Well – Level II','c. Deep well (Level II)','d. Mineral water','e. Open shallow dug well'];
+    $garbage = [      
+      'a. Barangay/City Garbage Collection',
+      'b. Own Compose Pit',
+      'c. Burning',
+      'd. Dumping'];
     $i='a';
-    foreach($water as $label): ?>
+    foreach($garbage as $label): ?>
     <tr class="indent">
       <td><?= $label ?></td>
       <td class="number-cell">
@@ -375,22 +389,6 @@ function copyTitle() {
     </tr>
     <?php $i++; endforeach; ?>
 
-    <tr>
-      <td>29. Households with:</td>
-      <td class="number-cell"><div>No.</div><div>%</div></td>
-    </tr>
-    <?php 
-    $household = ['a. Vegetable garden','b. Livestock/poultry','c. Combination garden & livestock','d. Fishponds','e. No garden'];
-    $i='a';
-    foreach($household as $label): ?>
-    <tr class="indent">
-      <td><?= $label ?></td>
-      <td class="number-cell">
-        <div><input type="number" name="ind29<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind29{$i}_no"]) : '' ?>" style="width:70px;"></div>
-        <div><input type="text" name="ind29<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind29{$i}_pct"]) : '' ?>" style="width:70px;"></div>
-      </td>
-    </tr>
-    <?php $i++; endforeach; ?>
         </tbody>
         </table>
         <div class="page-number">Page 2</div>
@@ -404,73 +402,171 @@ function copyTitle() {
     <col style="width: 180px;"> 
   </colgroup>
         <tbody>
+
     <tr>
-      <td>30. Type of dwelling unit</td>
+      <td>29. Household, by Type of Water Source</td>
       <td class="number-cell"><div>No.</div><div>%</div></td>
     </tr>
     <?php 
-    $d=['a. Concrete','b. Semi concrete','c. Wooden house','d. Nipa bamboo house','e. Barong-barong']; 
+    $water = ['a. Pipe Water System(Level III)',
+      'b. Spring (Level II)',
+      'c. Deep Well With Topstand Communal Source Water System (Level II)',
+      'd. Deep Well With Individual Faucet (Level III)',
+      'e. Purified Station (Level III)',
+      'f. Open Shallow Dug Well (Level I)',
+      'g. Artesian Well '];
+    $i='a';
+    foreach($water as $label): ?>
+    <tr class="indent">
+      <td><?= $label ?></td>
+      <td class="number-cell">
+        <div><input type="number" name="ind29<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind29{$i}_no"]) : '' ?>" style="width:70px;"></div>
+        <div><input type="text" name="ind29<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind29{$i}_pct"]) : '' ?>" style="width:70px;"></div>
+      </td>
+    </tr>
+    <?php $i++; endforeach; ?>
+
+    <tr>
+      <td>30. Household with</td>
+      <td class="number-cell"><div>No.</div><div>%</div></td>
+    </tr>
+    <?php 
+    $household = ['a. Vegetable Garden',
+      'b. Livestock Poultry',
+      'c. Fishponds',
+      'd. Other Specify: No Garden'];
+    $i='a';
+    foreach($household as $label): ?>
+    <tr class="indent">
+      <td><?= $label ?></td>
+      <td class="number-cell">
+        <div><input type="number" name="ind30<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_no"]) : '' ?>" style="width:70px;"></div>
+        <div><input type="text" name="ind0<3?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;"></div>
+      </td>
+    </tr>
+    <?php $i++; endforeach; ?>
+
+
+    <tr>
+      <td>31. Households according to type of dwelling unit:</td>
+      <td class="number-cell"><div>No.</div><div>%</div></td>
+    </tr>
+    <?php 
+    $d=[ 'a. Concrete',
+      'b. Semi Concrete',
+      'c. Wooden House',
+      'd. Nipa Bamboo House',
+      'e. Barong-Barong Makeshift',
+      'f. Makeshift']; 
     $i='a'; 
     foreach($d as $label): ?>
     <tr class="indent">
       <td><?= $label ?></td>
       <td class="number-cell">
         <div>
-            <input type="number" name="ind30<?= $i ?>_no" 
-                   value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_no"]) : '' ?>" style="width:70px;">
+            <input type="number" name="ind31<?= $i ?>_no" 
+                   value="<?= $has_bns ? htmlspecialchars($row["ind31{$i}_no"]) : '' ?>" style="width:70px;">
         </div>
         <div>
-            <input type="text" name="ind30<?= $i ?>_pct" 
-                   value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;">
+            <input type="text" name="ind31<?= $i ?>_pct" 
+                   value="<?= $has_bns ? htmlspecialchars($row["ind31{$i}_pct"]) : '' ?>" style="width:70px;">
         </div>
       </td>
     </tr>
     <?php $i++; endforeach; ?>
 
-    <tr>
-      <td>31. Households using iodized salt</td>
-      <td>
-        <input type="number" name="ind31" value="<?= $has_bns ? htmlspecialchars($row['ind31']) : '' ?>" style="width:100px;">
-      </td>
-    </tr>
-    <tr>
-      <td>32. Total number of eateries/carinderia</td>
-      <td>
-        <input type="number" name="ind32" value="<?= $has_bns ? htmlspecialchars($row['ind32']) : '' ?>" style="width:100px;">
-      </td>
-    </tr>
-    <tr>
-      <td>33. Total number of bakeries</td>
-      <td>
-        <input type="number" name="ind33" value="<?= $has_bns ? htmlspecialchars($row['ind33']) : '' ?>" style="width:100px;">
-      </td>
-    </tr>
-    <tr>
-      <td>34. Total number of sari-sari stores</td>
-      <td>
-        <input type="number" name="ind34" value="<?= $has_bns ? htmlspecialchars($row['ind34']) : '' ?>" style="width:100px;">
-      </td>
-    </tr>
-    <tr>
-      <td>35. Number of health and nutrition workers</td>
+    <tr class="indent">
+ <tr>
+  <td>33. Total Number of Eateries/Carenderia</td>
+  <td class="number-cell">
+    <div>
+      <input type="number" 
+             name="ind33_no" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind33_no'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+    <div>
+      <input type="text" 
+             name="ind33_pct" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind33_pct'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <td>34. Total Number Sari-Sari Stores Related Iodized Salt</td>
+  <td class="number-cell">
+    <div>
+      <input type="number" 
+             name="ind34_no" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind34_no'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+    <div>
+      <input type="text" 
+             name="ind34_pct" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind34_pct'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <td>35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
+  <td class="number-cell">
+    <div>
+      <input type="number" 
+             name="ind35_no" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind35_no'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+    <div>
+      <input type="text" 
+             name="ind35_pct" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind35_pct'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <td>36. Total Number of Bakery With Fortified Flour</td>
+  <td class="number-cell">
+    <div>
+      <input type="number" 
+             name="ind36_no" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind36_no'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+    <div>
+      <input type="text" 
+             name="ind36_pct" 
+             value="<?= $has_bns ? htmlspecialchars($row['ind36_pct'] ?? '') : '' ?>" 
+             style="width:70px;">
+    </div>
+  </td>
+</tr>
+
+      <td>37. Number of Health and Nutrition Workers:</td>
       <td></td>
     </tr>
     <tr class="indent">
       <td>a. Barangay Nutrition Scholar</td>
       <td>
-        <input type="number" name="ind35a" value="<?= $has_bns ? htmlspecialchars($row['ind35a']) : '' ?>" style="width:100px;">
+        <input type="number" name="ind37a" value="<?= $has_bns ? htmlspecialchars($row['ind37a']) : '' ?>" style="width:100px;">
       </td>
     </tr>
     <tr class="indent">
       <td>b. Barangay Health Worker</td>
       <td>
-        <input type="number" name="ind35b" value="<?= $has_bns ? htmlspecialchars($row['ind35b']) : '' ?>" style="width:100px;">
+        <input type="number" name="ind37b" value="<?= $has_bns ? htmlspecialchars($row['ind37b']) : '' ?>" style="width:100px;">
       </td>
     </tr>
     <tr>
-      <td>36. Total number of households beneficiaries of Pantawid Pamilyang Pilipino</td>
+      <td>38. Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program</td>
       <td>
-        <input type="number" name="ind36" value="<?= $has_bns ? htmlspecialchars($row['ind36']) : '' ?>" style="width:100px;">
+        <input type="number" name="ind38" value="<?= $has_bns ? htmlspecialchars($row['ind38']) : '' ?>" style="width:100px;">
       </td>
     </tr>
         </tbody>

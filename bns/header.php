@@ -148,53 +148,83 @@
 <script>
 // Side menu logic
 document.getElementById('menuBtn').addEventListener('click', async () => {
-  const container = document.getElementById('sidemenu-container');
-  if (!container.innerHTML.trim()) {
-    const response = await fetch('sidemenu.php');
-    const html = await response.text();
-    container.innerHTML = html;
+    const container = document.getElementById('sidemenu-container');
+    if (!container.innerHTML.trim()) {
+        const response = await fetch('sidemenu.php');
+        const html = await response.text();
+        container.innerHTML = html;
+
+        const menu = document.getElementById('sideMenu');
+        if (!menu) return;
+
+        // Close button
+        const closeBtn = menu.querySelector('.close-btn');
+        if (closeBtn) closeBtn.addEventListener('click', () => menu.classList.remove('open'));
+
+        // Menu items navigation
+        const menuItems = menu.querySelectorAll('.menu-links li[data-url]');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const url = item.getAttribute('data-url');
+                if (url) window.location.href = url;
+                menu.classList.remove('open');
+            });
+        });
+
+        // Settings dropdown items
+        const settingsItems = menu.querySelectorAll('#settingsMenu li[data-url]');
+        settingsItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const url = item.getAttribute('data-url');
+                if (url) window.location.href = url;
+                menu.classList.remove('open');
+            });
+        });
+
+        // Profile button
+        const profileBtn = menu.querySelector('#userProfileBtn');
+        if (profileBtn) profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.php';
+            menu.classList.remove('open');
+        });
+
+        // Settings dropdown toggle
+        const settingsBtn = menu.querySelector('#settingsBtn');
+        const settingsMenu = menu.querySelector('#settingsMenu');
+        if (settingsBtn && settingsMenu) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                settingsBtn.classList.toggle('open');
+                settingsMenu.style.display = settingsMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+        }
+
+        // ===================== ACTIVE PAGE HIGHLIGHT =====================
+        const currentPage = window.location.pathname.split("/").pop(); // e.g., 'home.php'
+
+        // Highlight main menu items
+        menu.querySelectorAll('.menu-links li[data-url]').forEach(li => {
+            if (li.getAttribute('data-url') === currentPage) {
+                li.classList.add('active');
+            }
+        });
+
+        // Highlight settings submenu
+        menu.querySelectorAll('#settingsMenu li[data-url]').forEach(li => {
+            if (li.getAttribute('data-url') === currentPage) {
+                li.classList.add('active');
+                // Open parent dropdown
+                if (settingsBtn && settingsMenu) {
+                    settingsBtn.classList.add('open');
+                    settingsMenu.style.display = 'flex';
+                }
+            }
+        });
+        // =================================================================
+    }
 
     const menu = document.getElementById('sideMenu');
-    if (!menu) return;
-    const closeBtn = menu.querySelector('.close-btn');
-    if (closeBtn) closeBtn.addEventListener('click', () => menu.classList.remove('open'));
-    const menuItems = menu.querySelectorAll('.menu-links li[data-url]');
-    menuItems.forEach(item => item.addEventListener('click', () => {
-      const url = item.getAttribute('data-url');
-      if (url) window.location.href = url;
-      menu.classList.remove('open');
-    }));
-    const footerLinks = menu.querySelectorAll('.footer-links > a');
-    footerLinks.forEach(link => link.addEventListener('click', () => menu.classList.remove('open')));
-    const profileBtn = menu.querySelector('#userProfileBtn');
-    if (profileBtn) profileBtn.addEventListener('click', () => {
-      window.location.href = 'profile.php';
-      menu.classList.remove('open');
-    });
-    const settingsBtn = menu.querySelector('#settingsBtn');
-    const settingsMenu = menu.querySelector('#settingsMenu');
-    if (settingsBtn && settingsMenu) {
-      settingsBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
-      });
-      document.addEventListener('click', (e) => {
-        if (!settingsBtn.contains(e.target) && !settingsMenu.contains(e.target)) {
-          settingsMenu.style.display = 'none';
-        }
-      });
-      const settingsItems = settingsMenu.querySelectorAll('li[data-url]');
-      settingsItems.forEach(item => {
-        item.addEventListener('click', () => {
-          const url = item.getAttribute('data-url');
-          if (url) window.location.href = url;
-          menu.classList.remove('open');
-        });
-      });
-    }
-  }
-  const menu = document.getElementById('sideMenu');
-  if (menu) menu.classList.add('open');
+    if (menu) menu.classList.add('open');
 });
 
 // Notifications

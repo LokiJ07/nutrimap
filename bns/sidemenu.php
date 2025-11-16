@@ -27,6 +27,9 @@ $profile_pic = "../uploads/profile_placeholder.png";
 if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_pic'])) {
     $profile_pic = "../uploads/" . htmlspecialchars($user['profile_pic']);
 }
+
+// ✅ Current page
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <style>
@@ -62,6 +65,17 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 }
 .menu-links li:hover { background: #f0f0f0; color: #009688; }
 .menu-links i { margin-right: 12px; font-size: 18px; color: #666; }
+
+/* Active page highlight */
+.menu-links li.active,
+#settingsMenu li.active {
+    background-color: #03af9eff;
+    color: #fff;
+}
+.menu-links li.active i,
+#settingsMenu li.active i {
+    color: #fff;
+}
 
 .divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
@@ -105,36 +119,35 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
   </div>
 
   <ul class="menu-links">
-    <li data-url="home.php"><i class="fa fa-home"></i> Home</li>
-    <li data-url="reports.php"><i class="fa fa-file-alt"></i> Reports</li>
-    <li data-url="report_history.php"><i class="fa fa-history"></i> Report History</li>
-    <li data-url="barangay_data.php"><i class="fa fa-database"></i> Barangay Data</li>
+    <li data-url="home.php" class="<?php echo ($current_page=='home.php')?'active':''; ?>"><i class="fa fa-home"></i> Home</li>
+    <li data-url="reports.php" class="<?php echo ($current_page=='reports.php')?'active':''; ?>"><i class="fa fa-file-alt"></i> Reports</li>
+    <li data-url="report_history.php" class="<?php echo ($current_page=='report_history.php')?'active':''; ?>"><i class="fa fa-history"></i> Report History</li>
+    <li data-url="barangay_data.php" class="<?php echo ($current_page=='barangay_data.php')?'active':''; ?>"><i class="fa fa-database"></i> Barangay Data</li>
 
     <!-- Settings dropdown -->
-    <li class="settings-dropdown">
+    <li class="settings-dropdown <?php echo ($current_page=='archive.php' || $current_page=='security.php')?'active':''; ?>">
       <div class="settings-btn" id="settingsBtn">
         <span><i class="fa fa-cog"></i> Settings</span>
         <i class="fa fa-chevron-down"></i>
       </div>
       <ul id="settingsMenu">
-        <li data-url="archive.php"><i class="fa fa-archive"></i> Archive</li>
-        <li data-url="security.php"><i class="fa fa-shield-alt"></i> Security</li>
+        <li data-url="archive.php" class="<?php echo ($current_page=='archive.php')?'active':''; ?>"><i class="fa fa-archive"></i> Archive</li>
+        <li data-url="security.php" class="<?php echo ($current_page=='security.php')?'active':''; ?>"><i class="fa fa-shield-alt"></i> Security</li>
       </ul>
     </li>
   </ul>
 
   <div class="divider"></div>
 
-
-<div class="sideMenu-footer">
-  <div class="user-info" id="userProfileBtn">
-    <img src="<?php echo $profile_pic; ?>" alt="User">
-    <span><?php echo $user_name; ?></span>
+  <div class="sideMenu-footer">
+    <div class="user-info" id="userProfileBtn">
+      <img src="<?php echo $profile_pic; ?>" alt="User">
+      <span><?php echo $user_name; ?></span>
+    </div>
+    <div class="footer-links">
+      <a href="../logout.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+    </div>
   </div>
-  <div class="footer-links">
-    <a href="../logout.php"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
-  </div>
-</div>
 </div>
 
 <script>
@@ -154,6 +167,40 @@ document.addEventListener('DOMContentLoaded', () => {
       settingsBtn.classList.toggle('open');
       settingsMenu.style.display = settingsMenu.style.display === 'flex' ? 'none' : 'flex';
     });
+    
+    // Auto-open dropdown if a child is active
+    const activeChild = settingsMenu.querySelector('li.active');
+    if (activeChild) {
+      settingsBtn.classList.add('open');
+      settingsMenu.style.display = 'flex';
+    }
   }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Highlight active menu item based on current page
+    const currentPage = window.location.pathname.split("/").pop(); // e.g., 'home.php'
+
+    // Main menu
+    document.querySelectorAll('#sideMenu .menu-links li[data-url]').forEach(li => {
+        if (li.getAttribute('data-url') === currentPage) {
+            li.classList.add('active');
+        }
+    });
+
+    // Settings submenu
+    document.querySelectorAll('#sideMenu #settingsMenu li[data-url]').forEach(li => {
+        if (li.getAttribute('data-url') === currentPage) {
+            li.classList.add('active');
+            // Also open the dropdown if a child is active
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsMenu = document.getElementById('settingsMenu');
+            if (settingsBtn && settingsMenu) {
+                settingsBtn.classList.add('open');
+                settingsMenu.style.display = 'flex';
+            }
+        }
+    });
+});
+
 </script>
