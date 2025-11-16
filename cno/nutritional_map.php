@@ -113,6 +113,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 .active-gradient-cell {
   outline: 2px solid #000;
 }
+#legend-buttons li.active {
+  font-weight: bold;
+  transform: scale(1.05);
+}
   </style>
 </head>
 <body class="bg-gray-50 font-sans flex flex-col min-h-screen">
