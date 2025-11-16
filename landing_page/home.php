@@ -21,6 +21,7 @@
     <!-- Logo -->
     <div class="flex items-center font-bold text-2xl text-gray-700">
       <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
       <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
 
@@ -85,7 +86,7 @@
   </header>
 
   <!-- HERO SECTION -->
-  <main class="relative flex items-center justify-start text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
+  <main class="relative flex items-center justify-start text-white min-h-[89vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/50"></div>
 

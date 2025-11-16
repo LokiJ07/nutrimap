@@ -49,6 +49,7 @@
 }
 /* TOOLTIP + MINI CHART — FIXED TOP-LEFT */
 #chart-tooltip {
+  display: none;  /* hide by default */
   position: absolute;
   top: 200px;
   left: 80px;
@@ -61,7 +62,6 @@
   max-height: 350px;
   overflow-y: auto;
   pointer-events: none;
-  display: flex;
   flex-direction: column;
   align-items: stretch;
 }
@@ -75,14 +75,16 @@
 /* MOBILE ADJUSTMENTS */
 @media (max-width: 768px) {
   #chart-tooltip {
+    display: none; /* hide by default */
     position: fixed;
     bottom: 30px;
-    left: 10px; /* smaller left padding */
-    right: 10px; /* allow width to expand */
-    max-width: calc(100vh - 20px);
-    max-height: 160px;       /* smaller max height */
+    left: 10px;
+    right: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: 160px;
   }
 }
+
 
   #chart-tooltip canvas {
     height: auto !important;
@@ -129,6 +131,7 @@
   <!-- Logo -->
   <div class="flex items-center font-bold text-2xl text-gray-700">
     <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
     <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
   </div>
 

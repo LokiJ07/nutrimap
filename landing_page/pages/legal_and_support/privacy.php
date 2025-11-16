@@ -16,6 +16,7 @@
     <!-- Logo -->
     <div class="flex items-center space-x-2">
       <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 rounded-lg" />
+      <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 rounded-lg" />
       <h1 class="text-2xl font-bold text-gray-700">
         <span class="text-teal-600">CNO</span> NutriMap
       </h1>

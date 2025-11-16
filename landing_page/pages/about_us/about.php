@@ -14,6 +14,7 @@
   <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative z-50">
     <div class="flex items-center font-bold text-2xl text-gray-700">
       <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
       <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
 
