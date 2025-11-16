@@ -104,14 +104,18 @@ function drawLayer(selectedYear) {
 function styleFeature(feature) {
   const props = feature.properties;
 
-  if (activeField && activeColor) {
-    const val = props[activeField.toUpperCase()];
-    if (val === 0 || val == null || props.NO_DATA === true) {
-      return { color: '#444', weight: 1, fillOpacity: 0, fillColor: 'transparent', dashArray: '2,2' };
-    }
-    // Visual color scaling matches 0–50 chart scale
-    return { color: '#333', weight: 1, fillOpacity: 0.8, fillColor: getGradientColor(activeColor, val) };
+if (activeField && activeColor) {
+  const val = props[activeField.toUpperCase()];
+  if (val === 0 || val == null || props.NO_DATA === true) {
+    return { color: '#444', weight: 1, fillOpacity: 0, fillColor: 'transparent', dashArray: '2,2' };
   }
+  return { 
+    color: '#000', 
+    weight: 2,            // thicker border for active
+    fillOpacity: 0.8, 
+    fillColor: getGradientColor(activeColor, val) 
+  };
+}
 
   const hasData = legendItems.some(li => li.dataset.field !== 'all' && (props[li.dataset.field.toUpperCase()] ?? 0) > 0);
 
@@ -273,22 +277,41 @@ function createChart(width, height, labels, datasets, type) {
 }
 
 // ===================== LEGEND + FILTERS =====================
+const defaultLegend = legendItems.find(li => li.dataset.field === 'all');
+if (defaultLegend) {
+  defaultLegend.classList.add('active'); // highlight it
+  activeField = null;                     // "All" means no specific field
+  activeLabel = defaultLegend.dataset.label;
+  activeColor = defaultLegend.dataset.color;
+  if (geoLayer) geoLayer.setStyle(styleFeature);
+}
+
+// ===== Click handlers =====
 legendItems.forEach(item => {
   item.addEventListener('click', () => {
+    // Remove "active" class from all legend items
     legendItems.forEach(li => li.classList.remove('active'));
+
+    // Add "active" class to clicked item
     item.classList.add('active');
 
+    // Set active indicators
     activeField = item.dataset.field === 'all' ? null : item.dataset.field.toUpperCase();
     activeLabel = item.dataset.label;
     activeColor = item.dataset.color;
 
-    if(geoLayer) geoLayer.setStyle(styleFeature);
-    if(activeField) updateGradientScale(activeColor);
+    // Update map colors
+    if (geoLayer) geoLayer.setStyle(styleFeature);
+
+    // Update gradient scale or clear it
+    if (activeField) updateGradientScale(activeColor);
     else document.getElementById('gradient-grid').innerHTML = '';
 
-    if(!chartContainer.classList.contains('hidden')) renderFullChart();
+    // If chart is visible, update full chart
+    if (!chartContainer.classList.contains('hidden')) renderFullChart();
   });
 });
+
 
 document.getElementById('barangayFilter').addEventListener('change', () => {
   const selected = document.getElementById('barangayFilter').value.toLowerCase();

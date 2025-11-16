@@ -103,6 +103,11 @@
 .active-gradient-cell {
   outline: 2px solid #000;
 }
+#legend-buttons li.active {
+  font-weight: bold;
+  transform: scale(1.05);
+}
+
   </style>
 <body class="flex flex-col min-h-screen">
 
