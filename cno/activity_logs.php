@@ -91,143 +91,109 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>CNO | Activity Logs</title>
   <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; margin: 0; }
-    .layout { display: flex; flex-direction: column; height: 100vh; }
-    .body-layout { display: flex; flex: 1; }
-    .content { flex: 1; padding: 20px; overflow-y: auto; }
-    .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
-    .filters input { width: 250px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
-    .filters select { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
-    .table-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-    thead { background: #009688; color: #fff; }
-    .pagination { margin-top: 15px; display: flex; justify-content: center; gap: 5px; }
-    .pagination span {
-  padding: 6px 10px;
-  color: #888;
-}
-    .pagination a { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; text-decoration: none; color: #333; }
-    .pagination a.active { background: #009688; color: #fff; }
-    .pagination a.disabled { color: #aaa; pointer-events: none; background: #f9f9f9; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-  <div class="layout">
-    <?php include 'header.php'; ?>
-    <?php include 'sidebar.php'; ?>
-    <div class="body-layout">
-      <main class="content">
-        <h2>Activity Logs</h2>
+<body class="bg-gray-100 h-screen flex flex-col">
+  <?php include 'header.php'; ?>
+  <div class="flex flex-1 overflow-hidden">
+    <main class="flex-1 p-4 flex flex-col">
+      <h2 class="text-xl font-semibold mb-4">Activity Logs</h2>
 
-        <div class="filters">
-          <input type="text" id="logSearch" placeholder="Search logs...">
-        <form method="get" style="margin:0;">
-  <select name="sort" onchange="this.form.submit()">
-    <option value="new" <?= $sortOpt === 'new' ? 'selected' : '' ?>>New → Old</option>
-    <option value="old" <?= $sortOpt === 'old' ? 'selected' : '' ?>>Old → New</option>
-    <option value="az" <?= $sortOpt === 'az' ? 'selected' : '' ?>>A → Z</option>
-    <option value="za" <?= $sortOpt === 'za' ? 'selected' : '' ?>>Z → A</option>
-  </select>
-  <input type="hidden" name="page" value="<?= $page ?>">
-</form>
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <input type="text" id="logSearch" placeholder="Search logs..." class="px-3 py-2 border border-gray-300 rounded-md w-64">
+        <form method="get" class="flex items-center gap-2">
+          <select name="sort" onchange="this.form.submit()" class="px-3 py-2 border border-gray-300 rounded-md">
+            <option value="new" <?= $sortOpt === 'new' ? 'selected' : '' ?>>New → Old</option>
+            <option value="old" <?= $sortOpt === 'old' ? 'selected' : '' ?>>Old → New</option>
+            <option value="az" <?= $sortOpt === 'az' ? 'selected' : '' ?>>A → Z</option>
+            <option value="za" <?= $sortOpt === 'za' ? 'selected' : '' ?>>Z → A</option>
+          </select>
+          <input type="hidden" name="page" value="<?= $page ?>">
+        </form>
+      </div>
 
-        </div>
-
-        <div class="table-container">
-          <table id="logsTable">
-            <thead>
+      <!-- Table -->
+      <div class="bg-white rounded-lg shadow flex-1 flex flex-col overflow-hidden">
+        <div class="overflow-x-auto flex-1">
+          <table class="min-w-full table-fixed">
+            <thead class="bg-teal-600 text-white">
               <tr>
-                <th>Date & Time</th>
-                <th>User</th>
-                <th>Role</th>
-                <th>Barangay</th>
-                <th>Action</th>
-                <th>Details</th>
+                <th class="px-4 py-2 text-left">Date & Time</th>
+                <th class="px-4 py-2 text-left">User</th>
+                <th class="px-4 py-2 text-left">Role</th>
+                <th class="px-4 py-2 text-left">Barangay</th>
+                <th class="px-4 py-2 text-left">Action</th>
+                <th class="px-4 py-2 text-left">Details</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-900">
               <?php if ($logs): ?>
                 <?php foreach ($logs as $log): ?>
-                  <tr>
-                    <td><?= htmlspecialchars($log['created_at']) ?></td>
-                    <td><?= htmlspecialchars($log['first_name'].' '.$log['last_name']) ?></td>
-                    <td><?= htmlspecialchars($log['user_type']) ?></td>
-                    <td><?= htmlspecialchars($log['barangay']) ?></td>
-                    <td><?= htmlspecialchars($log['action']) ?></td>
-                    <td><?= htmlspecialchars($log['details']) ?></td>
+                  <tr class="border-b">
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['created_at']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['first_name'].' '.$log['last_name']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['user_type']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['barangay']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['action']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($log['details']) ?></td>
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>
-                <tr><td colspan="6" style="text-align:center;color:#888;">No logs found</td></tr>
+                <tr><td colspan="6" class="text-center py-4 text-gray-500">No logs found</td></tr>
               <?php endif; ?>
             </tbody>
           </table>
-
- <div class="pagination">
-  <?php
-    // Show up to 5 pagination links
-    $maxLinks = 5;
-    $start = max(1, $page - floor($maxLinks / 2));
-    $end = min($totalPages, $start + $maxLinks - 1);
-
-    // Adjust if near the end
-    if ($end - $start < $maxLinks - 1) {
-        $start = max(1, $end - $maxLinks + 1);
-    }
-  ?>
-
-  <!-- Prev -->
-  <?php if ($page > 1): ?>
-    <a href="?page=<?= $page-1 ?>&sort=<?= $sortOpt ?>">Prev</a>
-  <?php else: ?>
-    <a class="disabled">Prev</a>
-  <?php endif; ?>
-
-  <!-- First page + ellipsis -->
-  <?php if ($start > 1): ?>
-    <a href="?page=1&sort=<?= $sortOpt ?>">1</a>
-    <?php if ($start > 2): ?><span>...</span><?php endif; ?>
-  <?php endif; ?>
-
-  <!-- Page numbers -->
-  <?php for ($i = $start; $i <= $end; $i++): ?>
-    <a href="?page=<?= $i ?>&sort=<?= $sortOpt ?>"
-       class="<?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
-  <?php endfor; ?>
-
-  <!-- Last page + ellipsis -->
-  <?php if ($end < $totalPages): ?>
-    <?php if ($end < $totalPages - 1): ?><span>...</span><?php endif; ?>
-    <a href="?page=<?= $totalPages ?>&sort=<?= $sortOpt ?>"><?= $totalPages ?></a>
-  <?php endif; ?>
-
-  <!-- Next -->
-  <?php if ($page < $totalPages): ?>
-    <a href="?page=<?= $page+1 ?>&sort=<?= $sortOpt ?>">Next</a>
-  <?php else: ?>
-    <a class="disabled">Next</a>
-  <?php endif; ?>
-</div>
-
-
         </div>
-      </main>
-    </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center flex-wrap gap-2">
+          <?php
+            $maxLinks = 5;
+            $start = max(1, $page - floor($maxLinks / 2));
+            $end = min($totalPages, $start + $maxLinks - 1);
+            if ($end - $start < $maxLinks - 1) { $start = max(1, $end - $maxLinks + 1); }
+          ?>
+          <?php if ($page > 1): ?>
+            <a href="?page=<?= $page-1 ?>&sort=<?= $sortOpt ?>" class="px-3 py-1 border rounded hover:bg-teal-600 hover:text-white">Prev</a>
+          <?php else: ?>
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Prev</span>
+          <?php endif; ?>
+
+          <?php if ($start > 1): ?>
+            <a href="?page=1&sort=<?= $sortOpt ?>" class="px-3 py-1 border rounded hover:bg-teal-600 hover:text-white">1</a>
+            <?php if ($start > 2): ?><span class="px-2">...</span><?php endif; ?>
+          <?php endif; ?>
+
+          <?php for ($i = $start; $i <= $end; $i++): ?>
+            <a href="?page=<?= $i ?>&sort=<?= $sortOpt ?>" class="px-3 py-1 border rounded <?= $i === $page ? 'bg-teal-600 text-white' : 'hover:bg-teal-600 hover:text-white' ?>"><?= $i ?></a>
+          <?php endfor; ?>
+
+          <?php if ($end < $totalPages): ?>
+            <?php if ($end < $totalPages - 1): ?><span class="px-2">...</span><?php endif; ?>
+            <a href="?page=<?= $totalPages ?>&sort=<?= $sortOpt ?>" class="px-3 py-1 border rounded hover:bg-teal-600 hover:text-white"><?= $totalPages ?></a>
+          <?php endif; ?>
+
+          <?php if ($page < $totalPages): ?>
+            <a href="?page=<?= $page+1 ?>&sort=<?= $sortOpt ?>" class="px-3 py-1 border rounded hover:bg-teal-600 hover:text-white">Next</a>
+          <?php else: ?>
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Next</span>
+          <?php endif; ?>
+        </div>
+      </div>
+    </main>
   </div>
 
-<script>
-// Client-side filter (same as reports)
-document.getElementById("logSearch").addEventListener("keyup", function() {
-  let filter = this.value.toLowerCase();
-  let rows = document.querySelectorAll("#logsTable tbody tr");
-  rows.forEach(row => {
-    let text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
+  <script>
+  // Client-side filter
+  document.getElementById("logSearch").addEventListener("keyup", function() {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+    });
   });
-});
-</script>
+  </script>
 </body>
 </html>

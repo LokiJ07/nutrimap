@@ -106,7 +106,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
   <div class="layout">
     <div class="page-title">
       View Profile
-      <a href="users.php" class="back-btn"><i class="fa fa-arrow-left"></i> Back</a>
+      <a href="javascript:history.back()" class="back-btn"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
 
     <div class="body-layout">
