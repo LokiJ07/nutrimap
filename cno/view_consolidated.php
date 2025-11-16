@@ -18,7 +18,7 @@ function val($a, $k, $fmt='int') {
     return htmlspecialchars($a[$k]);
 }
 
-/* Build SUM query (latest approved report per barangay) */
+/* Base fields */
 $base = [
  'ind1','ind_male','ind_female','ind2','ind3','ind4','ind5','ind6a','ind6b',
  'ind7','ind8','ind9','ind9a','ind10','ind11','ind12','ind13','ind14','ind15',
@@ -28,6 +28,7 @@ $base = [
  'ind35_no','ind35_pct','ind36_no','ind36_pct','ind37a','ind37b','ind38'
 ];
 
+/* Grouped fields (_no and _pct) */
 $groups = [
  '9b' => ['ind9b1','ind9b2','ind9b3','ind9b4','ind9b5','ind9b6','ind9b7','ind9b8','ind9b9'],
  '22'=>['ind22a','ind22b','ind22c','ind22d','ind22e','ind22f','ind22g'],
@@ -38,38 +39,44 @@ $groups = [
  '31'=>['ind31a','ind31b','ind31c','ind31d','ind31e','ind31f'],
 ];
 
+/* Build SUM select dynamically */
 $sel = [];
-foreach($base as $f) $sel[] = "SUM(bns.$f) AS $f";
+foreach($base as $f) $sel[] = "SUM(lr.$f) AS $f";
 foreach($groups as $arr){
     foreach($arr as $f){
-        $sel[] = "SUM(bns.{$f}_no) AS {$f}_no";
-        $sel[] = "SUM(bns.{$f}_pct) AS {$f}_pct";
+        $sel[] = "SUM(lr.{$f}_no) AS {$f}_no";
+        $sel[] = "SUM(lr.{$f}_pct) AS {$f}_pct";
     }
 }
 
-/* Barangay filter */
-$barangayFilter = '';
-$params = [];
+/* Barangay filter for CTE */
+$barangayFilterCTE = '';
+$params = [$selectedYear]; // Year parameter
 if (!empty($_GET['barangays'])) {
     $barangays = $_GET['barangays'];
     $placeholders = implode(',', array_fill(0, count($barangays), '?'));
-    $barangayFilter = "AND bns.barangay IN ($placeholders)";
-    $params = $barangays;
+    $barangayFilterCTE = "AND bns.barangay IN ($placeholders)";
+    $params = array_merge($params, $barangays);
 }
 
+/* Final SQL with CTE for latest report per barangay */
 $sql = "
+WITH latest_reports AS (
+    SELECT bns.*, r.status,
+           ROW_NUMBER() OVER (
+               PARTITION BY bns.barangay 
+               ORDER BY r.report_date DESC, r.report_time DESC
+           ) AS rn
+    FROM bns_reports bns
+    JOIN reports r ON bns.report_id = r.id
+    WHERE r.status = 'approved'
+      AND bns.year = ?
+      $barangayFilterCTE
+)
 SELECT ".implode(',', $sel)."
-FROM bns_reports bns
-JOIN reports r ON bns.report_id = r.id
-WHERE r.status = 'approved'
-$barangayFilter
-AND bns.id IN (
-    SELECT MAX(br2.id)
-    FROM bns_reports br2
-    JOIN reports r2 ON br2.report_id = r2.id
-    WHERE r2.status = 'approved'
-    GROUP BY br2.barangay
-)";
+FROM latest_reports lr
+WHERE rn = 1
+";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);

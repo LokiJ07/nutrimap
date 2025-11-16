@@ -215,7 +215,7 @@ table th:nth-child(2) {
   <thead>
   <tr>
       <th>Indicator</th>
-      <th>Number / %</th>
+      <th>Number</th>
   </tr>
   </thead>
   <tbody>
