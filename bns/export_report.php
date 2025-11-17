@@ -164,11 +164,19 @@ class MYPDF extends TCPDF {
         $this->Ln(8);
     }
 
-    public function Footer() {
-        $this->SetY(-15);
-        $this->SetFont('times','I',10);
-        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
-    }
+public function Footer() {
+    date_default_timezone_set('Asia/Manila'); // PH TIME
+
+    $this->SetY(-15);
+    $this->SetFont('times','I',10);
+
+    // Philippine time export timestamp
+    $exported = date("F d, Y h:i A");
+    $this->Cell(0, 10, "$exported", 0, 0, 'L');
+
+    // Page number
+    $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
+}
 }
 
 // ---------- PDF Init ----------
