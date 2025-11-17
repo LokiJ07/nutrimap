@@ -108,16 +108,10 @@ class MYPDF extends TCPDF {
 
         $this->Ln(8);
     }
-    // This overrides TCPDF's footer
+
 public function Footer() {
     date_default_timezone_set('Asia/Manila'); // PH TIME
 
-<<<<<<< HEAD
-public function Footer() {
-    date_default_timezone_set('Asia/Manila'); // PH TIME
-
-=======
->>>>>>> dumb
     $this->SetY(-15);
     $this->SetFont('times','I',10);
 
@@ -141,33 +135,43 @@ $pdf->SetAutoPageBreak(true,15);
 $pdf->SetFont('times','',11);
 
 // ---------- Table Builder ----------
-function makeTable(array $rows): string {
-    $html  = '<table cellpadding="4" cellspacing="0" width="100%" style="border-collapse:collapse;">';
+function makeTable(array $rows, bool $hidePctHeader = false): string {
+    $html  = '<table cellpadding="2" cellspacing="0" width="100%" style="border-collapse:collapse; font-size:11px;">';
     $html .= '<thead><tr>'
-          .  '<th width="33.4%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:left;">Indicator</th>'
-          .  '<th width="33.3%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:center;">No.</th>'
-          .  '<th width="33.3%" style="border:1px solid #000;background:#f2f2f2;font-weight:bold;text-align:center;">%</th>'
-          .  '</tr></thead><tbody>';
+          .  '<th width="60%" style="border:1px solid #000;background:#dcdcdc;font-weight:bold;text-align:left;padding:2px;line-height:2;">Indicator</th>'
+          .  '<th width="40%" style="border:1px solid #000;background:#dcdcdc;font-weight:bold;text-align:center;padding:2px;line-height:2;">No.</th>';
+    if (!$hidePctHeader) {
+        $html .= '<th width="33%" style="padding:2px;line-height:2;"></th>';
+    }
+    $html .= '</tr></thead><tbody>';
     foreach ($rows as $r) {
-        $indicator = htmlspecialchars($r[0]);
+        $indicator = $r[0];
         $no        = $r[1] ?? '—';
         $pct       = $r[2] ?? '';
         $html .= '<tr>';
-        $html .= '<td style="border:1px solid #000;">'.$indicator.'</td>';
+        $html .= '<td width="60%" style="border:1px solid #000;padding:2px;line-height:2;">'.$indicator.'</td>';
         if ($pct === '' || $pct === null) {
-            $html .= '<td colspan="2" style="border:1px solid #000;text-align:center;">'.$no.'</td>';
+            // Only number, merge columns
+            $colspan = $hidePctHeader ? 1 : 2;
+            $html .= '<td colspan="'.$colspan.'" width="40%" style="border:1px solid #000;text-align:center;padding:2px;line-height:2;">'.$no.'</td>';
         } else {
-            $html .= '<td style="border:1px solid #000;text-align:center;">'.$no.'</td>';
-            $html .= '<td style="border:1px solid #000;text-align:center;">'.$pct.'</td>';
+            // Number + percent, separate columns
+            $html .= '<td width="20%" style="border:1px solid #000;text-align:center;padding:2px;line-height:2;">'.$no.'</td>';
+            if (!$hidePctHeader) {
+                $html .= '<td width="20%" style="border:1px solid #000;text-align:center;padding:2px;line-height:2;">'.$pct.'</td>';
+            }
         }
         $html .= '</tr>';
     }
     $html .= '</tbody></table>';
     return $html;
 }
-
-// ---------- Page 1 ----------
+// ---------- PAGE 1 ----------
 $pdf->AddPage();
+$pdf->SetFont('times','B',14);
+$pdf->Ln(6);
+$pdf->SetFont('times','',11);
+
 $p1 = [
     ['Total Population', val($totals,'ind1')],
     ['Male', val($totals,'ind_male')],
@@ -184,16 +188,21 @@ $p1 = [
     ['Percent Measured Coverage (OPT Plus)', val($totals,'ind9a','pct')]
 ];
 
-
-$nutri = [
-    'Severely Underweight','Underweight','Normal Weight','Severely Wasted',
-    'Wasted','Overweight','Obese','Severely Stunted','Stunted'
-];
+// Nutrition indicators
+$nutri = ['Severely Underweight','Underweight','Normal Weight','Severely Wasted','Wasted','Overweight','Obese','Severely Stunted','Stunted'];
 for($i=1;$i<=9;$i++){
     $p1[] = [$nutri[$i-1], val($totals,"ind9b{$i}_no"), val($totals,"ind9b{$i}_pct",'pct')];
 }
 
-$p1 = array_merge($p1, [
+
+
+$pdf->writeHTML(makeTable($p1), true, false, false, false, '');
+
+// ---------- PAGE 2 ----------
+$pdf->AddPage();
+$p2 = [];
+
+$p2 = array_merge($p2, [
     ['Total Number of Infants 0–5 Months Old', val($totals,'ind10')],
     ['Total Number of Infants 6–11 Months Old', val($totals,'ind11')],
     ['Total Number of Preschool Children 0–23 Months Old', val($totals,'ind12')],
@@ -202,104 +211,84 @@ $p1 = array_merge($p1, [
     ['Total Number of Families with Wasted and Severely Wasted Preschool Children', val($totals,'ind15')],
     ['Total Number of Families with Stunted and Severely Stunted Preschool Children', val($totals,'ind16')]
 ]);
-$pdf->writeHTML(makeTable($p1), true, false, false, false, '');
 
-// ---------- Page 2 ----------
-$pdf->AddPage();
-$p2 = [];
+$p2[] = ['Number of Day Care Centers', val($totals,'ind17a_public'), ''];
+$p2[] = ['Number of Elementary Schools', val($totals,'ind17b_public'), ''];
 
-$p2[] = ['Number of Day Care Centers', val($totals,'ind17a_public'), val($totals,'ind17a_private','no')];
-$p2[] = ['Number of Elementary Schools', val($totals,'ind17b_public'), val($totals,'ind17b_private','no')];
-
-$p2[] = ['Total Number of Children Enrolled in Kindergarten', val($totals,'ind18')];
-$p2[] = ['Total Number of School Children (Grades 1–6)', val($totals,'ind19')];
-$p2[] = ['Total Number of School Children Weighed at Start of School Year', val($totals,'ind20')];
+$p2[] = ['Total Number of Children Enrolled in Kindergarten', val($totals,'ind18'), ''];
+$p2[] = ['Total Number of School Children (Grades 1–6)', val($totals,'ind19'), ''];
+$p2[] = ['Total Number of School Children Weighed at Start of School Year', val($totals,'ind20'), ''];
 $p2[] = ['Percentage Coverage of School Children Measured', val($totals,'ind21','pct')];
 
-
-$school = [
-    'Severely Wasted','Wasted','Severely Stunted','Stunted','Normal','Overweight','Obese'
-];
+// School nutrition
+$school = ['Severely Wasted','Wasted','Severely Stunted','Stunted','Normal','Overweight','Obese'];
 for($i=0;$i<count($school);$i++){
     $c = chr(97 + $i);
     $p2[] = [$school[$i], val($totals,"ind22{$c}_no"), val($totals,"ind22{$c}_pct",'pct')];
 }
 
-
-$p2[] = ['0–5 Months Old Children Exclusively Breastfed', val($totals,'ind23')];
-$p2[] = ['Households with Severely Wasted School Children', val($totals,'ind24')];
-$p2[] = ['School Children Dewormed at Start of School Year', val($totals,'ind25')];
-$p2[] = ['Fully Immunized Children (FIC)', val($totals,'ind26')];
-
-
-$toilet = [
-    'Water-sealed toilet','Antipolo (Unsanitary Toilet)','Open Pit','Shared','No Toilet'
-];
-for($i=0;$i<count($toilet);$i++){
-    $c = chr(97 + $i);
-    $p2[] = [$toilet[$i], val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
-}
 $pdf->writeHTML(makeTable($p2), true, false, false, false, '');
 
-// ---------- Page 3 ----------
+// ---------- PAGE 3 ----------
 $pdf->AddPage();
 $p3 = [];
-$garbage = [
-    'Barangay/City Garbage Collection','Own Compost Pit','Burning','Dumping'
-];
+
+$p3[] = ['0–5 Months Old Children Exclusively Breastfed', val($totals,'ind23'), ''];
+$p3[] = ['Households with Severely Wasted School Children', val($totals,'ind24'), ''];
+$p3[] = ['School Children Dewormed at Start of School Year', val($totals,'ind25'), ''];
+$p3[] = ['Fully Immunized Children (FIC)', val($totals,'ind26'), ''];
+
+// Toilet types
+$toilet = ['Water-sealed toilet','Antipolo (Unsanitary Toilet)','Open Pit','Shared','No Toilet'];
+for($i=0;$i<count($toilet);$i++){
+    $c = chr(97 + $i);
+    $p3[] = [$toilet[$i], val($totals,"ind27{$c}_no"), val($totals,"ind27{$c}_pct",'pct')];
+}
+
+// Garbage
+$garbage = ['Barangay/City Garbage Collection','Own Compost Pit','Burning','Dumping'];
 for($i=0;$i<count($garbage);$i++){
     $c = chr(97 + $i);
     $p3[] = [$garbage[$i], val($totals,"ind28{$c}_no"), val($totals,"ind28{$c}_pct",'pct')];
 }
 
-
-$water = [
-    'Pipe Water System (Level III)',
-    'Spring (Level II)',
-    'Deep Well with Communal Source (Level II)',
-    'Deep Well with Individual Faucet (Level III)',
-    'Purified Station (Level III)',
-    'Open Shallow Dug Well (Level I)',
-    'Artesian Well'
-];
+// Water source
+$water = ['Pipe Water System (Level III)','Spring (Level II)','Deep Well with Communal Source (Level II)','Deep Well with Individual Faucet (Level III)','Purified Station (Level III)','Open Shallow Dug Well (Level I)','Artesian Well'];
 for($i=0;$i<count($water);$i++){
     $c = chr(97 + $i);
     $p3[] = [$water[$i], val($totals,"ind29{$c}_no"), val($totals,"ind29{$c}_pct",'pct')];
 }
 
-
-$home = [
-    'Vegetable Garden','Livestock/Poultry','Fishponds','Other Specify: No Garden'
-];
+// Home/farming
+$home = ['Vegetable Garden','Livestock/Poultry','Fishponds','Other Specify: No Garden'];
 for($i=0;$i<count($home);$i++){
     $c = chr(97 + $i);
     $p3[] = [$home[$i], val($totals,"ind30{$c}_no"), val($totals,"ind30{$c}_pct",'pct')];
 }
 
-
-$dwelling = [
-    'Concrete','Semi Concrete','Wooden House','Nipa Bamboo House','Barong-Barong Makeshift','Makeshift'
-];
-for($i=0;$i<count($dwelling);$i++){
-    $c = chr(97 + $i);
-    $p3[] = [$dwelling[$i], val($totals,"ind31{$c}_no"), val($totals,"ind31{$c}_pct",'pct')];
-}
-
-
-$p3[] = ['Total Number of Households Using Iodized Salt', val($totals,'ind32_no'), val($totals,'ind32_pct','pct')];
-$p3[] = ['Total Number of Eateries/Carinderia', val($totals,'ind33_no'), val($totals,'ind33_pct','pct')];
-$p3[] = ['Total Number of Sari-Sari Stores Related to Iodized Salt', val($totals,'ind34_no'), val($totals,'ind34_pct','pct')];
-$p3[] = ['Total Number of Sari-Sari Stores Related to Cooking Oil', val($totals,'ind35_no'), val($totals,'ind35_pct','pct')];
-$p3[] = ['Total Number of Bakeries with Fortified Flour', val($totals,'ind36_no'), val($totals,'ind36_pct','pct')];
-
-
-$p3[] = ['Barangay Nutrition Scholar', val($totals,'ind37a')];
-$p3[] = ['Barangay Health Worker', val($totals,'ind37b')];
-
-
-$p3[] = ['Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program', val($totals,'ind38')];
-
 $pdf->writeHTML(makeTable($p3), true, false, false, false, '');
 
-// ---------- Output ----------
+//Page 4 (if needed)
+$pdf->AddPage();
+$p4 = [];
+
+// Dwelling
+$dwelling = ['Concrete','Semi Concrete','Wooden House','Nipa Bamboo House','Barong-Barong Makeshift','Makeshift'];
+for($i=0;$i<count($dwelling);$i++){
+    $c = chr(97 + $i);
+    $p4[] = [$dwelling[$i], val($totals,"ind31{$c}_no"), val($totals,"ind31{$c}_pct",'pct')];
+}
+
+// Number-only indicators
+$p4[] = ['Total Number of Households Using Iodized Salt', val($totals,'ind32_no'), val($totals,'ind32_pct','pct')];
+$p4[] = ['Total Number of Eateries/Carinderia', val($totals,'ind33_no'), val($totals,'ind33_pct','pct')];
+$p4[] = ['Total Number of Sari-Sari Stores Related to Iodized Salt', val($totals,'ind34_no'), val($totals,'ind34_pct','pct')];
+$p4[] = ['Total Number of Sari-Sari Stores Related to Cooking Oil', val($totals,'ind35_no'), val($totals,'ind35_pct','pct')];
+$p4[] = ['Total Number of Bakeries with Fortified Flour', val($totals,'ind36_no'), val($totals,'ind36_pct','pct')];
+
+$p4[] = ['Barangay Nutrition Scholar', val($totals,'ind37a'), ''];
+$p4[] = ['Barangay Health Worker', val($totals,'ind37b'), ''];
+$p4[] = ['Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program', val($totals,'ind38'), ''];
+$pdf->writeHTML(makeTable($p4), true, false, false, false, '');
+// ---------- OUTPUT ----------
 $pdf->Output('Consolidated_Barangay_Situation_Analysis.pdf','I');
