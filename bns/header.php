@@ -93,6 +93,80 @@
   border-bottom: 1px solid #ddd;
   padding-bottom: 8px;
 }
+
+#notificationTable td:first-child {
+    max-width: 220px;   /* adjust width as needed */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Notification Sidebar Table Styling */
+#notificationTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px; /* adds space between rows */
+}
+
+#notificationTable thead th {
+  text-align: left;
+  font-weight: bold;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+}
+
+#notificationTable tbody tr {
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+#notificationTable tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+#notificationTable td {
+  padding: 10px;
+  font-size: 13px;
+  color: #444;
+  vertical-align: middle;
+}
+
+#notificationTable td:first-child {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#notificationTable td:nth-child(2) {
+  font-size: 12px;
+  color: #888;
+}
+
+#notificationTable td:nth-child(3) {
+  font-size: 12px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+#notificationTable td:nth-child(3).Read {
+  background-color: #838080ff;
+}
+
+#notificationTable td:nth-child(3).New {
+  background-color: #979797ff;
+}
+
+
 #closeNotifSidebar { font-size: 26px; cursor: pointer; }
 </style>
 
@@ -147,13 +221,13 @@
 
 <!-- Notification Detail Modal -->
 <div id="notifModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
-  <div style="background:#fff; padding:20px; border-radius:8px; width:400px; max-width:90%; position:relative;">
+  <div style="background:#fff; padding:20px; border-radius:8px; width:400px; max-width:90%; position:relative; display:flex; flex-direction:column; justify-content:space-between; height:auto;">
     <span id="closeNotifModal" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">&times;</span>
     <h3 id="notifModalHeader" style="margin-bottom:15px;">Status</h3>
-    <p id="notifModalMessage" style="white-space:pre-wrap;"></p>
+    <p id="notifModalMessage" style="white-space:pre-wrap; flex-grow:1;"></p>
+    <div id="notifModalFooter" style="text-align:right; font-size:12px; color:#666; margin-top:15px;"></div>
   </div>
 </div>
-
 
 <script>
 // Side menu logic
@@ -319,27 +393,50 @@ function showToast(msg) {
 
 async function fetchNotifications() {
   try {
-    const res = await fetch(basePath+`get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly?'&unread_only=1':''}`);
+    const res = await fetch(basePath + `get_notifications.php?page=${currentPage}&size=${pageSize}${showUnreadOnly ? '&unread_only=1' : ''}`);
     const data = await res.json();
-    totalNotifications=data.totalCount; totalUnread=data.totalUnread;
-    const tbody=document.querySelector('#notificationTable tbody'); tbody.innerHTML='';
-    data.notifications.forEach(n=>{
-      const tr=document.createElement('tr'); tr.style.cursor='pointer';
-      if(!n.read) tr.style.fontWeight='bold';
-      tr.innerHTML=`<td>${n.message}</td><td>${n.date}</td><td>${n.read?'Read':'New'}</td>`;
+    totalNotifications = data.totalCount;
+    totalUnread = data.totalUnread;
+
+    const tbody = document.querySelector('#notificationTable tbody');
+    tbody.innerHTML = '';
+
+    data.notifications.forEach(n => {
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      if (!n.read) tr.style.fontWeight = 'bold';
+
+      // Truncate message for sidebar (e.g., 50 chars)
+      let displayMsg = n.message.length > 10 ? n.message.slice(0, 10) + '…' : n.message;
+
+      // Status class for colored badge
+      let statusClass = n.read ? 'Read' : 'New';
+
+      tr.innerHTML = `
+        <td title="${n.message}">${displayMsg}</td>
+        <td>${n.date}</td>
+        <td class="${statusClass}">${n.read ? 'Read' : 'New'}</td>
+      `;
+
       tr.onclick = () => openNotificationModal(n);
       tbody.appendChild(tr);
     });
-    const effectiveTotal = showUnreadOnly?totalUnread:totalNotifications;
-    btnPrev.disabled=currentPage<=1;
-    btnNext.disabled=(currentPage*pageSize)>=effectiveTotal;
-    if(data.notifications.length>0){
+
+    const effectiveTotal = showUnreadOnly ? totalUnread : totalNotifications;
+    btnPrev.disabled = currentPage <= 1;
+    btnNext.disabled = (currentPage * pageSize) >= effectiveTotal;
+
+    if (data.notifications.length > 0) {
       const newest = data.notifications[0];
-      if(initialized && isLiveUpdate && newest.id>lastAlertedId) playNotificationEffect(newest.message);
-      lastAlertedId=Math.max(lastAlertedId,newest.id);
+      if (initialized && isLiveUpdate && newest.id > lastAlertedId) playNotificationEffect(newest.message);
+      lastAlertedId = Math.max(lastAlertedId, newest.id);
     }
-    if(!initialized) initialized=true; isLiveUpdate=false;
-  } catch(e){console.error(e);}
+
+    if (!initialized) initialized = true;
+    isLiveUpdate = false;
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 btnPrev.addEventListener('click',()=>{if(currentPage>1){currentPage--;fetchNotifications();}});
@@ -350,10 +447,14 @@ function openNotificationModal(notification) {
   const modal = document.getElementById('notifModal');
   const header = document.getElementById('notifModalHeader');
   const message = document.getElementById('notifModalMessage');
+  const footer = document.getElementById('notifModalFooter');
 
   // Set header based on status
   header.innerText = notification.status === 'Approved' ? 'Approved' : 'Rejected';
   message.innerText = notification.message;
+
+  // Set footer date
+  footer.innerText = notification.date;
 
   modal.style.display = 'flex';
 

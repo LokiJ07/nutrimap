@@ -207,7 +207,7 @@ function featureHandler(feature, layer) {
         colorBox.style.marginRight = '6px';
 
         const text = document.createElement('span');
-        text.textContent = `${li.dataset.label}: ${value.toFixed(0)}%`; // real 100% value
+        text.textContent = `${li.dataset.label}: ${value.toFixed(2)}%`; // real 100% value
 
         liItem.appendChild(colorBox);
         liItem.appendChild(text);
@@ -251,13 +251,12 @@ function createChart(width, height, labels, datasets, type) {
       },
       scales: {
         x: { display: true },
-        y: {
-          display: true,
-          min: 0,
-          max: 50, // visual max
-          ticks: { 
-            callback: val => val + '%', // use visual value directly
-            stepSize: 5                // 0,5,10,...50
+          y: { 
+          beginAtZero: true, 
+          max: 20, // VISUAL MAX for chart
+          ticks: {
+            callback: val => val + '%',
+            stepSize: 2 // mini chart step size
           }
         }
       }
@@ -265,8 +264,7 @@ function createChart(width, height, labels, datasets, type) {
     plugins: [ChartDataLabels]
   });
 }
-    },
-
+    },  
     mouseout(e) {
       tooltip.style.opacity = 0;
       tooltip.style.display = 'none';
@@ -492,7 +490,7 @@ function renderFullChart() {
                 originalValue = f ? Number(f.properties[field] || 0) : 0;
               }
 
-              return `${context.dataset.label}: ${originalValue.toFixed(0)}%`;
+              return `${context.dataset.label}: ${originalValue.toFixed(2)}%`;
             }
           }
         }
@@ -500,10 +498,10 @@ function renderFullChart() {
       scales: {
         y: { 
           beginAtZero: true, 
-          max: 50, // VISUAL MAX for chart
+          max: 20, // VISUAL MAX for chart
           ticks: {
             callback: val => val + '%',
-            stepSize: 5 // 11 horizontal grid lines: 0,5,...50
+            stepSize: 2 // 11 horizontal grid lines: 0,5,...50
           }
         }
       }
@@ -515,7 +513,7 @@ function renderFullChart() {
 function hexToRgb(hex){ const c=parseInt(hex.slice(1),16); return {r:(c>>16)&255,g:(c>>8)&255,b:c&255}; }
 function getGradientColor(baseColor,value){
   if(value==null) return '#999';
-  const ratio = Math.min(1,value/100);
+  const ratio = Math.min(1,value/10);
   const rgb = hexToRgb(baseColor);
   const start = {r:190,g:190,b:180};
   const r = Math.round(start.r+(rgb.r-start.r)*ratio);
@@ -531,23 +529,25 @@ function updateGradientScale(baseColor) {
   grid.innerHTML = '';
   let activeCellIndex = null;
 
-  // create 10 gradient steps for 0–50%
-  const maxVisual = 50; // visual max
-  for (let i = 1; i <= 10; i++) {
-    const minVal = (i - 1) * 5 + 0; // 0,5,10,...45
-    const maxVal = i * 5;                  // 5,10,...50
+  const steps = 10;  // 10 cells
+  const rangeSize = 2; // each tooltip range = 2%
+
+  for (let i = 0; i < steps; i++) {
+    const minPercent = i * rangeSize;        // 0,2,4,6,...38
+    const maxPercent = minPercent + rangeSize - 0; // 1,3,5,7,...39  
 
     const cell = document.createElement('div');
     cell.className = 'gradient-cell';
 
-    // Map value 0–50 to 0–100 for full color gradient
-    const ratio = (maxVal / maxVisual) * 100;
-    cell.style.background = getGradientColor(baseColor, ratio);
-    cell.title = `${minVal}% - ${maxVal}%`; // 0–50 visual
+    // Send 1–20 to gradient color function
+    cell.style.background = getGradientColor(baseColor, i + 1);
+
+    // Tooltip: show 0–2%, 3–4%, ...
+    cell.title = `${minPercent}% – ${maxPercent}%`;
 
     cell.addEventListener('mouseover', () => {
       cell.classList.add('active-gradient-cell');
-      activeGradientRange = { min: minVal, max: maxVal };
+      activeGradientRange = { min: minPercent, max: maxPercent };
       filterMapByGradient();
     });
 
@@ -561,58 +561,85 @@ function updateGradientScale(baseColor) {
       if (activeCellIndex !== null && grid.children[activeCellIndex]) {
         grid.children[activeCellIndex].classList.remove('active-gradient-cell');
       }
-      activeCellIndex = i - 1;
+      activeCellIndex = i;
       cell.classList.add('active-gradient-cell');
-      activeGradientRange = { min: minVal, max: maxVal };
+
+      activeGradientRange = { min: minPercent, max: maxPercent };
       filterMapByGradient();
     });
 
     grid.appendChild(cell);
   }
 
-  // "No Data" cell
+  // === NO DATA CELL ===
   const noDataCell = document.createElement('div');
   noDataCell.className = 'gradient-cell';
   noDataCell.style.background = 'transparent';
   noDataCell.style.border = '1px dashed #333';
   noDataCell.title = 'No Data';
+
   noDataCell.addEventListener('mouseover', () => {
     noDataCell.classList.add('active-gradient-cell');
     activeGradientRange = 'nodata';
     filterMapByGradient();
   });
+
   noDataCell.addEventListener('mouseout', () => {
     noDataCell.classList.remove('active-gradient-cell');
     activeGradientRange = null;
     filterMapByGradient();
   });
+
   noDataCell.addEventListener('click', () => {
     if (activeCellIndex !== null && grid.children[activeCellIndex]) {
       grid.children[activeCellIndex].classList.remove('active-gradient-cell');
     }
-    activeCellIndex = 10;
+    activeCellIndex = steps;
     noDataCell.classList.add('active-gradient-cell');
     activeGradientRange = 'nodata';
     filterMapByGradient();
   });
+
   grid.appendChild(noDataCell);
 }
 
 // ===================== FILTER BY GRADIENT =====================
-function filterMapByGradient(){
-  if(!geoLayer) return;
-  geoLayer.eachLayer(layer=>{
-    const props=layer.feature.properties;
-    if(!activeField) return layer.setStyle(styleFeature(layer.feature));
+function filterMapByGradient() {
+  if (!geoLayer) return;
+
+  geoLayer.eachLayer(layer => {
+    const props = layer.feature.properties;
+    if (!activeField) return layer.setStyle(styleFeature(layer.feature));
 
     let val = props[activeField.toUpperCase()];
-    val = (val===0||val==null||props.NO_DATA===true)?null:val;
+    val = (val === 0 || val == null || props.NO_DATA === true) ? null : val;
 
-    let inRange=false;
-    if(activeGradientRange==='nodata') inRange=val===null;
-    else if(activeGradientRange) inRange=(val!==null && val>=activeGradientRange.min && val<=activeGradientRange.max);
-    else inRange=true;
+    let inRange = false;
 
-    layer.setStyle({ ...styleFeature(layer.feature), fillOpacity: inRange?(val===null?0:0.8):0.1, opacity: inRange?1:0.3 });
-  }); 
+    if (activeGradientRange === 'nodata') {
+      inRange = val === null;
+
+    } else if (activeGradientRange) {
+      const min = activeGradientRange.min;
+      const max = activeGradientRange.max;
+
+      if (val !== null) {
+        // Make upper bound exclusive for all bins except the last
+        if (max === 20) { // last bin, inclusive upper bound
+          inRange = val >= min && val <= max;
+        } else {
+          inRange = val >= min && val < max;
+        }
+      }
+
+    } else {
+      inRange = true;
+    }
+
+    layer.setStyle({
+      ...styleFeature(layer.feature),
+      fillOpacity: inRange ? (val === null ? 0 : 0.8) : 0.1,
+      opacity: inRange ? 1 : 0.3
+    });
+  });
 }

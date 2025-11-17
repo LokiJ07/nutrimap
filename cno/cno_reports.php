@@ -147,28 +147,55 @@ function showMessage(msg, success=true){
 }
 
 // Approve/Decline actions
-document.querySelector('#Pending-reports-body').addEventListener('click',function(e){
-    const btn = e.target.closest('button'); if(!btn) return;
-    const row = btn.closest('tr'); if(!row) return;
-    const reportId = row.dataset.id; if(!reportId) return;
+document.querySelector('#Pending-reports-body').addEventListener('click', function(e){
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const row = btn.closest('tr');
+    if(!row) return;
+
+    const reportId = row.dataset.id;
+    if(!reportId) return;
+
     const action = btn.classList.contains('approve-button') ? 'approve' :
                    btn.classList.contains('decline-button') ? 'reject' : null;
     if(!action) return;
 
+    let message = '';
+    if(action === 'reject') {
+        message = prompt("Enter a message for declining this report:");
+        if(message === null) return; // user cancelled
+    }
+
     fetch('update_status.php',{
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:`report_id=${reportId}&action=${action}`
-    }).then(r=>r.json()).then(data=>{
+        body:`report_id=${reportId}&action=${action}&message=${encodeURIComponent(message)}`
+    })
+    .then(r=>r.json())
+    .then(data=>{
         if(data.error){ showMessage(data.error,false); return; }
+
         const status = (data.status||'').toLowerCase();
         const tbody = document.getElementById(status==='approved'?'Approved-reports-body':'Rejected-reports-body');
-        row.querySelector('.status').textContent = status.charAt(0).toUpperCase()+status.slice(1);
-        row.querySelector('td:last-child').remove();
+
+        row.querySelector('.status').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+        // Only remove actions if it was pending
+        const actionsTd = row.querySelector('td:last-child');
+        if(actionsTd) actionsTd.remove();
+
+        // Add a new message cell if rejected
+        if(status === 'rejected') {
+            const msgCell = document.createElement('td');
+            msgCell.textContent = data.message || '';
+            row.appendChild(msgCell);
+        }
+
         tbody.appendChild(row);
         showMessage(`Report ${status}`, status==='approved');
         applyFilters();
-    }).catch(()=>showMessage('Network error',false));
+    })
+    .catch(()=>showMessage('Network error', false));
 });
 
 // Filters & Sorting
