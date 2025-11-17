@@ -194,8 +194,6 @@ for($i=1;$i<=9;$i++){
     $p1[] = [$nutri[$i-1], val($totals,"ind9b{$i}_no"), val($totals,"ind9b{$i}_pct",'pct')];
 }
 
-
-
 $pdf->writeHTML(makeTable($p1), true, false, false, false, '');
 
 // ---------- PAGE 2 ----------
