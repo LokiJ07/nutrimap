@@ -149,7 +149,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
       <h1 class="text-lg md:text-xl font-semibold">
-        El Salvador Health and Nutrition Map: Share of children who are 0-50 months old measured during OPT Plus
+        El Salvador Health and Nutrition Map: Share of children who are 0-59 months old measured during OPT Plus
       </h1>
       <div class="flex flex-wrap gap-4 mt-2 md:mt-0 items-center">
         <div id="chart-tooltip" class="absolute bottom-5 left-5 max-w-[340px]"></div>
@@ -202,10 +202,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
    <li data-field="WASTED" data-label="Wasted" data-color="#FFA500" class="cursor-pointer">
     <span class="w-4 h-4 mr-2 bg-orange-500 inline-block"></span>Wasted
   </li>
-  <li data-field="NORMAL" data-label="Normal" data-color="#008000" class="cursor-pointer">
-    <span class="w-4 h-4 mr-2 bg-green-500 inline-block"></span>Normal
-  </li>
-
   <li data-field="OVERWEIGHT_OBESE" data-label="Overweight/Obese" data-color="#0000FF" class="cursor-pointer">
     <span class="w-4 h-4 mr-2 bg-blue-500  inline-block"></span>Overweight/Obese
   </li>

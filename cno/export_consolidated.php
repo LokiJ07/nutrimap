@@ -108,10 +108,16 @@ class MYPDF extends TCPDF {
 
         $this->Ln(8);
     }
-
+    // This overrides TCPDF's footer
 public function Footer() {
     date_default_timezone_set('Asia/Manila'); // PH TIME
 
+<<<<<<< HEAD
+public function Footer() {
+    date_default_timezone_set('Asia/Manila'); // PH TIME
+
+=======
+>>>>>>> dumb
     $this->SetY(-15);
     $this->SetFont('times','I',10);
 
