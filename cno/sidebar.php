@@ -147,38 +147,48 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const userProfileBtn = document.getElementById('userProfileBtn');
-  if (userProfileBtn) {
-    userProfileBtn.addEventListener('click', () => {
-      window.location.href = 'profile.php';
-    });
-  }
+    const menu = document.getElementById('sideMenu'); // ✅ REQUIRED FOR CNO SIDEBAR
+    const userProfileBtn = document.getElementById('userProfileBtn');
 
-  const settingsBtn = document.getElementById('settingsBtn');
-  const settingsMenu = document.getElementById('settingsMenu');
-
-  const menuItems = document.querySelectorAll('.menu-links li[data-url]');
-  const settingsItems = document.querySelectorAll('#settingsMenu li[data-url]');
-
-  const currentPage = window.location.pathname.split("/").pop();
-
-  menuItems.forEach(li => {
-    if (li.getAttribute('data-url') === currentPage) li.classList.add('active');
-  });
-
-  settingsItems.forEach(li => {
-    if (li.getAttribute('data-url') === currentPage) {
-      li.classList.add('active');
-      settingsBtn.classList.add('open');
-      settingsMenu.style.display = 'flex';
+    // ---- Profile Click ----
+    if (userProfileBtn) {
+        userProfileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.php';
+            if (menu) menu.classList.remove('open'); // prevent JS error
+        });
     }
-  });
 
-  if (settingsBtn) {
-    settingsBtn.addEventListener('click', () => {
-      settingsBtn.classList.toggle('open');
-      settingsMenu.style.display = settingsMenu.style.display === 'flex' ? 'none' : 'flex';
+    // ---- Settings ----
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsMenu = document.getElementById('settingsMenu');
+
+    const menuItems = document.querySelectorAll('.menu-links li[data-url]');
+    const settingsItems = document.querySelectorAll('#settingsMenu li[data-url]');
+
+    const currentPage = window.location.pathname.split("/").pop();
+
+    menuItems.forEach(li => {
+        if (li.getAttribute('data-url') === currentPage) {
+            li.classList.add('active');
+        }
     });
-  }
+
+    settingsItems.forEach(li => {
+        if (li.getAttribute('data-url') === currentPage) {
+            li.classList.add('active');
+            settingsBtn.classList.add('open');
+            settingsMenu.style.display = 'flex';
+        }
+    });
+
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            settingsBtn.classList.toggle('open');
+            settingsMenu.style.display = 
+                settingsMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+    }
+
 });
 </script>
+

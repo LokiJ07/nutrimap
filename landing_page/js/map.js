@@ -105,15 +105,28 @@ function styleFeature(feature) {
   const props = feature.properties;
 
 if (activeField && activeColor) {
-  const val = props[activeField.toUpperCase()];
+  let val = props[activeField.toUpperCase()];
+
   if (val === 0 || val == null || props.NO_DATA === true) {
-    return { color: '#444', weight: 1, fillOpacity: 0, fillColor: 'transparent', dashArray: '2,2' };
+    return {
+      color: '#444',
+      weight: 1,
+      fillOpacity: 0,
+      fillColor: 'transparent',
+      dashArray: '2,2'
+    };
   }
-  return { 
-    color: '#000', 
-    weight: 2,            // thicker border for active
-    fillOpacity: 0.8, 
-    fillColor: getGradientColor(activeColor, val) 
+
+  // Convert raw percent to bin 1–10
+  let step = Math.floor(val / 2) + 1;  
+  if (step < 1) step = 1;
+  if (step > 10) step = 10;
+
+  return {
+    color: '#000',
+    weight: 2,
+    fillOpacity: 0.8,
+    fillColor: getGradientColor(activeColor, step)
   };
 }
 
@@ -528,9 +541,9 @@ function renderFullChart() {
 function hexToRgb(hex){ const c=parseInt(hex.slice(1),16); return {r:(c>>16)&255,g:(c>>8)&255,b:c&255}; }
 function getGradientColor(baseColor,value){
   if(value==null) return '#999';
-  const ratio = Math.min(1,value/10);
+  const ratio = Math.min(1,value/9);
   const rgb = hexToRgb(baseColor);
-  const start = {r:190,g:190,b:180};
+  const start = {r:485,g:285,b:185};
   const r = Math.round(start.r+(rgb.r-start.r)*ratio);
   const g = Math.round(start.g+(rgb.g-start.g)*ratio);
   const b = Math.round(start.b+(rgb.b-start.b)*ratio);

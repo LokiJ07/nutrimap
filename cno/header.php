@@ -224,6 +224,7 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
     const container = document.getElementById('sidemenu-container');
 
     if (!container.innerHTML.trim()) {
+        // Load CNO sidebar
         const response = await fetch('sidebar.php');
         const html = await response.text();
         container.innerHTML = html;
@@ -231,11 +232,11 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
         const menu = document.getElementById('sideMenu');
         if (!menu) return;
 
-        // close button
+        // Close button
         const closeBtn = menu.querySelector('.close-btn');
         if (closeBtn) closeBtn.addEventListener('click', () => menu.classList.remove('open'));
 
-        // menu clicks
+        // Menu items
         const menuItems = menu.querySelectorAll('.menu-links li[data-url]');
         menuItems.forEach(item => {
             item.addEventListener('click', () => {
@@ -244,24 +245,22 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
             });
         });
 
-        // settings
+        // Settings dropdown
         const settingsBtn = menu.querySelector('#settingsBtn');
         const settingsMenu = menu.querySelector('#settingsMenu');
-
         if (settingsBtn && settingsMenu) {
             settingsBtn.addEventListener('click', e => {
                 e.preventDefault();
-                settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
+                settingsBtn.classList.toggle('open');
+                settingsMenu.style.display = settingsMenu.style.display === 'flex' ? 'none' : 'flex';
             });
         }
 
-        // ACTIVE PAGE HIGHLIGHT FIX
+        // Active page highlight
         const currentPage = window.location.pathname.split('/').pop();
 
         menuItems.forEach(li => {
-            if (li.getAttribute('data-url') === currentPage) {
-                li.classList.add('active');
-            }
+            if (li.getAttribute('data-url') === currentPage) li.classList.add('active');
         });
 
         const settingsItems = settingsMenu.querySelectorAll('li[data-url]');
@@ -269,9 +268,18 @@ document.getElementById('menuBtn').addEventListener('click', async () => {
             if (li.getAttribute('data-url') === currentPage) {
                 li.classList.add('active');
                 settingsBtn.classList.add('open');
-                settingsMenu.style.display = 'block';
+                settingsMenu.style.display = 'flex';
             }
         });
+
+        // Profile click
+        const userProfileBtn = menu.querySelector('#userProfileBtn');
+        if (userProfileBtn) {
+            userProfileBtn.addEventListener('click', () => {
+                window.location.href = 'profile.php';
+                menu.classList.remove('open');
+            });
+        }
     }
 
     // Open sidebar after loading
