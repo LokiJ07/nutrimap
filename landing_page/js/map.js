@@ -118,15 +118,15 @@ if (activeField && activeColor) {
   }
 
   // Convert raw percent to bin 1–10
-  let step = Math.floor(val / 2) + 1;  
-  if (step < 1) step = 1;
-  if (step > 10) step = 10;
+let step = Math.floor(val / 2);
+if (step < 0) step = 0;
+if (step > 9) step = 9;
 
   return {
     color: '#000',
     weight: 2,
     fillOpacity: 0.8,
-    fillColor: getGradientColor(activeColor, step)
+    fillColor: getGradientColor(activeColor, step + 1)
   };
 }
 
@@ -543,7 +543,7 @@ function getGradientColor(baseColor,value){
   if(value==null) return '#999';
   const ratio = Math.min(1,value/9);
   const rgb = hexToRgb(baseColor);
-  const start = {r:485,g:285,b:185};
+  const start = { r: 240, g: 240, b: 240 };
   const r = Math.round(start.r+(rgb.r-start.r)*ratio);
   const g = Math.round(start.g+(rgb.g-start.g)*ratio);
   const b = Math.round(start.b+(rgb.b-start.b)*ratio);
