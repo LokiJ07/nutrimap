@@ -291,7 +291,7 @@ function playNotificationEffect() {
   setTimeout(()=>bell.classList.remove('pulse'),1000);
 
   const toast = document.createElement('div');
-  toast.innerText = "You Receive new Notification"; // fixed text
+  toast.innerText = "You Receive a New Notification"; // fixed text
   toast.style.cssText = "background:#333;color:#fff;padding:10px 16px;border-radius:8px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.5s, transform 0.5s;transform:translateY(-20px)";
   
   toastContainer.appendChild(toast);
