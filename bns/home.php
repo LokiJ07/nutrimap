@@ -10,19 +10,62 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
 }
 $userId = $_SESSION['user_id'];
 
-$totalStmt = $pdo->prepare("SELECT COUNT(*) FROM reports r JOIN bns_reports b ON r.id = b.report_id WHERE r.user_id = ?");
+// Total submitted reports
+$totalStmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.is_submitted = 1
+");
 $totalStmt->execute([$userId]);
 $totalReports = $totalStmt->fetchColumn();
 
-$approvedStmt = $pdo->prepare("SELECT COUNT(*) FROM reports r JOIN bns_reports b ON r.id = b.report_id WHERE r.user_id = ? AND r.status = 'Approved' AND NOT EXISTS (SELECT 1 FROM report_archives a WHERE a.report_id = r.id AND a.is_archived = 1)");
+// Approved submitted reports
+$approvedStmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Approved' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
+");
 $approvedStmt->execute([$userId]);
 $approvedReports = $approvedStmt->fetchColumn();
 
-$pendingStmt = $pdo->prepare("SELECT COUNT(*) FROM reports r JOIN bns_reports b ON r.id = b.report_id WHERE r.user_id = ? AND r.status = 'Pending' AND NOT EXISTS (SELECT 1 FROM report_archives a WHERE a.report_id = r.id AND a.is_archived = 1)");
+// Pending submitted reports
+$pendingStmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Pending' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
+");
 $pendingStmt->execute([$userId]);
 $pendingReports = $pendingStmt->fetchColumn();
 
-$rejectedStmt = $pdo->prepare("SELECT COUNT(*) FROM reports r JOIN bns_reports b ON r.id = b.report_id WHERE r.user_id = ? AND r.status = 'Rejected' AND NOT EXISTS (SELECT 1 FROM report_archives a WHERE a.report_id = r.id AND a.is_archived = 1)");
+// Rejected submitted reports
+$rejectedStmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Rejected' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
+");
 $rejectedStmt->execute([$userId]);
 $rejectedReports = $rejectedStmt->fetchColumn();
 
@@ -36,7 +79,7 @@ $totalRowsStmt->execute([$userId]);
 $totalRows = $totalRowsStmt->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-$stmt = $pdo->prepare("SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date FROM reports r JOIN users u ON r.user_id = u.id JOIN bns_reports b ON r.id = b.report_id LEFT JOIN report_archives a ON r.id = a.report_id AND (a.is_deleted = 0 OR a.is_deleted IS NULL) AND (a.is_archived = 0 OR a.is_archived IS NULL) WHERE r.user_id = :userId AND (r.status = 'Pending' OR r.status = 'Rejected') ORDER BY r.report_date DESC, r.report_time DESC LIMIT :limit OFFSET :offset");
+$stmt = $pdo->prepare("SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date FROM reports r JOIN users u ON r.user_id = u.id JOIN bns_reports b ON r.id = b.report_id LEFT JOIN report_archives a ON r.id = a.report_id AND (a.is_deleted = 0 OR a.is_deleted IS NULL) AND (a.is_archived = 0 OR a.is_archived IS NULL) WHERE r.user_id = :userId AND (r.status = 'Pending' OR r.status = 'Rejected') AND r.is_submitted = 1 ORDER BY r.report_date DESC, r.report_time DESC LIMIT :limit OFFSET :offset");
 $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);

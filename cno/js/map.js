@@ -265,8 +265,7 @@ function createChart(width, height, labels, datasets, type) {
     plugins: [ChartDataLabels]
   });
 }
-    },
-
+    },  
     mouseout(e) {
       tooltip.style.opacity = 0;
       tooltip.style.display = 'none';
