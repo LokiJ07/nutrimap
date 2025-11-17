@@ -127,6 +127,7 @@ if (activeField && activeColor) {
 // ===================== TOOLTIP + MINI CHART =====================
 function featureHandler(feature, layer) {
   const tooltip = document.getElementById('chart-tooltip');
+  const barangayName = feature.properties.BARANGAY || 'Unknown';
 
   layer.on({
     mouseover(e) {
@@ -135,8 +136,6 @@ function featureHandler(feature, layer) {
       tooltip.style.opacity = 1;
       tooltip.innerHTML = '';
       tooltip.style.padding = '8px';
-
-      const barangayName = feature.properties.BARANGAY || 'Unknown';
 
       // ===== TITLE =====
       const title = document.createElement('div');
@@ -167,7 +166,7 @@ function featureHandler(feature, layer) {
         const data = labels.map(y => getValue(barangayName, y, li.dataset.field));
         return {
           label: li.dataset.label,
-          data, // real data, no division
+          data,
           borderColor: li.dataset.color,
           backgroundColor: li.dataset.color,
           fill: chartType === 'bar',
@@ -207,7 +206,7 @@ function featureHandler(feature, layer) {
         colorBox.style.marginRight = '6px';
 
         const text = document.createElement('span');
-        text.textContent = `${li.dataset.label}: ${value.toFixed(2)}%`; // real 100% value
+        text.textContent = `${li.dataset.label}: ${value.toFixed(2)}%`;
 
         liItem.appendChild(colorBox);
         liItem.appendChild(text);
@@ -225,52 +224,75 @@ function featureHandler(feature, layer) {
         return f ? Number(f.properties[field.toUpperCase()] ?? 0) : 0;
       }
 
-function createChart(width, height, labels, datasets, type) {
-  const chartWrapper = document.createElement('div');
-  chartWrapper.style.width = width;
-  chartWrapper.style.height = height;
-  chartWrapper.style.marginTop = '4px';
-  tooltip.appendChild(chartWrapper);
+      function createChart(width, height, labels, datasets, type) {
+        const chartWrapper = document.createElement('div');
+        chartWrapper.style.width = width;
+        chartWrapper.style.height = height;
+        chartWrapper.style.marginTop = '4px';
+        tooltip.appendChild(chartWrapper);
 
-  const canvas = document.createElement('canvas');
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  chartWrapper.appendChild(canvas);
+        const canvas = document.createElement('canvas');
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        chartWrapper.appendChild(canvas);
 
-  if (miniChart) miniChart.destroy();
-  miniChart = new Chart(canvas, {
-    type: type,
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { 
-        legend: { display: false },
-        tooltip: { enabled: false },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: { display: true },
-          y: { 
-          beginAtZero: true, 
-          max: 20, // VISUAL MAX for chart
-          ticks: {
-            callback: val => val + '%',
-            stepSize: 2 // mini chart step size
-          }
-        }
+        if (miniChart) miniChart.destroy();
+        miniChart = new Chart(canvas, {
+          type: type,
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+              legend: { display: false },
+              tooltip: { enabled: false },
+              datalabels: { display: false }
+            },
+            scales: {
+              x: { display: true },
+              y: { 
+                beginAtZero: true, 
+                max: 20,
+                ticks: { callback: val => val + '%', stepSize: 2 }
+              }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
       }
     },
-    plugins: [ChartDataLabels]
-  });
-}
-    },  
     mouseout(e) {
       tooltip.style.opacity = 0;
       tooltip.style.display = 'none';
       tooltip.innerHTML = '';
       if (miniChart) miniChart.destroy();
+    },
+click(e) {
+  if (barangayName && barangayName !== 'Unknown') {
+    const barangayFilter = document.getElementById('barangayFilter');
+    
+    // Find the exact option that matches the clicked barangay (case-insensitive)
+    const option = Array.from(barangayFilter.options).find(
+      opt => opt.value.toLowerCase() === barangayName.toLowerCase()
+    );
+    if (option) {
+      barangayFilter.value = option.value; // set the select to the correct option
     }
+
+    // Highlight clicked barangay
+    geoLayer.eachLayer(l => {
+      const name = l.feature.properties.BARANGAY?.toLowerCase();
+      l.setStyle({
+        ...styleFeature(l.feature),
+        opacity: name === barangayName.toLowerCase() ? 1 : 0.3,
+        fillOpacity: name === barangayName.toLowerCase() ? 0.7 : 0.1,
+        weight: name === barangayName.toLowerCase() ? 3 : 1
+      });
+    });
+
+    flipToChart(); // flip and render full chart for this barangay
+  }
+}
   });
 }
 
@@ -346,14 +368,7 @@ function flipToMap() {
 
 // ===================== EVENT LISTENERS =====================
 // Desktop
-mapContainer.addEventListener('click', flipToChart);
 chartContainer.addEventListener('click', flipToMap);
-
-// Mobile
-mapContainer.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  flipToChart();
-}, { passive: false });
 
 chartContainer.addEventListener('touchstart', (e) => {
   e.preventDefault();
