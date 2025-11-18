@@ -45,7 +45,7 @@ $can_edit = in_array($row['status'], ['Pending', 'Rejected']);
 // ✅ Barangay logo function
 function getBarangayLogo($barangay) {
     $map = [
-        'cno' => 'CNO.png',
+       'cno' => 'CNO.png',
         'amoros' => 'Amoros.png',
         'bolisong' => 'Bolisong.png',
         'cogon' => 'Cogon.png',
@@ -53,12 +53,11 @@ function getBarangayLogo($barangay) {
         'hinigdaan' => 'Hinigdaan.png',
         'kalabaylabay' => 'Kalabaylabay.png',
         'molugan' => 'Molugan.png',
-        'pedro s. baculio' => 'Pedro_sa_Baculio.png',
-        'pedro sa baculio' => 'Pedro_sa_Baculio.png',
+        'bolobolo' => 'Bolobolo.png',
         'poblacion' => 'Poblacion.png',
-        'quibonbon' => 'Quibonbon.png',
+        'kibonbon' => 'Kibonbon.png',
         'sambulawan' => 'Sambulawan.png',
-        'san francisco de asis' => 'San_Francisco_de_Asis.png',
+        'calongonan' => 'Calongonan.png',
         'sinaloc' => 'Sinaloc.png',
         'taytay' => 'Taytay.png',
         'ulaliman' => 'Ulaliman.png'
@@ -89,7 +88,8 @@ if (isset($_SESSION['user_id'])) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>View BNS Report — CNO NutriMap</title>
+<title>BNS | Edit Report</title>
+<link rel="icon" type="image/png" href="../../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
