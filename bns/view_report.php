@@ -23,16 +23,13 @@ $stmt = $pdo->prepare("
         r.report_time,
         r.status,
         b.*,
-        -- Normalized barangay name
-        CASE 
-            WHEN b.barangay = 'Bolobolo'   THEN 'Pedro sa Baculio'
-            ELSE b.barangay
-        END AS normalized_barangay
+        b.barangay AS normalized_barangay
     FROM reports r
     LEFT JOIN bns_reports b ON b.report_id = r.id
     WHERE r.id = :id
     LIMIT 1
 ");
+
 
 
 $stmt->execute(['id' => $report_id]);
@@ -54,7 +51,7 @@ function getBarangayLogo($barangay) {
         'Hinigdaan' => 'Hinigdaan.png',
         'Kalabaylabay' => 'Kalabaylabay.png',
         'Molugan' => 'Molugan.png',
-        'Pedro sa Baculio' => 'Bolobolo.png',
+        'Bolobolo' => 'Bolobolo.png',
         'Poblacion' => 'Poblacion.png',
         'Kibonbon' => 'Kibonbon.png',
         'Sambulawan' => 'Sambulawan.png',

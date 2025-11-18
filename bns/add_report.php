@@ -11,6 +11,29 @@ if (session_status() === PHP_SESSION_NONE) {
     exit();
 }
 
+function getBarangayLogo($barangay) {
+    $logos = [
+        'CNO' => 'CNO.png',
+        'Amoros' => 'Amoros.png',
+        'Bolisong' => 'Bolisong.png',
+        'Cogon' => 'Cogon.png',
+        'Himaya' => 'Himaya.png',
+        'Hinigdaan' => 'Hinigdaan.png',
+        'Kalabaylabay' => 'Kalabaylabay.png',
+        'Molugan' => 'Molugan.png',
+        'Bolobolo' => 'Bolobolo.png',
+        'Poblacion' => 'Poblacion.png',
+        'Kibonbon' => 'Kibonbon.png',
+        'Sambulawan' => 'Sambulawan.png',
+        'Calongonan' => 'Calongonan.png',
+        'Sinaloc' => 'Sinaloc.png',
+        'Taytay' => 'Taytay.png',
+        'Ulaliman' => 'Ulaliman.png'
+    ];
+
+    return $logos[$barangay] ?? 'default.png';
+}
+
   $barangay = $_SESSION['barangay']; // auto-fill from session
   $year = date('Y'); // default year
   $user_id = $_SESSION['user_id'];
@@ -206,9 +229,9 @@ foreach ($cnoUsers as $cnoId) {
       <!-- Right: Logos -->
       <div style="display:flex; align-items:center; gap:15px;">
         <!-- Dynamic Barangay Logo -->
-        <img src="../logos/barangays/<?= strtolower(str_replace(' ', '_', $barangay)) ?>.png" 
-            alt="<?= htmlspecialchars($barangay) ?> Logo" 
-            style="height:100px;">
+        <img src="../logos/barangays/<?= getBarangayLogo($barangay) ?>" 
+     alt="<?= htmlspecialchars($barangay) ?> Logo" 
+     style="height:100px;">
         <!-- Fixed Logos -->
         <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="Logo 1" style="height:100px;">
         <img src="../logos/fixed/National_Nutrition_Council__NNC_.svg-removebg-preview.png" alt="Logo 2" style="height:100px;">
