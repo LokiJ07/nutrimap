@@ -20,28 +20,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remember = isset($_POST['remember']); // ✅ Capture remember me checkbox
 
     if (!empty($email) && !empty($password)) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
+
+        // ✅ Fetch user by email or username
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ? LIMIT 1");
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash'])) {
+        // ===========================
+        //   ✅ STATUS CHECK ADDED
+        // ===========================
+        if (!$user) {
+            $error = "Invalid email/username or password!";
+        } elseif ($user['status'] !== 'Active') {
+            $error = "Your account is Inactive. Please contact the CNO.";
+        } elseif (!password_verify($password, $user['password_hash'])) {
+            $error = "Invalid email/username or password!";
+        } else {
+            // ===========================
+            //   ✅ LOGIN CONTINUES HERE
+            // ===========================
 
-            // ✅ Save Remember Me cookie for 7 days if checked
+            // Save Remember Me cookie
             if ($remember) {
                 setcookie('remember_email', $email, time() + (7 * 24 * 60 * 60), "/");
             } else {
-                setcookie('remember_email', '', time() - 3600, "/"); // Clear if unchecked
+                setcookie('remember_email', '', time() - 3600, "/");
             }
 
-            // ✅ Generate or retrieve device token
+            // Generate or retrieve device token
             if (empty($_COOKIE['device_token'])) {
                 $device_token = bin2hex(random_bytes(16));
-                setcookie('device_token', $device_token, time() + (365 * 24 * 60 * 60), "/"); // 1 year
+                setcookie('device_token', $device_token, time() + (365 * 24 * 60 * 60), "/");
             } else {
                 $device_token = $_COOKIE['device_token'];
             }
 
-            // ✅ Check if this device is already trusted
+            // Check if device is trusted
             $checkDevice = $pdo->prepare("
                 SELECT id, session_id FROM login_history 
                 WHERE user_id = ? AND device_token = ? 
@@ -55,25 +69,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ip = $_SERVER['REMOTE_ADDR'];
 
             if ($existingDevice) {
-                // ✅ Trusted device → skip OTP and log in directly
+                // Trusted device → skip OTP
                 $_SESSION['user_id']    = $user['id'];
                 $_SESSION['user_type']  = $user['user_type'];
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['email']      = $user['email'];
                 $_SESSION['barangay']   = $user['barangay'];
 
-                // ✅ Update login time & session id
+                // Update login history
                 $update = $pdo->prepare("UPDATE login_history SET login_time = NOW(), logout_time = NULL, session_id = ? WHERE id = ?");
                 $update->execute([$session_id, $existingDevice['id']]);
 
-                // ✅ Save current session in users table
+                // Update users table
                 $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
                     ->execute([$session_id, $user['id']]);
 
-                // ✅ Log activity
+                // Log activity
                 logActivity($pdo, $user['id'], "User logged in", "Trusted device login from IP $ip");
 
-                // Redirect based on role
+                // Redirect
                 if ($user['user_type'] === 'CNO') {
                     header("Location: cno/home.php");
                 } else {
@@ -82,25 +96,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
 
             } else {
-                // ✅ New device → send OTP and save as pending
+                // New device → send OTP
                 $historyStmt = $pdo->prepare("
                     INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token, login_time)
                     VALUES (?, ?, ?, ?, ?, NOW())
                 ");
                 $historyStmt->execute([$user['id'], $session_id, $browser, $ip, $device_token]);
 
-                // ✅ Save current session in users table for reference
+                // Save session reference
                 $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
                     ->execute([$session_id, $user['id']]);
 
-                // ✅ Generate OTP
+                // Generate OTP
                 $otp = rand(100000, 999999);
                 $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
                 $stmt = $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)");
                 $stmt->execute([$user['id'], $otp, $expires]);
 
-                // ✅ Save user info temporarily until OTP verification
+                // Temp session data
                 $_SESSION['pending_user_id']      = $user['id'];
                 $_SESSION['pending_user_type']    = $user['user_type'];
                 $_SESSION['pending_first_name']   = $user['first_name'];
@@ -108,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['pending_barangay']     = $user['barangay'];
                 $_SESSION['pending_device_token'] = $device_token;
 
-                // ✅ Log activity for new device
+                // Log OTP activity
                 logActivity($pdo, $user['id'], "OTP sent for new device login", "Device token: $device_token, IP: $ip");
 
                 if (sendOTP($user['email'], $otp)) {
@@ -120,16 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: otp/verify_otp.php");
                 exit;
             }
-
-        } else {
-            $error = "Invalid email/username or password!";
         }
     } else {
         $error = "All fields are required!";
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
