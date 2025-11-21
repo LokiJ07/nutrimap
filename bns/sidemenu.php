@@ -84,7 +84,7 @@ if (!empty($user['profile_pic']) && file_exists("../uploads/" . $user['profile_p
     <li data-url="reports.php"><i class="fa fa-file-alt"></i> Reports</li>
     <li data-url="report_history.php"><i class="fa fa-history"></i> Report History</li>
     <li data-url="barangay_data.php"><i class="fa fa-database"></i> Barangay Data</li>
-
+    <li data-url="barangay_map.php"><i class="fa fa-map"></i> Barangay Map</li>
     <li class="settings-dropdown">
       <div class="settings-btn" id="settingsBtn">
         <span><i class="fa fa-cog"></i> Settings</span>
