@@ -9,7 +9,7 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
 
         // Flatten numeric values, including percentages
         let values = [];
-        for (let i = 5; i < rows.length; i++) { // skip header
+        for (let i = 0; i < rows.length; i++) { // skip header
             const cols = rows[i].split(/\t|,/); // split tab or comma
             cols.forEach(cell => {
                 let val = cell.trim();

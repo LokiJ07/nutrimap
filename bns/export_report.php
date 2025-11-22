@@ -242,8 +242,8 @@ $p2 = array_merge($p2, [
     ['Total Number of Families with Stunted and Severely Stunted Preschool Children', val($totals,'ind16')]
 ]);
 
-$p2[] = ['Number of Day Care Centers', val($totals,'ind17a_public'), ''];
-$p2[] = ['Number of Elementary Schools', val($totals,'ind17b_public'), ''];
+$p2[] = ['Number of Day Care Centers', val($totals,'ind17a_public'), val($totals,'ind17a_private','no')];
+$p2[] = ['Number of Elementary Schools', val($totals,'ind17b_public'), val($totals,'ind17b_private','no')];
 
 $p2[] = ['Total Number of Children Enrolled in Kindergarten', val($totals,'ind18'), ''];
 $p2[] = ['Total Number of School Children (Grades 1–6)', val($totals,'ind19'), ''];
@@ -320,5 +320,36 @@ $p4[] = ['Barangay Nutrition Scholar', val($totals,'ind37a'), ''];
 $p4[] = ['Barangay Health Worker', val($totals,'ind37b'), ''];
 $p4[] = ['Total Number of Households Beneficiaries of Pantawid Pamilyang Pilipino Program', val($totals,'ind38'), ''];
 $pdf->writeHTML(makeTable($p4), true, false, false, false, '');
-// ---------- OUTPUT ----------
-$pdf->Output('Barangay_Situation_Analysis.pdf','I');
+
+// ---------- Determine output format ----------
+$format = isset($_GET['format']) ? strtolower($_GET['format']) : 'pdf';
+
+if($format === 'csv') {
+    // ---------- CSV Export ----------
+    function exportCSV($filename, $pages) {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        $output = fopen('php://output', 'w');
+
+        foreach($pages as $page) {
+            foreach($page as $row) {
+                // Replace — with empty string for CSV
+                $cleanRow = array_map(function($v){ return $v === '—' ? '' : $v; }, $row);
+                fputcsv($output, $cleanRow);
+            }
+            // Add an empty line between pages
+            fputcsv($output, []);
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    // Prepare all pages in order
+    $allPages = [$p1, $p2, $p3, $p4];
+    exportCSV('Barangay_Situational_Analysis.csv', $allPages);
+
+} else {
+    // ---------- PDF Output ----------
+    $pdf->Output('Barangay_Situation_Analysis.pdf','I');
+}

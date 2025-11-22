@@ -215,7 +215,8 @@ unset($report);
                     <div class="card-right">
                       <div><?= $datetime ?></div>
                       <a href="view_report.php?id=<?= $row['id'] ?>" class="export-link">View</a>
-                      <a href="export_barangay.php?id=<?= $row['id'] ?>" class="export-link"><i class="fa fa-file-export"></i> Export</a>
+                      <a href="export_barangay.php?id=<?= $row['id'] ?>&format=pdf" class="export-link"><i class="fa fa-file-export"></i> Export PDF</a>
+                      <a href="export_barangay.php?id=<?= $row['id'] ?>&format=csv" class="export-link"><i class="fa fa-file-export"></i> Export CSV</a>
                       <a href="report_history.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
                         <i class="fa fa-archive"></i> Archive
                       </a>

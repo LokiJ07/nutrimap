@@ -159,7 +159,8 @@ button:hover { background: #0056b3; transform: scale(1.03); }
       <div class="actions">
         <span><?= $consolidated ? htmlspecialchars($consolidated['report_date']) : 'Current Year Consolidated' ?></span>
         <?php if ($consolidated): ?>
-          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>" target="_blank" class="export-link" onclick="event.stopPropagation()">Export PDF</a>
+          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>&format=pdf" target="_blank" class="export-link" onclick="event.stopPropagation()">Export PDF</a>
+          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>&format=csv" target="_blank" class="export-link" onclick="event.stopPropagation()">Export CSV</a>
         <?php endif; ?>
       </div>
     </a>
@@ -190,7 +191,8 @@ button:hover { background: #0056b3; transform: scale(1.03); }
           <strong><?= htmlspecialchars($r['barangay']) ?> Health and Nutrition Data</strong>
           <div class="actions">
             <span><?= htmlspecialchars($r['latest_date']) ?></span>
-            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>" target="_blank">Export PDF</a>
+            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>&format=pdf" target="_blank">Export PDF</a>
+            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>&format=csv" target="_blank">Export CSV</a>     
           </div>
         </div>
       <?php endforeach; ?>

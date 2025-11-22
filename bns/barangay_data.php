@@ -188,7 +188,8 @@ $fixedTitle = "Barangay Situational Analysis";
                 </div>
                 <div class="file-actions">
                   <a class="file-link" href="view_report.php?id=<?= $f['latest_report_id'] ?>">View</a>
-                  <a class="file-link" href="./export_report.php?id=<?= $f['latest_report_id'] ?>">Export</a>
+                  <a class="file-link" href="./export_report.php?id=<?= $f['latest_report_id'] ?>&format=pdf">Export PDF</a>
+                  <a class="file-link" href="./export_report.php?id=<?= $f['latest_report_id'] ?>&format=csv">Export CSV</a>
                 </div>
               </div>
             <?php endforeach; ?>
