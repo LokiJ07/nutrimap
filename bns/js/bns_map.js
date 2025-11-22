@@ -28,7 +28,7 @@ const chartContainer = document.getElementById('chartContainer');
 const realMap = document.getElementById('map'); // the actual map
 
 // ===================== LOAD GEOJSON DATA =====================
-fetch('../landing_page/get_map_data.php')
+fetch('bns_map_data.php')
   .then(r => r.json())
   .then(data => {
     geoData = data;
@@ -62,33 +62,53 @@ fetch('../landing_page/get_map_data.php')
 
 // ===================== DRAW LAYER =====================
 function drawLayer(selectedYear) {
-  if(!geoData) return;
-  if(!selectedYear) selectedYear = activeYear;
-  if(geoLayer) map.removeLayer(geoLayer);
+  if (!geoData) return;
+  if (!selectedYear) selectedYear = activeYear;
+  if (geoLayer) map.removeLayer(geoLayer);
 
   let mergedFeatures = [];
 
-  if(selectedYear === 'All') {
+  // ===========================
+  // 1) FILTER BY YEAR
+  // ===========================
+  if (selectedYear === 'All') {
     const barangayMap = new Map();
+
     geoData.features.forEach(f => {
       const b = f.properties.BARANGAY?.toUpperCase();
       const year = parseInt(f.properties.YEAR || 0);
-      if(!barangayMap.has(b) || year > (barangayMap.get(b).properties.YEAR || 0)) {
+
+      // keep only the latest year per barangay
+      if (!barangayMap.has(b) || year > (barangayMap.get(b).properties.YEAR || 0)) {
         barangayMap.set(b, f);
       }
     });
+
     mergedFeatures = Array.from(barangayMap.values());
   } else {
-    mergedFeatures = geoData.features.filter(f => f.properties.YEAR == selectedYear);
+    mergedFeatures = geoData.features.filter(
+      f => f.properties.YEAR == selectedYear
+    );
   }
 
-  // Add missing barangays
-  const barangayWithData = new Set(mergedFeatures.map(f => f.properties.BARANGAY?.toUpperCase()));
-  const allBarangays = geoData.features.map(f => f.properties.BARANGAY?.toUpperCase());
-  [...new Set(allBarangays)].forEach(b => {
-    if(!barangayWithData.has(b)) {
-      const base = geoData.features.find(f => f.properties.BARANGAY?.toUpperCase() === b);
-      if(base){
+  // =====================================
+  // 2) ADD BARANGAYS WITH NO DATA (ONCE)
+  // =====================================
+  const barangayWithData = new Set(
+    mergedFeatures.map(f => f.properties.BARANGAY?.toUpperCase())
+  );
+
+  const allBarangays = [
+    ...new Set(geoData.features.map(f => f.properties.BARANGAY?.toUpperCase()))
+  ];
+
+  allBarangays.forEach(b => {
+    if (!barangayWithData.has(b)) {
+      const base = geoData.features.find(
+        f => f.properties.BARANGAY?.toUpperCase() === b
+      );
+
+      if (base) {
         const clone = JSON.parse(JSON.stringify(base));
         clone.properties.NO_DATA = true;
         mergedFeatures.push(clone);
@@ -96,9 +116,35 @@ function drawLayer(selectedYear) {
     }
   });
 
-  const finalData = { type: "FeatureCollection", features: mergedFeatures };
-  geoLayer = L.geoJSON(finalData, { style: styleFeature, onEachFeature: featureHandler }).addTo(map);
+  // ===============================
+  // 3) FILTER ONLY LOGGED-IN USER'S BARANGAY
+  // ===============================
+  const userOnlyFeatures = mergedFeatures.filter(f =>
+    f.properties.BARANGAY?.toUpperCase() === USER_BARANGAY
+  );
+
+  // If the barangay is missing (should not happen), fallback to empty
+  const userGeoJSON = {
+    type: "FeatureCollection",
+    features: userOnlyFeatures
+  };
+
+  // ===============================
+  // 4) DRAW THE BARANGAY POLYGON
+  // ===============================
+  geoLayer = L.geoJSON(userGeoJSON, {
+    style: styleFeature,
+    onEachFeature: featureHandler
+  }).addTo(map);
+
+  // ===============================
+  // 5) AUTO ZOOM
+  // ===============================
+  if (geoLayer.getLayers().length > 0) {
+    map.fitBounds(geoLayer.getBounds());
+  }
 }
+
 
 // ===================== STYLING =====================
 function styleFeature(feature) {
@@ -110,7 +156,7 @@ if (activeField && activeColor) {
   if (val === 0 || val == null || props.NO_DATA === true) {
     return {
       color: '#444',
-      weight: 1,
+      weight: 3,
       fillOpacity: 0,
       fillColor: 'transparent',
       dashArray: '2,2'
@@ -133,63 +179,64 @@ if (step > 9) step = 9;
   const hasData = legendItems.some(li => li.dataset.field !== 'all' && (props[li.dataset.field.toUpperCase()] ?? 0) > 0);
 
   return hasData
-    ? { color: '#333', weight: 1, fillOpacity: 0.8, fillColor: '#000' }
-    : { color: '#444', weight: 1, fillOpacity: 0, fillColor: 'transparent', dashArray: '2,2' };
+    ? { color: '#333', weight: 2, fillOpacity: 0.8, fillColor: '#000' }
+    : { color: '#444', weight: 3, fillOpacity: 0, fillColor: 'transparent', dashArray: '2,2' };
 }
 
 // ===================== TOOLTIP + MINI CHART =====================
 function featureHandler(feature, layer) {
   const tooltip = document.getElementById('chart-tooltip');
+  const barangayName = feature.properties.BARANGAY || 'Unknown';
 
   layer.on({
     mouseover(e) {
       const isMobile = window.innerWidth < 768;
-      if (isMobile) return; // skip hover behavior on mobile
+      if (isMobile) return; // skip tooltip on mobile
 
-      // ===== DESKTOP HOVER =====
       tooltip.style.display = 'block';
       tooltip.style.opacity = 1;
-      tooltip.style.padding = '8px';
       tooltip.innerHTML = '';
+      tooltip.style.padding = '8px';
 
       // ===== TITLE =====
       const title = document.createElement('div');
       title.className = 'tooltip-title';
-      title.textContent = feature.properties.BARANGAY || 'Unknown';
+      title.textContent = barangayName;
       title.style.fontWeight = 'bold';
       title.style.marginBottom = '6px';
       tooltip.appendChild(title);
 
-      // ===== DETERMINE INDICATORS =====
-      const indicatorsToShow = (activeField && activeField !== 'all')
+      // ===== INDICATORS =====
+      const indicatorsToShow = activeField && activeField !== 'all'
         ? legendItems.filter(li => li.dataset.field.toUpperCase() === activeField)
         : legendItems.filter(li => li.dataset.field !== 'all');
 
+      // ===== CHART TYPE =====
+      const chartType = (activeYear === 'All') ? 'line' : 'bar';
+
       // ===== LABELS =====
-      let labels = (activeYear === 'All')
-        ? [...new Set(geoData.features.filter(f => f.properties.BARANGAY === feature.properties.BARANGAY)
-            .map(f => f.properties.YEAR))].sort((a, b) => a - b)
+      const labels = (activeYear === 'All')
+        ? [...new Set(geoData.features.filter(f => f.properties.BARANGAY === barangayName).map(f => f.properties.YEAR))].sort((a,b)=>a-b)
         : [activeYear];
 
       // ===== DATASETS =====
       const datasets = indicatorsToShow.map(li => {
-        const data = labels.map(y => getValue(feature.properties.BARANGAY, y, li.dataset.field));
+        const data = labels.map(y => getValue(barangayName, y, li.dataset.field));
         return {
           label: li.dataset.label,
           data,
           borderColor: li.dataset.color,
           backgroundColor: li.dataset.color,
-          fill: activeYear === 'All' ? false : true,
+          fill: chartType === 'bar',
           tension: 0.3,
           borderWidth: 2,
-          pointRadius: 3,
-          spanGaps: true
+          spanGaps: true,
+          pointRadius: 3
         };
       });
 
-      // ===== MINI CHART =====
-      const chartType = (activeYear === 'All') ? 'line' : 'bar';
-      createMiniChart('300px', '150px', labels, datasets, chartType);
+      // ===== CREATE MINI CHART =====
+      createChart('300px', '150px', labels, datasets, chartType);
 
       // ===== INDICATOR LIST =====
       const indicatorList = document.createElement('ul');
@@ -199,7 +246,7 @@ function featureHandler(feature, layer) {
 
       indicatorsToShow.forEach(li => {
         const value = getValue(
-          feature.properties.BARANGAY,
+          barangayName,
           activeYear === 'All' ? labels[labels.length - 1] : activeYear,
           li.dataset.field
         );
@@ -226,7 +273,7 @@ function featureHandler(feature, layer) {
 
       tooltip.appendChild(indicatorList);
 
-      // ===== HELPERS =====
+      // ===== HELPER FUNCTIONS =====
       function getValue(barangay, year, field) {
         const f = geoData.features.find(ff =>
           ff.properties.BARANGAY === barangay &&
@@ -235,7 +282,7 @@ function featureHandler(feature, layer) {
         return f ? Number(f.properties[field.toUpperCase()] ?? 0) : 0;
       }
 
-      function createMiniChart(width, height, labels, datasets, type) {
+      function createChart(width, height, labels, datasets, type) {
         const chartWrapper = document.createElement('div');
         chartWrapper.style.width = width;
         chartWrapper.style.height = height;
@@ -254,14 +301,18 @@ function featureHandler(feature, layer) {
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
+            plugins: { 
               legend: { display: false },
               tooltip: { enabled: false },
               datalabels: { display: false }
             },
             scales: {
               x: { display: true },
-              y: { beginAtZero: true, max: 20, ticks: { callback: val => val + '%', stepSize: 2 } }
+              y: { 
+                beginAtZero: true, 
+                max: 20,
+                ticks: { callback: val => val + '%', stepSize: 2 }
+              }
             }
           },
           plugins: [ChartDataLabels]
@@ -271,27 +322,16 @@ function featureHandler(feature, layer) {
 
     mouseout(e) {
       const isMobile = window.innerWidth < 768;
-      if (isMobile) return; // skip hover on mobile
+      if (isMobile) return;
 
       tooltip.style.opacity = 0;
       tooltip.style.display = 'none';
       tooltip.innerHTML = '';
-      if (miniChart) {
-        miniChart.destroy();
-        miniChart = null;
-      }
+      if (miniChart) miniChart.destroy();
     },
 
     click(e) {
-      // CLICK works for both mobile and desktop
-      const barangayName = feature.properties.BARANGAY;
-      if (!barangayName || barangayName === 'Unknown') return;
-
-      const barangayFilter = document.getElementById('barangayFilter');
-      const option = Array.from(barangayFilter.options)
-        .find(opt => opt.value.toLowerCase() === barangayName.toLowerCase());
-      if (option) barangayFilter.value = option.value;
-
+      // Just highlight clicked barangay (no dropdown)
       geoLayer.eachLayer(l => {
         const name = l.feature.properties.BARANGAY?.toLowerCase();
         l.setStyle({
@@ -301,8 +341,6 @@ function featureHandler(feature, layer) {
           weight: name === barangayName.toLowerCase() ? 3 : 1
         });
       });
-
-      flipToChart();
     }
   });
 }
@@ -343,22 +381,6 @@ legendItems.forEach(item => {
   });
 });
 
-
-document.getElementById('barangayFilter').addEventListener('change', () => {
-  const selected = document.getElementById('barangayFilter').value.toLowerCase();
-  geoLayer.eachLayer(layer => {
-    const name = layer.feature.properties.BARANGAY?.toLowerCase();
-    layer.setStyle({
-      ...styleFeature(layer.feature),
-      opacity: (selected === 'all' || selected === name) ? 1 : 0.3,
-      fillOpacity: (selected === 'all' || selected === name) ? 0.7 : 0.1,
-      weight: (selected === name) ? 3 : 1
-    });
-  });
-
-  if(!chartContainer.classList.contains('hidden')) renderFullChart();
-});
-
 // ===================== FULL CHART =====================
 mapContainer.classList.remove('flipped');
 chartContainer.classList.add('hidden');
@@ -377,58 +399,46 @@ function flipToMap() {
   chartContainer.classList.remove('flipped');
 }
 
-// ===================== EVENT LISTENERS =====================
-// Desktop
-chartContainer.addEventListener('click', flipToMap);
+// ===================== BUTTON LISTENERS (UPDATED) =====================
+document.addEventListener('DOMContentLoaded', () => {
+  const btnChart = document.getElementById('btnShowChart');
+  const btnMap = document.getElementById('btnBackToMap');
 
-chartContainer.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  flipToMap();
-}, { passive: false });
+  if (btnChart) btnChart.addEventListener('click', flipToChart);
+  if (btnMap) btnMap.addEventListener('click', flipToMap);
+});
 
 // ===================== RENDER FULL CHART =====================
 function renderFullChart() {
   if (!geoData) return;
 
-  const selectedBarangay = document.getElementById('barangayFilter').value.trim().toLowerCase();
   const selectedYear = document.getElementById('yearFilter').value.trim();
 
+  // Get the active indicators from the legend
   const indicators = activeField 
     ? legendItems.filter(li => li.dataset.field.toUpperCase() === activeField)
     : legendItems.filter(li => li.dataset.field !== 'all');
 
-  const filteredFeatures = geoData.features.filter(f => {
-    const barangay = (f.properties.BARANGAY || '').trim().toLowerCase();
-    const year = String(f.properties.YEAR || '');
-    const matchesBarangay = selectedBarangay === 'all' || barangay === selectedBarangay;
-    const matchesYear = selectedYear === 'All' || year === selectedYear;
-    return matchesBarangay && matchesYear;
-  });
+  // Filter features: only the logged-in user's barangay
+  const filteredFeatures = geoData.features.filter(f =>
+    f.properties.BARANGAY?.toUpperCase() === USER_BARANGAY &&
+    (selectedYear === 'All' || String(f.properties.YEAR) === selectedYear)
+  );
 
   let labels = [];
   let datasets = [];
-  let chartType = 'line';
+  let chartType;
 
   if (selectedYear === 'All') {
+    // Line chart for all years
     chartType = 'line';
     labels = [...new Set(filteredFeatures.map(f => f.properties.YEAR))].sort((a, b) => a - b);
 
     indicators.forEach(li => {
       const field = li.dataset.field.toUpperCase();
-
-      const data = labels.map(year => {
-        if (selectedBarangay === 'all') {
-          const vals = filteredFeatures
-            .filter(f => String(f.properties.YEAR) == year)
-            .map(f => Number(f.properties[field] || 0));
-          return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0; // REAL DATA
-        } else {
-          const f = filteredFeatures.find(f => 
-            (f.properties.BARANGAY || '').trim().toLowerCase() === selectedBarangay &&
-            String(f.properties.YEAR) == year
-          );
-          return f ? Number(f.properties[field] || 0) : 0; // REAL DATA
-        }
+      const data = labels.map(y => {
+        const f = filteredFeatures.find(f => String(f.properties.YEAR) == y);
+        return f ? Number(f.properties[field] || 0) : 0;
       });
 
       datasets.push({
@@ -445,24 +455,18 @@ function renderFullChart() {
     });
 
   } else {
+    // Bar chart for a single year
     chartType = 'bar';
-    labels = selectedBarangay === 'all'
-      ? [...new Set(filteredFeatures.map(f => f.properties.BARANGAY))].sort()
-      : [selectedBarangay];
+    labels = [USER_BARANGAY];
 
     indicators.forEach(li => {
       const field = li.dataset.field.toUpperCase();
-
-      const data = labels.map(barangay => {
-        const f = filteredFeatures.find(f =>
-          (f.properties.BARANGAY || '').trim().toLowerCase() === barangay.toLowerCase()
-        );
-        return f ? Number(f.properties[field] || 0) : 0; // REAL DATA
-      });
+      const f = filteredFeatures[0];
+      const value = f ? Number(f.properties[field] || 0) : 0;
 
       datasets.push({
         label: li.dataset.label,
-        data,
+        data: [value],
         borderColor: li.dataset.color,
         backgroundColor: li.dataset.color,
         borderWidth: 2,
@@ -472,8 +476,8 @@ function renderFullChart() {
     });
   }
 
+  // Render chart
   const ctx = document.getElementById('fullChart').getContext('2d');
-
   if (fullChart) fullChart.destroy();
 
   fullChart = new Chart(ctx, {
@@ -482,53 +486,21 @@ function renderFullChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { 
+      plugins: {
         legend: { display: true },
         tooltip: {
           callbacks: {
             label: function(context) {
-              const datasetIndex = context.datasetIndex;
-              const dataIndex = context.dataIndex;
-              let originalValue;
-
-              if (selectedYear === 'All') {
-                const year = context.label;
-                const field = indicators[datasetIndex].dataset.field?.toUpperCase() || indicators[datasetIndex].label.toUpperCase();
-
-                if (selectedBarangay === 'all') {
-                  const vals = filteredFeatures
-                    .filter(f => String(f.properties.YEAR) == year)
-                    .map(f => Number(f.properties[field] || 0));
-                  originalValue = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
-                } else {
-                  const f = filteredFeatures.find(f => 
-                    (f.properties.BARANGAY || '').trim().toLowerCase() === selectedBarangay &&
-                    String(f.properties.YEAR) == year
-                  );
-                  originalValue = f ? Number(f.properties[field] || 0) : 0;
-                }
-              } else {
-                const barangay = context.label.toLowerCase();
-                const field = indicators[datasetIndex].dataset.field?.toUpperCase() || indicators[datasetIndex].label.toUpperCase();
-                const f = filteredFeatures.find(f =>
-                  (f.properties.BARANGAY || '').trim().toLowerCase() === barangay
-                );
-                originalValue = f ? Number(f.properties[field] || 0) : 0;
-              }
-
-              return `${context.dataset.label}: ${originalValue.toFixed(2)}%`;
+              return `${context.dataset.label}: ${context.raw.toFixed(2)}%`;
             }
           }
         }
       },
       scales: {
         y: { 
-          beginAtZero: true, 
-          max: 20, // VISUAL MAX for chart
-          ticks: {
-            callback: val => val + '%',
-            stepSize: 2 // 11 horizontal grid lines: 0,5,...50
-          }
+          beginAtZero: true,
+          max: 20,
+          ticks: { callback: val => val + '%', stepSize: 2 }
         }
       }
     }

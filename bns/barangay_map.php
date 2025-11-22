@@ -28,23 +28,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
 }
 
 /* MAP & CHART CONTAINER FLIP */
-#mapContainer, #chartContainer {
-  transition: transform 0.6s;
+#mapContainer{
+  top: 0;
+  left: 0;
+  transition: transform 1s;
   backface-visibility: hidden;
 }
-
+ #chartContainer{
+  position: absolute;
+  top: 160px;
+  transition: transform 1s;
+  backface-visibility: hidden;
+ }
 #mapContainer.flipped {
+    z-index: 1;
   transform: rotateY(180deg);
-  display: none;
 }
 
 #chartContainer.flipped {
   transform: rotateY(0deg);
   display: block;
+    z-index: 1;
 }
 
 /* FULL CHART */
 #chartContainer {
+  top: 250px;
   display: none;
   width: 100%;
   max-width: 700px;   /* desktop width */
@@ -143,9 +152,18 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
 
   <!-- Main Content -->
  <main class="flex-1 max-w-7xl mx-auto px-6 pt-2 pb-6 mb-28 bg-white">
-    <div class="bg-gray-200 py-2 px-4 mb-4">
-      <span class="uppercase tracking-wide text-cyan-600 font-semibold">Data</span>
-    </div>
+ <div class="bg-gray-200 py-2 px-4 mb-4 flex items-center justify-between">
+  <span class="uppercase tracking-wide text-cyan-600 font-semibold">Data</span>
+
+  <div class="space-x-2">
+    <button id="btnShowChart" class="bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700 transition">
+      Show Chart
+    </button>
+    <button id="btnBackToMap" class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition">
+      Show Map
+    </button>
+  </div>
+</div>
     
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
       <h1 class="text-lg md:text-xl font-semibold">
@@ -203,6 +221,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-  <script src="js/map.js"></script>
+
+
+  <?php
+if (!isset($_SESSION['user_id'])) exit();
+
+$stmt = $pdo->prepare("SELECT barangay FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$userBarangay = strtoupper(trim($stmt->fetchColumn() ?? ''));
+?>
+<script>
+  const USER_BARANGAY = "<?= $userBarangay ?>";
+</script>
+
+  <script src="js/bns_map.js"></script>
+  
 </body>
 </html>
