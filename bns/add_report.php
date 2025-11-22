@@ -245,9 +245,9 @@ foreach ($cnoUsers as $cnoId) {
            <div class="form-section">
             <table>
               <tr><th>Indicator</th><th>Number</th></tr>
-              <tr><td>1. Total Population</td><td><input type="number" name="ind1" required></td></tr>
-              <tr><td class="indent">Male</td><td><input type="number" name="ind_male" required></td></tr>
-              <tr><td class="indent">Female</td><td><input type="number" name="ind_female" required></td></tr>
+              <tr><td>1. Total Population</td><td><input type="number" id="total" name="ind1" required min="0"></td></tr>
+              <tr><td class="indent">Male</td><td><input type="number" id="male" name="ind_male" required min="0"></td></tr>
+              <tr><td class="indent">Female</td><td><input type="number" id="female" name="ind_female" required min="0"></td></tr>
               <tr><td>2. Total Number of Households</td><td><input type="number" name="ind2" required></td></tr>
               <tr><td>3. Total Number of Family</td><td><input type="number" name="ind3" required></td></tr>
               <tr><td>4. Total Number of HHs More Than 5 Below Members</td><td><input type="number" name="ind4" required></td></tr>

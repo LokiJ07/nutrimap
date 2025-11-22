@@ -92,3 +92,65 @@ function copyTitle() {
     document.getElementById('hidden-title').value = 
         document.getElementById('report-title').value;
 }
+
+
+// For the Number of Population inputs
+const totalInput = document.getElementById('total');
+const maleInput = document.getElementById('male');
+const femaleInput = document.getElementById('female');
+
+let isUpdating = false;
+
+// Update total automatically when male or female changes
+function updateTotalFromParts() {
+  if (isUpdating) return;
+  isUpdating = true;
+  
+  const male = parseInt(maleInput.value) || 0;
+  const female = parseInt(femaleInput.value) || 0;
+  totalInput.value = male + female;
+  
+  isUpdating = false;
+}
+
+// Adjust Male or Female proportionally when total changes
+function adjustPartsFromTotal() {
+  if (isUpdating) return;
+  isUpdating = true;
+  
+  const total = parseInt(totalInput.value) || 0;
+  let male = parseInt(maleInput.value) || 0;
+  let female = parseInt(femaleInput.value) || 0;
+  const sum = male + female;
+
+  if (sum === 0) {
+    // If both are empty, split equally
+    maleInput.value = Math.floor(total / 2);
+    femaleInput.value = total - Math.floor(total / 2);
+  } else {
+    // Scale proportionally
+    maleInput.value = Math.round((male / sum) * total);
+    femaleInput.value = total - maleInput.value;
+  }
+  
+  isUpdating = false;
+}
+
+// Prevent negative values or overflows
+function validateInputs() {
+  const total = parseInt(totalInput.value) || 0;
+  const male = parseInt(maleInput.value) || 0;
+  const female = parseInt(femaleInput.value) || 0;
+
+  if (male < 0) maleInput.value = 0;
+  if (female < 0) femaleInput.value = 0;
+  if (total < 0) totalInput.value = 0;
+
+  if (male + female > total) {
+    adjustPartsFromTotal();
+  }
+}
+
+maleInput.addEventListener('input', () => { updateTotalFromParts(); validateInputs(); });
+femaleInput.addEventListener('input', () => { updateTotalFromParts(); validateInputs(); });
+totalInput.addEventListener('input', adjustPartsFromTotal);
