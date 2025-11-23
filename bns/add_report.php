@@ -213,7 +213,7 @@ foreach ($cnoUsers as $cnoId) {
           <?php endif; ?>
     <div class="form-wrapper">
   <form method="post" onsubmit="copyTitle()">
-    <input type="hidden" id="hidden-title" name="title">
+    <input type="hidden" id="hidden-title" name="title" required>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <!-- Left: Titles -->
       <div style="text-align:left;">
