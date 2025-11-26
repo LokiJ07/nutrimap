@@ -125,16 +125,6 @@ document.addEventListener("DOMContentLoaded", function() {
       let female = parseInt(femaleInput.value) || 0;
       const sum = male + female;
 
-      if (sum === 0) {
-        // If both are empty, split equally
-        maleInput.value = Math.floor(total / 2);
-        femaleInput.value = total - Math.floor(total / 2);
-      } else {
-        // Scale proportionally
-        maleInput.value = Math.round((male / sum) * total);
-        femaleInput.value = total - maleInput.value;
-      }
-
       isUpdating = false;
     }
 
