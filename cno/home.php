@@ -96,7 +96,7 @@ $stmt = $pdo->prepare("
     LEFT JOIN report_archives a ON r.id = a.report_id 
         AND (a.is_deleted = 0 OR a.is_deleted IS NULL) 
         AND (a.is_archived = 0 OR a.is_archived IS NULL)
-    WHERE r.status IN ('Pending','Rejected') 
+    WHERE r.status IN ('Pending','Rejected', 'Approved') 
       AND r.is_submitted = 1
     ORDER BY r.report_date DESC, r.report_time DESC
     LIMIT :limit OFFSET :offset
