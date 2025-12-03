@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Adjust Male or Female proportionally when total changes
-    function adjustPartsFromTotal() {
+  //  function adjustPartsFromTotal() {
       if (isUpdating) return;
       isUpdating = true;
 
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const sum = male + female;
 
       isUpdating = false;
-    }
+   // }
 
     // Prevent negative values or overflows
     function validateInputs() {
