@@ -10,7 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
 $userId   = $_SESSION['user_id'];
 $userType = $_SESSION['user_type']; // 'CNO'
 
-
 // ✅ Set Philippine Timezone
 date_default_timezone_set('Asia/Manila');
 
@@ -18,13 +17,11 @@ date_default_timezone_set('Asia/Manila');
 if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
     $reportId = (int)$_GET['archive_id'];
 
-    // 🔹 Check if report exists and approved
     $stmt = $pdo->prepare("SELECT * FROM reports WHERE id = ? AND status = 'Approved'");
     $stmt->execute([$reportId]);
     $report = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($report) {
-        // 🔹 Check if already archived for this user
         $check = $pdo->prepare("
             SELECT * FROM report_archives 
             WHERE report_id = ? AND user_id = ? AND user_type = ?
@@ -33,7 +30,6 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
         $exists = $check->fetch(PDO::FETCH_ASSOC);
 
         if ($exists) {
-            // 🔹 If record exists, just mark as archived (reactivate if unarchived)
             $update = $pdo->prepare("
                 UPDATE report_archives 
                 SET is_archived = 1, is_deleted = 0, archived_at = NOW() 
@@ -41,7 +37,6 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
             ");
             $update->execute([$reportId, $userId, $userType]);
         } else {
-            // 🔹 Otherwise insert new record
             $insert = $pdo->prepare("
                 INSERT INTO report_archives (report_id, user_id, user_type, is_archived, archived_at)
                 VALUES (?, ?, ?, 1, NOW())
@@ -58,10 +53,10 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
 $search = $_GET['search'] ?? '';
 $barangay_filter = $_GET['barangay'] ?? '';
 $year_filter = $_GET['year'] ?? '';
+$quarter_filter = $_GET['quarter'] ?? '';
 $sort = $_GET['sort'] ?? 'date';
 
 // --- Build query ---
-// 🔹 Exclude reports that are archived OR deleted for THIS user/type
 $sql = "
     SELECT r.id, r.report_date, r.report_time, b.title, b.barangay, b.year
     FROM reports r
@@ -96,6 +91,12 @@ if ($year_filter) {
     $params[':year'] = $year_filter;
 }
 
+// quarter filter
+if ($quarter_filter) {
+    $sql .= " AND QUARTER(r.report_date) = :quarter";
+    $params[':quarter'] = $quarter_filter;
+}
+
 // sorting
 if ($sort === 'name') {
     $sql .= " ORDER BY b.title ASC";
@@ -111,7 +112,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($reports as &$report) {
     $utc = new DateTime($report['report_date'] . ' ' . $report['report_time'], new DateTimeZone('UTC'));
     $utc->setTimezone(new DateTimeZone('Asia/Manila'));
-    $report['formatted_datetime'] = $utc->format("M d, Y h:i A"); // Example: Oct 01, 2025 11:00 AM
+    $report['formatted_datetime'] = $utc->format("M d, Y h:i A"); 
+    $report['quarter'] = ceil((int)date('m', strtotime($report['report_date'])) / 3); // Calculate quarter
 }
 unset($report);
 ?>
@@ -140,6 +142,7 @@ unset($report);
     .barangay-section { margin-top:25px; }
     .barangay-title { font-weight:bold; margin:15px 0 8px; font-size:16px; color:#009688; }
     .year-title { margin:10px 0; font-weight:bold; color:#444; }
+    .quarter-title { margin-left:15px; font-weight:bold; color:#555; }
     .card { background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:12px 16px; margin-bottom:8px;
             display:flex; justify-content:space-between; align-items:center; font-size:14px; }
     .card-title { font-weight:500; }
@@ -154,13 +157,12 @@ unset($report);
 <div class="layout">
 <?php include 'header.php'; ?>
 
-  <!-- Content -->
   <div class="container">
     <h2>Barangay Files</h2>
 
-    <!-- Toolbar -->
     <form method="get" class="toolbar">
-      <input type="text" id="reportSearch" name="search" placeholder="Search">
+      <input type="text" id="reportSearch" name="search" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+
       <select name="barangay" onchange="this.form.submit()">
         <option value="">All Barangays</option>
         <?php
@@ -175,6 +177,7 @@ unset($report);
         }
         ?>
       </select>
+
       <select name="year" onchange="this.form.submit()">
         <option value="">All Years</option>
         <?php
@@ -185,6 +188,15 @@ unset($report);
         }
         ?>
       </select>
+
+      <select name="quarter" onchange="this.form.submit()">
+        <option value="">All Quarters</option>
+        <option value="1" <?= ($quarter_filter=="1")?"selected":"" ?>>January - March</option>
+        <option value="2" <?= ($quarter_filter=="2")?"selected":"" ?>>April - June</option>
+        <option value="3" <?= ($quarter_filter=="3")?"selected":"" ?>>July - September</option>
+        <option value="4" <?= ($quarter_filter=="4")?"selected":"" ?>>October - December</option>
+      </select>
+
       <label for="sort">Sort by:</label>
       <select name="sort" id="sort" onchange="this.form.submit()">
         <option value="date" <?= $sort=="date"?"selected":"" ?>>New - Old</option>
@@ -193,36 +205,39 @@ unset($report);
       <button type="submit" style="display:none;"></button>
     </form>
 
-    <!-- Cards -->
     <?php if ($reports): ?>
       <?php
-        // ✅ Group by Barangay + Year automatically
+        // Group by Barangay > Year > Quarter
         $grouped = [];
         foreach ($reports as $row) {
-            $grouped[$row['barangay']][$row['year']][] = $row;
+            $grouped[$row['barangay']][$row['year']][$row['quarter']][] = $row;
         }
 
         foreach ($grouped as $brgy => $years) {
             echo "<div class='barangay-section'>";
             echo "<div class='barangay-title'>" . htmlspecialchars($brgy) . "</div>";
-            foreach ($years as $yr => $rows) {
+            foreach ($years as $yr => $quarters) {
                 echo "<div class='year-title'>Year $yr</div>";
-                foreach ($rows as $row) { 
-                    $datetime = date("M d, Y h:i A", strtotime($row['report_date'].' '.$row['report_time']));
-                    ?>
-                  <div class="card">
-                    <div class="card-title"><?= htmlspecialchars($row['title']) ?></div>
-                    <div class="card-right">
-                      <div><?= $datetime ?></div>
-                      <a href="view_report.php?id=<?= $row['id'] ?>" class="export-link">View</a>
-                      <a href="export_barangay.php?id=<?= $row['id'] ?>&format=pdf" class="export-link"><i class="fa fa-file-export"></i> Export PDF</a>
-                      <a href="export_barangay.php?id=<?= $row['id'] ?>&format=csv" class="export-link"><i class="fa fa-file-export"></i> Export CSV</a>
-                      <a href="report_history.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
-                        <i class="fa fa-archive"></i> Archive
-                      </a>
-                    </div>
-                  </div>
-        <?php   }
+                foreach ($quarters as $qtr => $rows) {
+                    echo "<div class='quarter-title'>Quarter Q$qtr</div>";
+                    foreach ($rows as $row) { 
+                        $datetime = $row['formatted_datetime'];
+                        ?>
+                        <div class="card">
+                            <div class="card-title"><?= htmlspecialchars($row['title']) ?></div>
+                            <div class="card-right">
+                                <div><?= $datetime ?></div>
+                                <a href="view_report.php?id=<?= $row['id'] ?>" class="export-link">View</a>
+                                <a href="export_barangay.php?id=<?= $row['id'] ?>&format=pdf" class="export-link"><i class="fa fa-file-export"></i> Export PDF</a>
+                                <a href="export_barangay.php?id=<?= $row['id'] ?>&format=csv" class="export-link"><i class="fa fa-file-export"></i> Export CSV</a>
+                                <a href="report_history.php?archive_id=<?= $row['id'] ?>" class="archive-link" onclick="return confirm('Are you sure you want to archive this file?')">
+                                    <i class="fa fa-archive"></i> Archive
+                                </a>
+                            </div>
+                        </div>
+                    <?php
+                    }
+                }
             }
             echo "</div>";
         }
@@ -235,13 +250,12 @@ unset($report);
 <script>
 document.getElementById('reportSearch').addEventListener('keyup', function() {
     const filter = this.value.toLowerCase();
-    const cards = document.querySelectorAll('.card'); // select all cards
+    const cards = document.querySelectorAll('.card'); 
     cards.forEach(card => {
         const text = card.textContent.toLowerCase();
         card.style.display = text.includes(filter) ? '' : 'none';
     });
 
-    // Hide barangay sections if no cards visible
     document.querySelectorAll('.barangay-section').forEach(section => {
         const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
         section.style.display = visibleCards.length ? '' : 'none';
