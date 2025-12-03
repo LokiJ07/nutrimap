@@ -26,6 +26,14 @@ body { margin:0;
     font-size:13px; 
     cursor:pointer; 
 }
+.submit-btn:disabled {
+    background: #aaa;        /* gray color when disabled */
+    cursor: not-allowed;     /* forbidden icon */
+    opacity: 0.7;            /* faded look */
+}
+.submit-btn:not(:disabled):hover {
+    background:#009688; 
+}
   .submit-btn { 
     background:#009688; 
     color:#fff; 

@@ -540,7 +540,7 @@ foreach ($cnoUsers as $cnoId) {
           </div>
       <!-- all your form fields here (unchanged) -->
       <div class="form-bottom">
-        <button type="submit" class="submit-btn">Submit</button>
+        <button type="submit" class="submit-btn" disabled>Submit</button>
       </div>      
     </form>
   </div>
