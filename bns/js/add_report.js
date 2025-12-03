@@ -1,3 +1,4 @@
+// Handle CSV file upload and auto-fill form
 document.getElementById('csvFile').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -88,12 +89,13 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
     reader.readAsText(file);
 });
 
+// Copy Report Title to hidden field
 function copyTitle() {
     document.getElementById('hidden-title').value = 
         document.getElementById('report-title').value;
 }
 
-
+// Synchronize Number of Population fields
 document.addEventListener("DOMContentLoaded", function() {
 
     // For the Number of Population inputs
