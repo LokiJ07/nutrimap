@@ -2,6 +2,14 @@
 session_start();
 require '../db/config.php';
 
+// Only allow CNO
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+$currentUserId = $_SESSION['user_id']; // CNO performing the action
+
 // Check inputs
 if (!isset($_POST['report_id']) || !isset($_POST['action'])) {
     echo json_encode(['error' => 'Missing data']);
@@ -22,6 +30,13 @@ $status = ($action === 'approve') ? 'Approved' : 'Rejected';
 // Update report status
 $stmt = $pdo->prepare("UPDATE reports SET status = ? WHERE id = ?");
 if ($stmt->execute([$status, $report_id])) {
+
+    // Log activity
+    $logStmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, ?)");
+    $logAction = ($action === 'approve') 
+        ? "Approved report ID $report_id"
+        : "Rejected report ID $report_id";
+    $logStmt->execute([$currentUserId, $logAction]);
 
     // Fetch report owner
     $userStmt = $pdo->prepare("SELECT user_id FROM reports WHERE id = ?");
