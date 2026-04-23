@@ -127,7 +127,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CNO NutriMap — Archive</title>
+  <title>CNO | Archive</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -227,7 +228,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="menu-container" onclick="event.stopPropagation();">
               <button class="menu-btn"><i class="fa fa-ellipsis-v"></i></button>
               <div class="menu-content">
-                <a href="view_barangay.php?id=<?= $r['id'] ?>" target="_blank"><i class="fa fa-eye"></i> View</a>
+                <a href="view_report.php?id=<?= $r['id'] ?>" target="_blank"><i class="fa fa-eye"></i> View</a>
                 <a href="archive/restore_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Restore this report?')"><i class="fa fa-undo"></i> Restore</a>
                 <a href="archive/delete_report.php?id=<?= $r['id'] ?>" onclick="return confirm('Delete this report?')"><i class="fa fa-trash"></i> Delete Permanently</a>
               </div>

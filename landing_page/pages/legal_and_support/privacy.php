@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy - CNO NutriMap</title>
+  <title>CNO NutriMap Privacy Policy</title>
   <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -12,10 +12,11 @@
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
   <!-- ====== HEADER ====== -->
-  <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow-md relative z-50">
+  <header class="flex justify-between items-center px-6 md:px-10 h-14 bg-white shadow-md relative z-50">
     <!-- Logo -->
     <div class="flex items-center space-x-2">
       <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 rounded-lg" />
+      <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 rounded-lg" />
       <h1 class="text-2xl font-bold text-gray-700">
         <span class="text-teal-600">CNO</span> NutriMap
       </h1>
@@ -38,7 +39,6 @@
         <div id="aboutDropdown" class="absolute left-0 mt-2 w-44 bg-white border border-gray-200 shadow-lg rounded-lg hidden">
           <a href="../about_us/about.php" class="block px-4 py-2 hover:bg-gray-100">About</a>
           <a href="../about_us/profile.php" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
-          <a href="../about_us/history.php" class="block px-4 py-2 hover:bg-gray-100">History</a>
           <a href="../about_us/vision.php" class="block px-4 py-2 hover:bg-gray-100">Vision</a>
           <a href="../about_us/mission.php" class="block px-4 py-2 hover:bg-gray-100">Mission</a>
         </div>
@@ -70,7 +70,6 @@
       <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
         <a href="../about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
         <a href="../about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-        <a href="../about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
         <a href="../about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
         <a href="../about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
       </div>
@@ -131,7 +130,6 @@
           <ul class="space-y-2">
             <li><a href="../about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
             <li><a href="../about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
-            <li><a href="../about_us/history.php" class="hover:text-teal-400">History</a></li>
           </ul>
         </div>
 

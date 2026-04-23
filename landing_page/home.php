@@ -17,10 +17,11 @@
 <body class="text-gray-800">
 
   <!-- HEADER -->
-  <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <header class="flex justify-between items-center px-6 md:px-10 h-14 bg-white shadow relative">
     <!-- Logo -->
     <div class="flex items-center font-bold text-2xl text-gray-700">
       <img src="../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <img src="../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
       <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
 
@@ -40,7 +41,6 @@
         <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded hidden z-50">
           <a href="pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-100">About</a>
           <a href="pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
-          <a href="pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-100">History</a>
           <a href="pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-100">Vision</a>
           <a href="pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-100">Mission</a>
         </div>
@@ -75,7 +75,6 @@
         <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
           <a href="pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
           <a href="pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-          <a href="pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
           <a href="pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
           <a href="pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
         </div>
@@ -87,14 +86,14 @@
   </header>
 
   <!-- HERO SECTION -->
-  <main class="relative flex items-center justify-start text-white min-h-[80vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
+  <main class="relative flex items-center justify-start text-white min-h-[89vh] bg-cover bg-center" style="background-image: url('../img/bg_img.jpg');">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/50"></div>
 
     <!-- Text Content -->
     <div class="relative z-10 px-8 md:px-16 lg:px-24 max-w-4xl text-left">
       <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
-        Welcome to <br><span class="text-teal-400">City Nutrition Office</span>
+        Welcome to <br><span class="text-teal-400">NutriMap</span>
       </h1>
       <p class="text-lg md:text-xl mb-6">El Salvador, Misamis Oriental</p>
       <a href="pages/kmau.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md">
@@ -102,7 +101,13 @@
       </a>
     </div>
   </main>
-
+<section class="w-full max-w-5xl mx-auto bg-gray-100 rounded-2xl shadow-md mt-10 mb-20 sm:p-12 text-center">
+    <h2 class="text-2xl sm:text-3xl font-bold text-teal-600 mb-4">Empowering Nutrition Awareness</h2>
+    <p class="text-gray-600 text-base sm:text-lg leading-relaxed">
+      The City Nutrition Office of El Salvador, Misamis Oriental, is committed to promoting a healthier community
+      through education, data-driven decisions, and continuous collaboration with local partners and stakeholders.
+    </p>
+  </section>
   <!-- FOOTER -->
   <footer class="bg-gray-800 text-gray-300 py-10 mt-10">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -122,7 +127,6 @@
         <ul class="space-y-2">
           <li><a href="pages/about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
           <li><a href="pages/about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
-          <li><a href="pages/about_us/history.php" class="hover:text-teal-400">History</a></li>
         </ul>
       </div>
 

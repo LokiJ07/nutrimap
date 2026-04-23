@@ -2,6 +2,7 @@
 session_start();
 require '../db/config.php';
 
+// Require login
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
@@ -9,101 +10,78 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// ✅ Fetch login history for current user (latest first)
-$stmt = $pdo->prepare("SELECT id, browser, ip_address, login_time, logout_time, session_id 
-                       FROM login_history 
-                       WHERE user_id = ? 
-                       ORDER BY login_time DESC");
+// Fetch all active login history (latest first)
+$stmt = $pdo->prepare("
+    SELECT id, browser, ip_address, login_time, logout_time, session_id, device_token
+    FROM login_history
+    WHERE user_id = ? AND logout_time IS NULL
+    ORDER BY login_time DESC
+");
 $stmt->execute([$user_id]);
-$allLogins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$logins = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 
-// ✅ Filter unique devices (latest only)
-$logins = [];
-$seenDevices = [];
-
-foreach ($allLogins as $login) {
-    $deviceKey = $login['browser'] . '|' . $login['ip_address'];
-    if (!isset($seenDevices[$deviceKey])) {
-        $logins[] = $login;
-        $seenDevices[$deviceKey] = true;
-    }
-}
-
-// ✅ Get user info
-$stmt = $pdo->prepare("SELECT current_session, password_hash FROM users WHERE id = ?");
+// Get user info
+$stmt = $pdo->prepare("SELECT password_changed, current_session, password_hash FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+$password_changed = $user['password_changed'] ?? 0;
 $current_session = $user['current_session'] ?? '';
 $current_password_hash = $user['password_hash'] ?? '';
 
 $password_message = '';
 $password_error = false;
-
-// ✅ Show change password card if form submitted
 $show_change_password = false;
 
+// Handle change password form
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password'])) {
     $show_change_password = true;
 
-    $current_password = $_POST['current_password'];
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    if (!password_verify($current_password, $current_password_hash)) {
-        $password_message = "Current password is incorrect!";
-        $password_error = true;
-    } elseif ($new_password !== $confirm_password) {
-        $password_message = "New password and confirm password do not match!";
-        $password_error = true;
-    } elseif (
-        strlen($new_password) < 6 || 
-        !preg_match('/[0-9]/', $new_password) || 
-        !preg_match('/[A-Za-z]/', $new_password) || 
-        !preg_match('/[.,!@$%]/', $new_password)
-    ) {
-        $password_message = "Password must include letters, numbers, and special characters (.,!@$%).";
+    if ($password_changed) {
+        $password_message = "You have already changed your password. This action is allowed only once.";
         $password_error = true;
     } else {
-        $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
-        $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
-        if ($updateStmt->execute([$new_hash, $user_id])) {
-            $password_message = "Password successfully changed!";
-            $password_error = false;
+        $current_password = $_POST['current_password'];
+        $new_password = $_POST['new_password'];
+        $confirm_password = $_POST['confirm_password'];
 
-            // 🔹 Log activity for password change
-            $logStmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
-            $logStmt->execute([$user_id, "Changed password"]);
-        } else {
-            $password_message = "Failed to update password. Please try again.";
+        if (!password_verify($current_password, $current_password_hash)) {
+            $password_message = "Current password is incorrect!";
             $password_error = true;
+        } elseif ($new_password !== $confirm_password) {
+            $password_message = "New password and confirm password do not match!";
+            $password_error = true;
+        } elseif (
+            strlen($new_password) < 6 ||
+            !preg_match('/[0-9]/', $new_password) ||
+            !preg_match('/[A-Za-z]/', $new_password) ||
+            !preg_match('/[.,!@$%]/', $new_password)
+        ) {
+            $password_message = "Password must include letters, numbers, and special characters (.,!@$%).";
+            $password_error = true;
+        } else {
+            $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
+            $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ?, password_changed = 1 WHERE id = ?");
+            if ($updateStmt->execute([$new_hash, $user_id])) {
+                $password_changed = 1;
+                $password_message = "Password successfully changed!";
+                $password_error = false;
+
+                $logStmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
+                $logStmt->execute([$user_id, "Changed password"]);
+            } else {
+                $password_message = "Failed to update password. Please try again.";
+                $password_error = true;
+            }
         }
     }
-}
-
-// ✅ Helper functions to parse friendly browser and OS names
-function getBrowserName($ua) {
-    if (strpos($ua, 'Firefox') !== false) return 'Firefox';
-    if (strpos($ua, 'Edg') !== false) return 'Edge';
-    if (strpos($ua, 'Chrome') !== false) return 'Chrome';
-    if (strpos($ua, 'Safari') !== false && strpos($ua, 'Chrome') === false) return 'Safari';
-    if (strpos($ua, 'Opera') !== false || strpos($ua, 'OPR') !== false) return 'Opera';
-    return 'Unknown';
-}
-
-function getOSName($ua) {
-    if (strpos($ua, 'Windows') !== false) return 'Windows';
-    if (strpos($ua, 'Macintosh') !== false) return 'Mac';
-    if (strpos($ua, 'Linux') !== false) return 'Linux';
-    if (strpos($ua, 'iPhone') !== false) return 'iPhone';
-    if (strpos($ua, 'Android') !== false) return 'Android';
-    return 'Unknown';
 }
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CNO NutriMap — Security</title>
+  <title>CNO | Security</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -129,133 +107,129 @@ function getOSName($ua) {
     .security-modal-content button { margin-top:12px; background:#dc3545; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
     .security-close-btn { margin-top:10px; background:#6c757d; color:#fff; padding:8px 12px; border:none; border-radius:4px; cursor:pointer; }
     .password-form { display:flex; flex-direction:column; gap:15px; margin-top:10px; }
-    .password-form input { width:97%; padding:12px 15px; font-size:15px; border:1px solid #ccc; border-radius:8px; outline:none; }
-    .password-form input:focus { border-color:#00AEEF; box-shadow:0 0 5px rgba(0,174,239,0.4); }
-    .btn-submit { padding:12px; background:#00AEEF; color:#fff; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s, transform 0.1s; }
-    .btn-submit:hover { background:#0195a0; transform:translateY(-1px); }
+    .password-form .form-group input { width:100%; padding:12px 15px; font-size:15px; border:1px solid #ccc; border-radius:8px; outline:none; }
+    .password-form .form-group input:focus { border-color:#0195a0ff; box-shadow:0 0 5px rgba(0,174,239,0.4); }
+    .password-form .btn-submit { padding:12px; background:#0195a0ff; color:#fff; font-weight:bold; border:none; border-radius:8px; cursor:pointer; }
+    .password-form .btn-submit:hover { background:#00AEEF; transform:translateY(-1px); }
     .password-message { margin-top:10px; font-size:14px; color:green; }
     .password-message.error { color:red; }
   </style>
 </head>
 <body>
-  <div class="layout">
-    <?php include 'header.php'; ?>
-
-    <div class="body-layout">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <h3>Security</h3>
-        <a href="#" class="menu-link active" data-target="view-logins"><i class="fa-solid fa-clock-rotate-left"></i> View login</a>
-        <a href="#" class="menu-link" data-target="change-password"><i class="fa-solid fa-lock"></i> Change password</a>
-      </div>
-
-      <!-- Content -->
-      <div class="content">
-        <!-- View Logins Card -->
-        <div class="card active" id="view-logins">
-          <h2>View logins</h2>
-          <p>These are the devices where your account is logged in.</p>
-
-          <?php if (count($logins) > 0): ?>
-            <?php foreach ($logins as $login):
-              $browser = getBrowserName($login['browser']);
-              $os = getOSName($login['browser']);
-              $isCurrent = $login['session_id'] === $current_session;
-              $deviceLabel = "$browser on $os";
-            ?>
-              <div class="device-btn"
-                   data-id="<?= $login['id'] ?>"
-                   data-current="<?= $isCurrent ? '1' : '0' ?>"
-                   data-login="<?= htmlspecialchars($login['login_time']) ?>"
-                   data-ip="<?= htmlspecialchars($login['ip_address']) ?>">
-                <span class="device-name"><?= htmlspecialchars($deviceLabel) ?><?= $isCurrent ? " (This device)" : "" ?></span>
-                <span class="device-time"><?= date('M j, g:i a', strtotime($login['login_time'])) ?></span>
-              </div>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <p>No logins recorded yet.</p>
-          <?php endif; ?>
-        </div>
-
-        <!-- Change Password Card -->
-        <div class="card" id="change-password">
-          <h2>Change Password</h2>
-          <p>Your password must be at least 6 characters and include numbers, letters, and special characters (.,!@$%).</p>
-
-          <form method="post" class="password-form">
-            <?php if ($password_message): ?>
-              <div class="password-message <?= $password_error ? 'error' : '' ?>">
-                  <?= htmlspecialchars($password_message) ?>
-              </div>
-            <?php endif; ?>
-
-            <input type="password" name="current_password" placeholder="Enter your current password" required>
-            <input type="password" name="new_password" placeholder="Enter new password" required>
-            <input type="password" name="confirm_password" placeholder="Confirm new password" required>
-            <button type="submit" class="btn-submit">Change Password</button>
-          </form>
-        </div>
-      </div>
-    </div>
+<div class="layout">
+<?php include 'header.php'; ?>
+<div class="body-layout">
+  <div class="sidebar">
+    <h3>Security</h3>
+    <a href="#" class="menu-link active" data-target="view-logins"><i class="fa-solid fa-clock-rotate-left"></i> View login</a>
+    <a href="#" class="menu-link" data-target="change-password"><i class="fa-solid fa-lock"></i> Change password</a>
   </div>
 
-  <!-- 🔒 Security Modal -->
-  <div class="security-modal" id="securityLogModal">
-    <div class="security-modal-content">
-      <h3>Log Info</h3>
-      <p id="securityLogDate"></p>
-      <p id="securityLogIp"></p>
-      <button id="securityLogoutBtn">Logout</button>
-      <button class="security-close-btn" onclick="closeSecurityModal()">Close</button>
+  <div class="content">
+    <!-- View Logins -->
+    <div class="card active" id="view-logins">
+      <h2>View logins</h2>
+      <p>These are the devices where your account is logged in.</p>
+
+<?php if (count($logins) > 0): ?>
+    <?php foreach ($logins as $login): 
+        $isCurrent = $login['session_id'] === session_id();
+    ?>
+        <div class="device-btn" 
+             data-id="<?= $login['id'] ?>" 
+             data-current="<?= $isCurrent ? '1':'0' ?>" 
+             data-login="<?= htmlspecialchars($login['login_time']) ?>" 
+             data-ip="<?= htmlspecialchars($login['ip_address']) ?>">
+            <span class="device-name"><?= htmlspecialchars($login['browser']) ?><?= $isCurrent ? " (This device)" : "" ?></span>
+            <span class="device-time"><?= date('M j, g:i a', strtotime($login['login_time'])) ?></span>
+        </div>
+    <?php endforeach; ?>
+<?php else: ?>
+    <p>No logins recorded yet.</p>
+<?php endif; ?>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card" id="change-password">
+      <h2>Change Password</h2>
+      <p class="form-text">You can change your password once. Must include letters, numbers & special characters (!$@%).</p>
+
+      <form method="post" class="password-form">
+        <?php if ($password_changed): ?>
+          <div class="password-message error">You have already changed your password. This action is allowed only once.</div>
+        <?php endif; ?>
+
+        <?php if ($password_message): ?>
+          <div class="password-message <?= $password_error ? 'error' : '' ?>"><?= htmlspecialchars($password_message) ?></div>
+        <?php endif; ?>
+
+        <?php if (!$password_changed): ?>
+          <div class="form-group"><input type="password" name="current_password" placeholder="Current password" required></div>
+          <div class="form-group"><input type="password" name="new_password" placeholder="New password" required></div>
+          <div class="form-group"><input type="password" name="confirm_password" placeholder="Confirm new password" required></div>
+          <button type="submit" class="btn-submit">Change Password</button>
+        <?php endif; ?>
+      </form>
     </div>
   </div>
+</div>
+</div>
 
-  <script>
-  (() => {
-    const modal = document.getElementById("securityLogModal");
-    const dateField = document.getElementById("securityLogDate");
-    const ipField = document.getElementById("securityLogIp");
-    const logoutBtn = document.getElementById("securityLogoutBtn");
-    let selectedId = null;
-    let isCurrentDevice = false;
+<div class="security-modal" id="securityLogModal">
+  <div class="security-modal-content">
+    <h3>Log Info</h3>
+    <p id="securityLogDate"></p>
+    <p id="securityLogIp"></p>
+    <button id="securityLogoutBtn">Logout</button>
+    <button class="security-close-btn" onclick="closeSecurityModal()">Close</button>
+  </div>
+</div>
 
-    document.querySelectorAll(".device-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        selectedId = btn.dataset.id;
-        isCurrentDevice = btn.dataset.current === "1";
-        dateField.textContent = "Login Date: " + btn.dataset.login;
-        ipField.textContent = "IP Address: " + btn.dataset.ip;
-        logoutBtn.style.display = isCurrentDevice ? "none" : "inline-block";
-        modal.style.display = "flex";
-      });
+<script>
+(() => {
+  const modal = document.getElementById("securityLogModal");
+  const dateField = document.getElementById("securityLogDate");
+  const ipField = document.getElementById("securityLogIp");
+  const logoutBtn = document.getElementById("securityLogoutBtn");
+  let selectedId = null;
+  let isCurrentDevice = false;
+
+  document.querySelectorAll(".device-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedId = btn.dataset.id;
+      isCurrentDevice = btn.dataset.current === "1";
+      dateField.textContent = "Login Date: " + btn.dataset.login;
+      ipField.textContent = "IP Address: " + btn.dataset.ip;
+      logoutBtn.style.display = isCurrentDevice ? "none" : "inline-block";
+      modal.style.display = "flex";
     });
+  });
 
-    function closeSecurityModal() { modal.style.display = "none"; }
-    window.closeSecurityModal = closeSecurityModal;
+  window.closeSecurityModal = () => { modal.style.display = "none"; };
 
-    logoutBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you want to log out this device?")) {
-        window.location.href = "force_logout.php?id=" + selectedId;
-      }
-    });
+  logoutBtn.addEventListener("click", () => {
+    if (confirm("Are you sure you want to log out this device?")) {
+      window.location.href = "force_logout.php?id=" + selectedId;
+    }
+  });
 
-    document.querySelectorAll('.menu-link').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-        link.classList.add('active');
-        document.getElementById(link.dataset.target).classList.add('active');
-      });
-    });
-
-    <?php if (!empty($show_change_password) && $show_change_password): ?>
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
       document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
       document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-      document.querySelector('[data-target="change-password"]').classList.add('active');
-      document.getElementById('change-password').classList.add('active');
-    <?php endif; ?>
-  })();
-  </script>
+      link.classList.add('active');
+      document.getElementById(link.dataset.target).classList.add('active');
+    });
+  });
+
+  <?php if (!empty($show_change_password) && $show_change_password): ?>
+    document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-target="change-password"]').classList.add('active');
+    document.getElementById('change-password').classList.add('active');
+  <?php endif; ?>
+})();
+</script>
 </body>
 </html>

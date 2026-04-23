@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNO NutriMap - Organizational Chart</title>
+  <title>CNO NutriMap | Organizational Chart</title>
    <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -11,9 +11,10 @@
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
   <!-- Header -->
-  <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative z-50">
+  <header class="flex justify-between items-center px-6 md:px-10 h-14 bg-white shadow relative z-50">
     <div class="flex items-center font-bold text-2xl text-gray-700">
       <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
       <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
 
@@ -33,7 +34,6 @@
         <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
           <a href="about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
           <a href="profile.php" class="block px-4 py-2 hover:bg-gray-200 text-teal-600">Profile</a>
-          <a href="history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
           <a href="vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
           <a href="mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
         </div>
@@ -67,7 +67,6 @@
         <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
           <a href="about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
           <a href="profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-          <a href="history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
           <a href="vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
           <a href="mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
         </div>
@@ -133,63 +132,77 @@
       </div>
 
       <!-- Top Node -->
-      <div class="flex flex-col items-center">
-        <div class="bg-white border border-teal-500 rounded-lg shadow-md p-4 flex flex-col items-center min-w-[150px] mb-3">
-          <img src="../../../img/org/7.png" alt="Elma M. Clapano, RN" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-teal-500 mb-2">
-          <div class="font-bold text-gray-800 text-sm md:text-base">Elma M. Clapano, RN</div>
-          <div class="mt-1 font-bold text-yellow-800 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs md:text-sm text-center">City Nutrition Action Officer</div>
-        </div>
+      <!-- ===== Chart Section ===== -->
+  <section class="max-w-6xl mx-auto text-center py-16 px-6">
 
-        <!-- Vertical Line -->
-        <div class="w-1 h-6 md:h-8 bg-gray-600"></div>
-
-        <!-- Division Boxes -->
-        <div class="flex flex-col md:flex-row justify-center w-full relative mt-2 md:mt-4 space-y-2 md:space-y-0 md:space-x-8">
-          <div class="bg-white border border-gray-600 border-t-0 rounded-b-lg px-6 py-2 font-bold text-gray-800 text-center">Technical Division</div>
-          <div class="bg-white border border-gray-600 border-t-0 rounded-b-lg px-6 py-2 font-bold text-gray-800 text-center">Administrative Division</div>
-        </div>
-
-        <!-- Division Members -->
-        <div class="flex flex-col md:flex-row justify-center w-full mt-6 md:mt-10 gap-6 md:gap-12">
-          <!-- Technical Division -->
-          <div class="flex flex-wrap justify-center md:justify-between flex-1 gap-4">
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/6.png" alt="Edgar B. Napiñas" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Edgar B. Napiñas</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">City Nutrition Program Coordinator</div>
-            </div>
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/5.png" alt="Arlie Joy O. Damiles, RND" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Arlie Joy O. Damiles, RND</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">Nutritionist-Dietitian</div>
-            </div>
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/4.png" alt="Karen Jay B. Langala, RND" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Karen Jay B. Langala, RND</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">Nutritionist-Dietitian</div>
-            </div>
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/3.png" alt="Jay S. Boctot, LPT" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Jay S. Boctot, LPT</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">City Nutrition Program Coordinator</div>
-            </div>
-          </div>
-
-          <!-- Administrative Division -->
-          <div class="flex flex-wrap justify-center md:justify-between flex-1 gap-4">
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/2.png" alt="Honey Grace S. Magriña" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Honey Grace S. Magriña</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">Office Clerk</div>
-            </div>
-            <div class="flex flex-col items-center pt-4">
-              <img src="../../../img/org/1.png" alt="Antonette E. Villbar" class="w-16 h-15 md:w-20 md:h-20 rounded-full border-4 border-teal-500 mb-2">
-              <div class="font-bold text-gray-800 text-sm md:text-base text-center">Antonette E. Villbar</div>
-              <div class="text-gray-600 text-xs md:text-sm text-center">Administrative Aide III</div>
-            </div>
-          </div>
-        </div>
+    <!-- Top Level -->
+    <div class="relative inline-block mb-16">
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-lg p-6 w-60 mx-auto hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/7.png" alt="Elma M. Clapano" class="w-28 h-28 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="text-lg font-semibold">Elma M. Clapano, RN</h3>
+        <p class="text-gray-600 text-sm">City Nutrition Action Officer</p>
       </div>
+      <div class="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-10 bg-teal-500 bottom-[-40px]"></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="w-full h-px bg-teal-400 opacity-30 my-8"></div>
+
+    <!-- ===== Technical Division ===== -->
+    <h3 class="text-xl sm:text-2xl font-bold text-teal-600 uppercase tracking-wide mb-8 border-b-4 border-teal-500 inline-block pb-1">
+      Technical Division
+    </h3>
+
+    <div class="flex flex-wrap justify-center items-start gap-6 mb-16">
+      <!-- Person -->
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/6.png" alt="Edgar B. Napilas" class="w-24 h-24 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Edgar B. Napilas</h3>
+        <p class="text-gray-600 text-sm">City Nutrition Program Coordinator</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/5.png" alt="Arlie Joy O. Damiles" class="w-24 h-24 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Arlie Joy O. Damiles, RND</h3>
+        <p class="text-gray-600 text-sm">Nutritionist-Dietitian</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/4.png" alt="Karen Jay B. Lagala" class="w-24 h-24 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Karen Jay B. Lagala, RND</h3>
+        <p class="text-gray-600 text-sm">Nutritionist-Dietitian</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/3.png" alt="Jay S. Boctot" class="w-24 h-24 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Jay S. Boctot, LPT</h3>
+        <p class="text-gray-600 text-sm">City Nutrition Program Coordinator</p>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="w-full h-px bg-teal-400 opacity-30 my-8"></div>
+
+    <!-- ===== Administrative Division ===== -->
+    <h3 class="text-xl sm:text-2xl font-bold text-teal-600 uppercase tracking-wide mb-8 border-b-4 border-teal-500 inline-block pb-1">
+      Administrative Division
+    </h3>
+
+    <div class="flex flex-wrap justify-center items-start gap-6">
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/2.png" alt="Honey Grace S. Magrifila" class="w-24 h-20 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Honey Grace S. Magrifila</h3>
+        <p class="text-gray-600 text-sm">Office Clerk</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border-t-4 border-teal-500 shadow-md p-6 w-56 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+        <img src="../../../img/org/1.png" alt="Antonette E. Vilbar" class="w-24 h-26 object-cover rounded-full border-4 border-teal-500 mx-auto mb-3">
+        <h3 class="font-semibold text-base">Antonette E. Vilbar</h3>
+        <p class="text-gray-600 text-sm">Administrative Aide III</p>
+      </div>
+    </div>
+  </section>
+
 
     </div>
   </main>
@@ -211,7 +224,6 @@
           <ul class="footer-links space-y-2">
             <li><a href="mission.php" class="hover:text-cyan-600">Our Mission</a></li>
             <li><a href="vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>

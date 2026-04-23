@@ -10,7 +10,7 @@ function logActivity($pdo, $user_id, $action) {
 
 // ✅ Require login
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -83,6 +83,6 @@ if ($archive) {
 logActivity($pdo, $user_id, "Restored report (ID: $reportId) from archive");
 
 // 🔹 Redirect back to reports page instead of archive
-header("Location: ../archive.php?msg=restored");
+header("Location: ../archive_report.php?msg=restored");
 exit();
 ?>

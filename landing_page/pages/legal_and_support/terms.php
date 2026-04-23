@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Use - CNO NutriMap</title>
+    <title>CNO NutriMap | Terms of Use</title>
     <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,10 +14,11 @@
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
   <!-- Header -->
-  <header class="header flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <header class="header flex justify-between items-center px-6 md:px-10 h-14 bg-white shadow relative">
   <!-- Logo -->
   <div class="flex items-center font-bold text-2xl text-gray-700">
     <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+    <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
     <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
   </div>
 
@@ -39,7 +40,6 @@
   <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
     <a href="../about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
     <a href="../about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-    <a href="../about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
     <a href="../about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
     <a href="../about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
   </div>
@@ -74,7 +74,6 @@
     <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
       <a href="../about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
       <a href="../about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-      <a href="../about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
       <a href="../about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
       <a href="../about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
     </div>
@@ -185,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <ul class="footer-links space-y-2">
             <li><a href="../about_us/mission.php" class="hover:text-cyan-600">Our Mission</a></li>
             <li><a href="../about_us/vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="../about_us/history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>

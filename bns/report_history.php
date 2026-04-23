@@ -62,6 +62,15 @@ if (isset($_GET['archive_id']) && is_numeric($_GET['archive_id'])) {
     exit();
 }
 
+// --- Sorting ---
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'new'; // default New → Old
+$orderSQL = '';
+if ($sort === 'new') {
+    $orderSQL = " ORDER BY r.report_date DESC, r.report_time DESC ";
+} elseif ($sort === 'az') {
+    $orderSQL = " ORDER BY b.title ASC ";
+}
+
 // --- Fetch approved reports for this user only (exclude archived) ---
 $stmt = $pdo->prepare("
     SELECT r.*, u.username, b.title 
@@ -74,7 +83,7 @@ $stmt = $pdo->prepare("
           SELECT report_id FROM report_archives 
           WHERE user_id = :uid2 AND user_type = :utype AND is_archived = 1
       )
-    ORDER BY r.report_date DESC, r.report_time DESC
+      $orderSQL
     LIMIT :limit OFFSET :offset
 ");
 $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
@@ -107,7 +116,8 @@ $totalPages = ceil($totalReports / $limit);
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CNO NutriMap — My Approved Reports</title>
+  <title>BNS | History Reports</title>
+  <link rel="icon" type="image/png" href="../img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -169,11 +179,11 @@ $totalPages = ceil($totalReports / $limit);
             <input type="text" id="reportSearch" placeholder="Search">
           </div>
           <div class="toolbar-right">
-            <label for="sort">Sort by:</label>
-            <select id="sort">
-              <option value="new">New → Old</option>
-              <option value="az">A → Z</option>
-            </select>
+        <label for="sortSelect">Sort by:</label>
+<select id="sortSelect" name="sort">
+  <option value="new" <?= ($sort === 'new') ? 'selected' : '' ?>>New → Old</option>
+  <option value="az" <?= ($sort === 'az') ? 'selected' : '' ?>>A → Z</option>
+</select>
             <a class="add-btn" href="add_report.php"><i class="fa fa-plus"></i> Add Report</a>
           </div>
         </div>
@@ -211,9 +221,12 @@ $totalPages = ceil($totalReports / $limit);
                     <td><?= date("m/d/Y", strtotime($r['report_date'])) ?></td>
                     <td><span class="status"><?= htmlspecialchars($r['status']) ?></span></td>
                     <td class="actions">
-                      <a href="view_report.php?id=<?= $r['id'] ?>" class="view"><i class="fa fa-eye"></i> View</a>
-                      <a href="report/edit_approved.php?id=<?= $r['id'] ?>" class="edit"><i class="fa fa-pen"></i> Edit</a>
+                      <a href="view_approved_report.php?id=<?= $r['id'] ?>" class="view"><i class="fa fa-eye"></i> View</a>
+                    <a href="edit_approved_report.php?id=<?= $r['id'] ?>" class="edit"><i class="fa fa-pen"></i> Update</a>  
                       <a href="?archive_id=<?= $r['id'] ?>" class="archive" onclick="return confirm('Archive this approved report?');"><i class="fa fa-archive"></i> Archive</a>
+                      <a href="export_report.php?id=<?= $r['id'] ?>&format=pdf" class="add-btn"><i class="fa fa-file-pdf"></i> PDF</a>
+                      
+                      <a href="export_report_excel.php?id=<?= $r['id'] ?>" class="add-btn"><i class="fa fa-file-excel"></i> Excel</a>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -236,6 +249,17 @@ document.getElementById('reportSearch').addEventListener('keyup', function() {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(filter) ? '' : 'none';
     });
+});
+
+document.getElementById('sortSelect').addEventListener('change', function() {
+    const sortValue = this.value;
+    const searchValue = document.getElementById('reportSearch').value;
+    // reload page with sort and search preserved
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', sortValue);
+    params.set('search', searchValue);
+    params.set('page', 1); // reset to page 1
+    window.location.search = params.toString();
 });
 </script>
 

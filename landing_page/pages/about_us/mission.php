@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNO NutriMap Mission</title>
+  <title>CNO NutriMap | Mission</title>
   <link rel="icon" type="image/png" href="../../../img/CNO_Logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -11,10 +11,11 @@
 <body class="flex flex-col min-h-screen bg-gray-100">
 
   <!-- Header -->
-  <header class="bg-white shadow px-6 md:px-10 py-4 flex justify-between items-center relative z-50">
+  <header class="bg-white shadow px-6 md:px-10 h-14 flex justify-between items-center relative z-50">
     <!-- Logo -->
     <div class="flex items-center text-2xl font-bold text-gray-700">
       <img src="../../../img/CNO_Logo.png" alt="CNO NutriMap Logo" class="h-10 mr-2">
+      <img src="../../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
       <span class="text-teal-600">CNO</span><span class="ml-2">NutriMap</span>
     </div>
 
@@ -34,7 +35,6 @@
         <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
           <a href="about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
           <a href="profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-          <a href="history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
           <a href="vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
           <a href="mission.php" class="block px-4 py-2 hover:bg-gray-200 text-teal-600 font-bold">Mission</a>
         </div>
@@ -68,8 +68,7 @@
         </button>
         <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
           <a href="about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
-          <a href="profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-          <a href="history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
+            <a href="profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
           <a href="vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
           <a href="mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
         </div>
@@ -119,7 +118,7 @@
     <h1 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-800">Our Mission</h1>
     <div class="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full text-gray-700 text-justify">
       <p class="text-lg leading-relaxed">
-        Our mission is to proactively implement sustainable nutrition programs and policies that empower individuals and families to achieve optimal health. We are committed to collaborating with communities, stakeholders, and government agencies to ensure food security, promote healthy eating habits, and reduce the prevalence of malnutrition across all sectors of the city.
+        Safeguard the nutrition integrity and well-being of Tagnipan-ons through pro-active nutrition program implementation.
       </p>
     </div>
   </main>
@@ -141,7 +140,6 @@
           <ul class="footer-links space-y-2">
             <li><a href="mission.php" class="hover:text-cyan-600">Our Mission</a></li>
             <li><a href="vision.php" class="hover:text-cyan-600">Our Vision</a></li>
-            <li><a href="history.php" class="hover:text-cyan-600">History</a></li>
           </ul>
         </div>
         <div>

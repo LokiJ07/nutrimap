@@ -8,7 +8,7 @@ function logActivity($pdo, $user_id, $action) {
 }
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 

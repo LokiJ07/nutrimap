@@ -4,54 +4,71 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require '../db/config.php';
 
-// ✅ Only allow BNS
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'BNS') {
     header("Location: ../login.php");
     exit();
 }
 $userId = $_SESSION['user_id'];
 
-// ✅ Total reports
+// Total submitted reports
 $totalStmt = $pdo->prepare("
     SELECT COUNT(*) 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ?
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.is_submitted = 1
 ");
 $totalStmt->execute([$userId]);
 $totalReports = $totalStmt->fetchColumn();
 
-// ✅ Approved reports
+// Approved submitted reports
 $approvedStmt = $pdo->prepare("
     SELECT COUNT(*) 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Approved'
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Approved' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
 ");
 $approvedStmt->execute([$userId]);
 $approvedReports = $approvedStmt->fetchColumn();
 
-// ✅ Pending reports
+// Pending submitted reports
 $pendingStmt = $pdo->prepare("
     SELECT COUNT(*) 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Pending'
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Pending' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
 ");
 $pendingStmt->execute([$userId]);
 $pendingReports = $pendingStmt->fetchColumn();
 
-// ✅ Rejected reports
+// Rejected submitted reports
 $rejectedStmt = $pdo->prepare("
     SELECT COUNT(*) 
-    FROM reports r
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = ? AND r.status = 'Rejected'
+    FROM reports r 
+    JOIN bns_reports b ON r.id = b.report_id 
+    WHERE r.user_id = ? 
+      AND r.status = 'Rejected' 
+      AND r.is_submitted = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM report_archives a 
+          WHERE a.report_id = r.id AND a.is_archived = 1
+      )
 ");
 $rejectedStmt->execute([$userId]);
 $rejectedReports = $rejectedStmt->fetchColumn();
 
-// ✅ Pagination
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
@@ -62,305 +79,148 @@ $totalRowsStmt->execute([$userId]);
 $totalRows = $totalRowsStmt->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-// ✅ Reports for main table
-$stmt = $pdo->prepare("
-    SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date
-    FROM reports r
-    JOIN users u ON r.user_id = u.id
-    JOIN bns_reports b ON r.id = b.report_id
-    WHERE r.user_id = :userId
-    ORDER BY r.report_date DESC, r.report_time DESC
-    LIMIT :limit OFFSET :offset
-");
-
+$stmt = $pdo->prepare("SELECT r.id, u.profile_pic, u.username, b.title, r.status, r.report_time, r.report_date FROM reports r JOIN users u ON r.user_id = u.id JOIN bns_reports b ON r.id = b.report_id LEFT JOIN report_archives a ON r.id = a.report_id AND (a.is_deleted = 0 OR a.is_deleted IS NULL) AND (a.is_archived = 0 OR a.is_archived IS NULL) WHERE r.user_id = :userId AND (r.status = 'Pending' OR r.status = 'Rejected') AND r.is_submitted = 1 ORDER BY r.report_date DESC, r.report_time DESC LIMIT :limit OFFSET :offset");
 $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
-
 $myReports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BNS Dashboard</title>
+<title>BNS | Dashboard</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* ❌ Prevent body scroll */
-}
-
-/* Overall Layout */
-.layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.body-layout {
-  display: flex;
-  flex: 1;
-  overflow: hidden; /* ✅ Prevent internal scroll */
-}
-
-/* Sidebar */
-.sidebar {
-  width: 230px;
-  background: #f9f9f9;
-  border-right: 1px solid #ccc;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-}
-.myreports-header {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-.searchbox {
-  margin-bottom: 10px;
-}
-.searchbox input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* Main content */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 15px;
-  overflow: hidden; /* ✅ Prevent main scroll */
-}
-
-/* Cards Section */
-.dashboard-cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-.card {
-  flex: 1 1 200px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
-  border-radius: 8px;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.card .icon {
-  font-size: 30px;
-}
-.card-total { background: #003d3c; }
-.card-approved { background: #006d6a; }
-.card-pending { background: #009688; }
-.card-rejected { background: #f44336; }
-
-/* Table Section */
-.table-container {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden; /* ✅ Keeps clean edge */
-}
-.table-container h3 {
-  padding: 10px 15px;
-  background: #009688;
-  color: #fff;
-  border-radius: 8px 8px 0 0;
-  margin: 0;
-  font-size: 16px;
-}
-.table-wrapper {
-  flex: 1;
-  overflow-y: auto; /* ✅ Only the table scrolls if too long */
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-th, td {
-  padding: 6px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-thead {
-  background: #009688;
-  color: #fff;
-}
-.status-badge {
-  padding: 2px 8px;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 12px;
-}
-.status-Pending { background: #00bcd4; }
-.status-Approved { background: #4caf50; }
-.status-Rejected { background: #f44336; }
-
-.btn {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  color: #fff;
-  text-decoration: none;
-}
-.btn-view { background: #3498db; }
-
-.pagination {
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  border-top: 1px solid #eee;
-  background: #fafafa;
-}
-.pagination a {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  text-decoration: none;
-  color: #333;
-}
-.pagination a.active {
-  background: #009688;
-  color: #fff;
-}
-
-.user-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-  object-fit: cover;
-}
-
-</style>
 </head>
-<body>
-<div class="layout">
+<body class="bg-gray-100 h-screen">
+<div class="flex flex-col h-screen">
   <?php include 'header.php'; ?>
-  <?php include 'sidemenu.php'; ?>
-  <div class="body-layout">
-    <!-- ✅ Sidebar -->
-    <aside class="sidebar">
-      <div class="myreports-header">Search My Reports</div>
-      <div class="searchbox">
-        <input type="text" id="sidebarSearch" placeholder="Search my reports...">
-      </div>
-    </aside>
 
-    <!-- ✅ Main Content -->
-    <main class="content">
-      <h2>Dashboard</h2>
-<div class="dashboard-cards">
-  <div class="card card-total">
-    <div class="icon"><i class="fa fa-file-alt"></i></div>
-    <div><h3>Total Reports: <?= $totalReports ?></h3></div>
-  </div>
+  <div class="flex flex-1 overflow-hidden">
 
-  <div class="card card-approved">
-    <div class="icon"><i class="fa fa-check-circle"></i></div>
-    <div><h3>Approved: <?= $approvedReports ?></h3></div>
-  </div>
-
-  <div class="card card-pending">
-    <div class="icon"><i class="fa fa-clock"></i></div>
-    <div><h3>Pending: <?= $pendingReports ?></h3></div>
-  </div>
-
-  <!-- ✅ NEW Rejected Card -->
-  <div class="card card-rejected">
-    <div class="icon"><i class="fa fa-times-circle"></i></div>
-    <div><h3>Rejected: <?= $rejectedReports ?></h3></div>
-  </div>
+    <main class="flex-1 flex flex-col p-4 overflow-hidden">
+      <div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Dashboard</h2>
+  <input 
+    id="tableSearch"
+    type="text" 
+    placeholder="Search Reports" 
+    class="px-3 py-2 w-60 border border-gray-300 rounded focus:ring-1 focus:ring-teal-500 focus:outline-none">
 </div>
-
-
-      <!-- ✅ Reports Table -->
-      <div class="table-container">
-        <h3>My Reports</h3>
-           <div class="table-wrapper">
-        <table id="reportsTable">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Time</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-          <?php if ($myReports): ?>
-            <?php foreach ($myReports as $r): ?>
-            <tr>
-              <td>
-              <?php if (!empty($r['profile_pic']) && file_exists("../uploads/".$r['profile_pic'])): ?>
-                  <img src="../uploads/<?= htmlspecialchars($r['profile_pic']) ?>" class="user-avatar" alt="Profile">
-                <?php else: ?>
-                  <img src="../uploads/default.png" class="user-avatar" alt="Default">
-                <?php endif; ?>  
-              <?= htmlspecialchars($r['username']) ?></td>
-              <td><?= htmlspecialchars($r['title']) ?></td>
-              <td><span class="status-badge status-<?= $r['status'] ?>"><?= $r['status'] ?></span></td>
-              <td><?= htmlspecialchars($r['report_time']) ?></td>
-              <td><?= htmlspecialchars($r['report_date']) ?></td>
-              <td><a class="btn btn-view" href="view_report.php?id=<?= $r['id'] ?>">View</a></td>
-            </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr><td colspan="6" style="text-align:center;color:#888;">No reports found</td></tr>
-          <?php endif; ?>
-          </tbody>
-        </table>
-
-        <!-- ✅ Pagination -->
-        <div class="pagination">
-          <?php if ($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>">Prev</a>
-          <?php endif; ?>
-          <?php for ($i=1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-          <?php endfor; ?>
-          <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page+1 ?>">Next</a>
-          <?php endif; ?>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="flex items-center h-25 gap-4 p-5 rounded-lg shadow bg-[#003d3c] text-white">
+          <i class="fa fa-file-alt text-4xl"></i>
+          <h3 class="font-normal text-2xl">Total Reports: <?= $totalReports ?></h3>
+        </div>
+        <div class="flex items-center h-25 gap-4 p-5 rounded-lg shadow bg-[#006d6a] text-white">
+          <i class="fa fa-check-circle text-4xl"></i>
+          <h3 class="font-normal text-2xl">Approved: <?= $approvedReports ?></h3>
+        </div>
+        <div class="flex items-center h-25 gap- p-5 rounded-lg shadow bg-[#009688] text-white">
+          <i class="fa fa-clock text-4xl"></i>
+          <h3 class="font-normal text-2xl">Pending: <?= $pendingReports ?></h3>
+        </div>
+        <div class="flex items-center h-25 gap-4 p-5 rounded-lg shadow bg-red-500 text-white">
+          <i class="fa fa-times-circle text-4xl"></i>
+          <h3 class="font-normal text-2xl">Rejected: <?= $rejectedReports ?></h3>
         </div>
       </div>
+
+      <div class="flex flex-col bg-white rounded-lg shadow overflow-hidden flex-1">
+        <div class="flex justify-between items-center py-3 px-4 font-bold border-b text-gray-700">
+          <span>Reports</span>
+          <a href="reports.php" class="text-blue-700 text-sm hover:underline">View All</a>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <table id="reportsTable" class="w-full text-sm border-collapse">
+            <thead class="bg-[#009688] text-white">
+              <tr>
+                <th class="p-2 text-left">User</th>
+                <th class="p-2 text-left">Title</th>
+                <th class="p-2 text-left">Status</th>
+                <th class="p-2 text-left">Time</th>
+                <th class="p-2 text-left">Date</th>
+                <th class="p-2 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php if ($myReports): ?>
+              <?php foreach ($myReports as $r): ?>
+              <tr class="border-b">
+                <td class="p-2 flex items-center gap-2">
+                  <?php if (!empty($r['profile_pic']) && file_exists("../uploads/".$r['profile_pic'])): ?>
+                    <img src="../uploads/<?= htmlspecialchars($r['profile_pic']) ?>" class="w-7 h-7 rounded-full object-cover">
+                  <?php else: ?>
+                    <img src="../uploads/default.png" class="w-7 h-7 rounded-full object-cover">
+                  <?php endif; ?>
+                  <?= htmlspecialchars($r['username']) ?>
+                </td>
+                <td class="p-2"><?= htmlspecialchars($r['title']) ?></td>
+                <td class="p-2">
+                  <span class="px-3 py-1 rounded-full text-white text-xs
+                    <?php if($r['status']==='Pending') echo 'bg-cyan-500'; ?>
+                    <?php if($r['status']==='Approved') echo 'bg-green-600'; ?>
+                    <?php if($r['status']==='Rejected') echo 'bg-red-500'; ?>
+                  ">
+                  <?= $r['status'] ?></span>
+                </td>
+                <td class="p-2"><?= htmlspecialchars($r['report_time']) ?></td>
+                <td class="p-2"><?= htmlspecialchars($r['report_date']) ?></td>
+                <td class="p-2">
+                  <a href="view_report.php?id=<?= $r['id'] ?>" class="bg-blue-600 text-white px-3 py-1 rounded text-xs">View</a>
+                </td>
+              </tr>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <tr><td colspan="6" class="text-center text-gray-500 py-4">No reports found</td></tr>
+            <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-center gap-2 py-3">
+          <?php
+            $maxLinks = 5;
+            $start = max(1, $page - floor($maxLinks / 2));
+            $end = min($totalPages, $start + $maxLinks - 1);
+            if ($end - $start < $maxLinks - 1) $start = max(1, $end - $maxLinks + 1);
+          ?>
+
+          <a href="?page=<?= $page-1 ?>" class="px-3 py-1 border rounded text-sm <?= $page>1?'':'pointer-events-none opacity-50' ?>">Prev</a>
+
+          <?php if ($start > 1): ?>
+            <a href="?page=1" class="px-3 py-1 border rounded text-sm">1</a>
+            <?php if ($start > 2): ?><span class="px-2 text-gray-500">...</span><?php endif; ?>
+          <?php endif; ?>
+
+          <?php for ($i=$start;$i<=$end;$i++): ?>
+            <a href="?page=<?= $i ?>" class="px-3 py-1 border rounded text-sm <?= $i==$page?'bg-[#009688] text-white':'' ?>"><?= $i ?></a>
+          <?php endfor; ?>
+
+          <?php if ($end < $totalPages): ?>
+            <?php if ($end < $totalPages - 1): ?><span class="px-2 text-gray-500">...</span><?php endif; ?>
+            <a href="?page=<?= $totalPages ?>" class="px-3 py-1 border rounded text-sm"><?= $totalPages ?></a>
+          <?php endif; ?>
+
+          <a href="?page=<?= $page+1 ?>" class="px-3 py-1 border rounded text-sm <?= $page<$totalPages?'':'pointer-events-none opacity-50' ?>">Next</a>
+        </div>
+
       </div>
     </main>
   </div>
 </div>
-
 <script>
-// ✅ Sidebar search filters the table
-document.getElementById("sidebarSearch").addEventListener("keyup", function() {
-  let filter = this.value.toLowerCase();
-  let rows = document.querySelectorAll("#reportsTable tbody tr");
+document.getElementById('tableSearch').addEventListener('keyup', function () {
+  const keyword = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#reportsTable tbody tr');
+
   rows.forEach(row => {
-    let text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(keyword) ? '' : 'none';
   });
 });
 </script>

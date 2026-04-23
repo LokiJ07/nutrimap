@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNO NutriMap - About CNO</title>
+  <title>CNO NutriMap | About CNO</title>
   <link rel="icon" type="image/png" href="../../img/CNO_Logo.png">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,11 +14,12 @@
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
 
   <!-- HEADER -->
-  <header class="flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow relative">
+  <header class="flex justify-between items-center px-6 md:px-10 h-14 bg-white shadow relative">
     
       <!-- Logo -->
       <div class="flex items-center text-2xl font-bold text-gray-700">
         <img src="../../img/CNO_Logo.png" alt="CNO Logo" class="h-10 mr-2">
+        <img src="../../logos/fixed/Seal_of_El_Salvador__Misamis_Oriental-removebg-preview.png" alt="NutriMap Logo" class="h-8 mr-2">
         <span class="text-teal-500">CNO</span><span class="ml-2">NutriMap</span>
       </div>
 
@@ -38,7 +39,6 @@
           <div id="aboutDropdown" class="absolute left-0 mt-2 w-40 bg-gray-100 shadow-lg rounded hidden z-50">
             <a href="../pages/about_us/about.php" class="block px-4 py-2 hover:bg-gray-200">About</a>
             <a href="../pages/about_us/profile.php" class="block px-4 py-2 hover:bg-gray-200">Profile</a>
-            <a href="../pages/about_us/history.php" class="block px-4 py-2 hover:bg-gray-200">History</a>
             <a href="../pages/about_us/vision.php" class="block px-4 py-2 hover:bg-gray-200">Vision</a>
             <a href="../pages/about_us/mission.php" class="block px-4 py-2 hover:bg-gray-200">Mission</a>
           </div>
@@ -69,7 +69,6 @@
         <div id="mobileAboutDropdown" class="hidden flex flex-col bg-gray-50">
           <a href="../pages/about_us/about.php" class="px-8 py-2 hover:bg-gray-200">About</a>
           <a href="../pages/about_us/profile.php" class="px-8 py-2 hover:bg-gray-200">Profile</a>
-          <a href="../pages/about_us/history.php" class="px-8 py-2 hover:bg-gray-200">History</a>
           <a href="../pages/about_us/vision.php" class="px-8 py-2 hover:bg-gray-200">Vision</a>
           <a href="../pages/about_us/mission.php" class="px-8 py-2 hover:bg-gray-200">Mission</a>
         </div>
@@ -122,7 +121,7 @@
         <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
           <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Mission</h2>
           <p class="text-gray-700 text-justify">
-            To serve as the primary advocate for a well-nourished community by implementing evidence-based nutritional programs, and by empowering families to take charge of their health through education, resources, and continuous support.
+            Safeguard the nutrition integrity and well-being of Tagnipan-ons through pro-active nutrition program implementation.
           </p>
         </div>
 
@@ -130,7 +129,15 @@
         <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
           <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Vision</h2>
           <p class="text-gray-700 text-justify">
-            A malnutrition-free El Salvador City where every citizen, regardless of age or background, has access to adequate and nutritious food, enabling them to reach their full potential and contribute to the city's progress.
+           Healthy Tagnipan-ons through Committed, People-Centered and Excellent Nutrition Services.
+          </p>
+        </div>
+
+        <!-- Goal -->
+        <div class="bg-gray-50 p-6 rounded-lg shadow mb-6">
+          <h2 class="text-2xl font-semibold text-teal-500 mb-3">Our Goal</h2>
+          <p class="text-gray-700 text-justify">
+           Improve and sustain at a low public health significance on malnutrition among all age groups.
           </p>
         </div>
 
@@ -166,7 +173,6 @@
         <ul class="space-y-2">
           <li><a href="../pages/about_us/mission.php" class="hover:text-teal-400">Our Mission</a></li>
           <li><a href="../pages/about_us/vision.php" class="hover:text-teal-400">Our Vision</a></li>
-          <li><a href="../pages/about_us/history.php" class="hover:text-teal-400">History</a></li>
         </ul>
       </div>
 

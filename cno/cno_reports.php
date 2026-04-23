@@ -8,44 +8,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
     exit();
 }
 
-// Fetch Pending Reports
-// Fetch Pending Reports (only submitted)
-$pendingStmt = $pdo->prepare("
-    SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
-    FROM reports r
-    JOIN bns_reports b ON b.report_id = r.id
-    JOIN users u ON r.user_id = u.id
-    WHERE r.status='Pending' AND r.is_submitted = 1
-    ORDER BY r.report_date DESC, r.report_time DESC
-");
-$pendingStmt->execute();
-$pendingReports = $pendingStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch Approved Reports
-// Fetch Approved Reports (only submitted)
-$approvedStmt = $pdo->prepare("
-    SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
-    FROM reports r
-    JOIN bns_reports b ON b.report_id = r.id
-    JOIN users u ON r.user_id = u.id
-    WHERE r.status='Approved' AND r.is_submitted = 1
-    ORDER BY r.report_date DESC, r.report_time DESC
-");
-$approvedStmt->execute();
-$approvedReports = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch Rejected Reports
-// Fetch Rejected Reports (only submitted)
-$rejectedStmt = $pdo->prepare("
-    SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
-    FROM reports r
-    JOIN bns_reports b ON b.report_id = r.id
-    JOIN users u ON r.user_id = u.id
-    WHERE r.status='Rejected' AND r.is_submitted = 1
-    ORDER BY r.report_date DESC, r.report_time DESC
-");
-$rejectedStmt->execute();
-$rejectedReports = $rejectedStmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch reports
+$statuses = ['Pending', 'Approved', 'Rejected'];
+$reports = [];
+foreach ($statuses as $status) {
+    $stmt = $pdo->prepare("
+        SELECT r.id, b.title, u.first_name, u.last_name, u.barangay, r.status, r.report_time, r.report_date
+        FROM reports r
+        JOIN bns_reports b ON b.report_id = r.id
+        JOIN users u ON r.user_id = u.id
+        WHERE r.status=? AND r.is_submitted=1
+        ORDER BY r.report_date DESC, r.report_time DESC
+    ");
+    $stmt->execute([$status]);
+    $reports[$status] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Fetch barangays for filter
 $barangays = $pdo->query("SELECT DISTINCT barangay FROM users ORDER BY barangay ASC")->fetchAll(PDO::FETCH_COLUMN);
@@ -55,54 +32,37 @@ $barangays = $pdo->query("SELECT DISTINCT barangay FROM users ORDER BY barangay 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNO Reports</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-body{font-family:Arial,sans-serif;margin:0;background:#f9fafb;}
-main{padding:1.5rem;}
-.container{max-width:72rem;margin:0 auto;background:#fff;padding:1.5rem;border-radius:.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);}
-h1{font-size:1.5rem;font-weight:bold;margin-bottom:1rem;}
-.tab-buttons{display:flex;border-bottom:1px solid #d1d5db;margin-bottom:1rem;}
-.tab-button{padding:.5rem 1rem;cursor:pointer;border:none;background:none;color:#374151;}
-.tab-button.active{font-weight:600;border-bottom:2px solid #2563eb;color:#2563eb;}
-.filters{display:flex;gap:1rem;margin-bottom:1rem;align-items:center;}
-select{padding:.25rem .75rem;border:1px solid #d1d5db;border-radius:.375rem;}
-table{width:100%;border-collapse:collapse;}
-thead{background:#f9fafb;}
-th,td{padding:1rem;text-align:left;font-size:.875rem;border:1px solid #e5e7eb;}
-th{text-transform:uppercase;font-weight:600;font-size:.75rem;color:#6b7280;}
-td{color:#374151;}
-.btn {padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer;color:#fff;text-decoration:none;}
-.btn-view {background:#3498db;}
-.approve-button{color: #01af41ff;background:#dcfce7;border-radius:.375rem;padding:.25rem .75rem;border:none;cursor:pointer;}
-.approve-button:hover{background: #bbf7d0;}
-.decline-button{color:#dc2626;background:#fee2e2;border-radius:.375rem;padding:.25rem .75rem;border:none;cursor:pointer;}
-#message-box{margin-top:1rem;font-weight:bold;padding:.5rem 1rem;border-radius:.375rem;display:none;}
-.hidden{display:none;}
-</style>
+<title>CNO | Reports</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
 <?php include 'header.php'; ?>
 <?php include 'sidebar.php'; ?>
 
-<main>
-<div class="container">
-<h1>Reports</h1>
+<main class="flex-1 p-6">
+<div class="container mx-auto space-y-6">
 
-<div class="tab-buttons">
-    <button id="pending-tab" class="tab-button active">Pending</button>
-    <button id="approved-tab" class="tab-button">Approved</button>
-    <button id="rejected-tab" class="tab-button">Rejected</button>
+<h1 class="text-2xl font-bold text-gray-700">Reports</h1>
+
+<!-- Tabs -->
+<div class="flex border-b border-gray-300">
+    <button class="tab-button py-2 px-4 text-teal-600 font-semibold border-b-2 border-teal-600" data-tab="Pending">Pending</button>
+    <button class="tab-button py-2 px-4 text-gray-500 font-semibold" data-tab="Approved">Approved</button>
+    <button class="tab-button py-2 px-4 text-gray-500 font-semibold" data-tab="Rejected">Rejected</button>
 </div>
 
-<div class="filters">
-    <select id="barangayFilter">
+<!-- Filters -->
+<div class="flex gap-4 mt-4">
+    <select id="barangayFilter" class="px-3 py-2 border border-gray-300 rounded shadow-sm">
         <option value="">All Barangays</option>
         <?php foreach($barangays as $b): ?>
         <option value="<?= htmlspecialchars($b) ?>"><?= htmlspecialchars($b) ?></option>
         <?php endforeach; ?>
     </select>
-    <select id="sortFilter">
+    <select id="sortFilter" class="px-3 py-2 border border-gray-300 rounded shadow-sm">
         <option value="">Sort By</option>
         <option value="name-asc">Name A-Z</option>
         <option value="name-desc">Name Z-A</option>
@@ -111,135 +71,88 @@ td{color:#374151;}
     </select>
 </div>
 
-<div id="pending-table">
-    <table>
-        <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Barangay</th>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="pending-reports-table-body">
-        <?php foreach($pendingReports as $r): ?>
-        <tr data-id="<?= $r['id'] ?>" data-barangay="<?= $r['barangay'] ?>" data-timestamp="<?= $r['report_date'].' '.$r['report_time'] ?>">
-            <td><?= htmlspecialchars($r['first_name'].' '.$r['last_name']) ?></td>
-            <td><?= htmlspecialchars($r['barangay']) ?></td>
-            <td><?= htmlspecialchars($r['title']) ?></td>
-            <td><?= htmlspecialchars($r['report_date']) ?></td>
-            <td><?= htmlspecialchars($r['report_time']) ?></td>
-            <td class="status"><?= ucfirst($r['status']) ?></td>
-            <td>
-                <button class="approve-button">Approve</button>
-                <button class="decline-button">Decline</button>
-                <a class="btn btn-view" href="view_report.php?id=<?= $r['id'] ?>">View</a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
+<!-- Tables -->
+<?php foreach ($statuses as $status): ?>
+<div id="<?= $status ?>-table" class="tab-content mt-4 <?= $status !== 'Pending' ? 'hidden' : '' ?>">
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full table-auto">
+            <thead class="bg-teal-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-left">Full Name</th>
+                    <th class="px-4 py-2 text-left">Barangay</th>
+                    <th class="px-4 py-2 text-left">Title</th>
+                    <th class="px-4 py-2 text-left">Date</th>
+                    <th class="px-4 py-2 text-left">Time</th>
+                    <th class="px-4 py-2 text-left">Status</th>
+                    <?php if($status==='Pending'): ?><th class="px-4 py-2 text-left">Actions</th><?php endif; ?>
+                </tr>
+            </thead>
+            <tbody id="<?= $status ?>-reports-body" class="text-gray-700">
+            <?php foreach($reports[$status] as $r): ?>
+            <tr data-id="<?= $r['id'] ?>" data-barangay="<?= $r['barangay'] ?>" data-timestamp="<?= $r['report_date'].' '.$r['report_time'] ?>" class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2"><?= htmlspecialchars($r['first_name'].' '.$r['last_name']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($r['barangay']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($r['title']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($r['report_date']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($r['report_time']) ?></td>
+                <td class="px-4 py-2 status"><?= ucfirst($r['status']) ?></td>
+                <?php if($status==='Pending'): ?>
+                <td class="px-4 py-2 flex gap-2">
+                    <button class="approve-button bg-green-100 text-green-700 px-2 py-1 rounded">Approve</button>
+                    <button class="decline-button bg-red-100 text-red-700 px-2 py-1 rounded">Decline</button>
+                    <a href="view_report.php?id=<?= $r['id'] ?>" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">View</a>
+                </td>
+                <?php endif; ?>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+            <!-- Pagination inside table -->
+            <tfoot>
+                <tr>
+                    <td colspan="<?= $status==='Pending'?7:6 ?>" class="px-4 py-2">
+                        <div class="flex justify-center space-x-2" id="<?= $status ?>-pagination"></div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
+<?php endforeach; ?>
 
-<div id="approved-table" class="hidden">
-    <table>
-        <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Barangay</th>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody id="approved-reports-table-body">
-        <?php foreach($approvedReports as $r): ?>
-        <tr data-barangay="<?= $r['barangay'] ?>" data-timestamp="<?= $r['report_date'].' '.$r['report_time'] ?>">
-            <td><?= htmlspecialchars($r['first_name'].' '.$r['last_name']) ?></td>
-            <td><?= htmlspecialchars($r['barangay']) ?></td>
-            <td><?= htmlspecialchars($r['title']) ?></td>
-            <td><?= htmlspecialchars($r['report_date']) ?></td>
-            <td><?= htmlspecialchars($r['report_time']) ?></td>
-            <td><?= ucfirst($r['status']) ?></td>
-        </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-
-<div id="rejected-table" class="hidden">
-    <table>
-        <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Barangay</th>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody id="rejected-reports-table-body">
-        <?php foreach($rejectedReports as $r): ?>
-        <tr data-barangay="<?= $r['barangay'] ?>" data-timestamp="<?= $r['report_date'].' '.$r['report_time'] ?>">
-            <td><?= htmlspecialchars($r['first_name'].' '.$r['last_name']) ?></td>
-            <td><?= htmlspecialchars($r['barangay']) ?></td>
-            <td><?= htmlspecialchars($r['title']) ?></td>
-            <td><?= htmlspecialchars($r['report_date']) ?></td>
-            <td><?= htmlspecialchars($r['report_time']) ?></td>
-            <td><?= ucfirst($r['status']) ?></td>
-        </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-
-<div id="message-box"></div>
+<div id="message-box" class="hidden p-2 rounded font-semibold"></div>
 </div>
 </main>
 
 <script>
-const pendingTab = document.getElementById('pending-tab');
-const approvedTab = document.getElementById('approved-tab');
-const rejectedTab = document.getElementById('rejected-tab');
-const pendingTable = document.getElementById('pending-table');
-const approvedTable = document.getElementById('approved-table');
-const rejectedTable = document.getElementById('rejected-table');
-const messageBox = document.getElementById('message-box');
-const barangayFilter = document.getElementById('barangayFilter');
-const sortFilter = document.getElementById('sortFilter');
+// Tabs
+const tabs = document.querySelectorAll('.tab-button');
+const contents = document.querySelectorAll('.tab-content');
+tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        tabs.forEach(t=>{t.classList.remove('text-teal-600','border-teal-600'); t.classList.add('text-gray-500');});
+        tab.classList.add('text-teal-600','border-teal-600');
+        contents.forEach(c=>c.classList.add('hidden'));
+        document.getElementById(tab.dataset.tab+'-table').classList.remove('hidden');
+        applyFilters();
+    });
+});
 
+// Show message
+const messageBox = document.getElementById('message-box');
 function showMessage(msg, success=true){
     messageBox.textContent = msg;
-    messageBox.style.display='block';
-    messageBox.style.backgroundColor = success ? '#16a34a' : '#dc2626';
-    messageBox.style.color='#fff';
-    setTimeout(()=>{messageBox.style.display='none';},3000);
+    messageBox.classList.remove('hidden','bg-green-600','bg-red-600');
+    messageBox.classList.add(success ? 'bg-green-600' : 'bg-red-600','text-white');
+    setTimeout(()=>messageBox.classList.add('hidden'),3000);
 }
 
-// Tabs
-pendingTab.addEventListener('click', ()=>{
-    pendingTab.classList.add('active'); approvedTab.classList.remove('active'); rejectedTab.classList.remove('active');
-    pendingTable.classList.remove('hidden'); approvedTable.classList.add('hidden'); rejectedTable.classList.add('hidden');
-});
-approvedTab.addEventListener('click', ()=>{
-    approvedTab.classList.add('active'); pendingTab.classList.remove('active'); rejectedTab.classList.remove('active');
-    approvedTable.classList.remove('hidden'); pendingTable.classList.add('hidden'); rejectedTable.classList.add('hidden');
-});
-rejectedTab.addEventListener('click', ()=>{
-    rejectedTab.classList.add('active'); pendingTab.classList.remove('active'); approvedTab.classList.remove('active');
-    rejectedTable.classList.remove('hidden'); pendingTable.classList.add('hidden'); approvedTable.classList.add('hidden');
-});
-
-// Approve/Decline Buttons
-document.getElementById('pending-reports-table-body').addEventListener('click', function(e){
+// Approve/Decline actions
+document.querySelector('#Pending-reports-body').addEventListener('click', function(e){
     const btn = e.target.closest('button');
     if(!btn) return;
     const row = btn.closest('tr');
+    if(!row) return;
+
     const reportId = row.dataset.id;
     if(!reportId) return;
 
@@ -247,56 +160,58 @@ document.getElementById('pending-reports-table-body').addEventListener('click', 
                    btn.classList.contains('decline-button') ? 'reject' : null;
     if(!action) return;
 
-    fetch('update_status.php', {
+    let message = '';
+    if(action === 'reject') {
+        message = prompt("Enter a message for declining this report:");
+        if(message === null) return; // user cancelled
+    }
+
+    fetch('update_status.php',{
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:`report_id=${reportId}&action=${action}`
+        body:`report_id=${reportId}&action=${action}&message=${encodeURIComponent(message)}`
     })
     .then(r=>r.json())
-.then(data => {
-    console.log('Server Response:', data); // Debug line — optional
-    if (data.error) {
-        showMessage(data.error, false);
-        return;
-    }
+    .then(data=>{
+        if(data.error){ showMessage(data.error,false); return; }
 
-    // Normalize status (Approved/Rejected)
-    const status = (data.status || '').toLowerCase();
+        const status = (data.status||'').toLowerCase();
+        const tbody = document.getElementById(status==='approved'?'Approved-reports-body':'Rejected-reports-body');
 
-    if (status === 'approved') {
-        row.querySelector('.status').textContent = 'Approved';
-        row.querySelector('td:last-child').remove();
-        document.getElementById('approved-reports-table-body').appendChild(row);
-        showMessage('Report approved', true);
-    } 
-    else if (status === 'rejected') {
-        row.querySelector('.status').textContent = 'Rejected';
-        row.querySelector('td:last-child').remove();
-        document.getElementById('rejected-reports-table-body').appendChild(row);
-        showMessage('Report rejected', false);
-    } 
-    else {
-        console.error('Unexpected response:', data);
-        showMessage('Unexpected server response', false);
-    }
-})
-.catch(err => {
-    console.error('Fetch error:', err);
-    showMessage('Network error', false);
-});
+        row.querySelector('.status').textContent = status.charAt(0).toUpperCase() + status.slice(1);
 
+        // Only remove actions if it was pending
+        const actionsTd = row.querySelector('td:last-child');
+        if(actionsTd) actionsTd.remove();
+
+        // Add a new message cell if rejected
+        if(status === 'rejected') {
+            const msgCell = document.createElement('td');
+            msgCell.textContent = data.message || '';
+            row.appendChild(msgCell);
+        }
+
+        tbody.appendChild(row);
+        showMessage(`Report ${status}`, status==='approved');
+        applyFilters();
+    })
+    .catch(()=>showMessage('Network error', false));
 });
 
 // Filters & Sorting
+const barangayFilter = document.getElementById('barangayFilter');
+const sortFilter = document.getElementById('sortFilter');
+[barangayFilter,sortFilter].forEach(el=>el.addEventListener('change',applyFilters));
+
 function applyFilters(){
-    ['pending-reports-table-body','approved-reports-table-body','rejected-reports-table-body'].forEach(tid=>{
-        const tbody = document.getElementById(tid);
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        rows.forEach(r=>{
-            r.style.display = (barangayFilter.value==='' || r.dataset.barangay===barangayFilter.value)?'':'none';
+    ['Pending','Approved','Rejected'].forEach(status=>{
+        const tbody=document.getElementById(status+'-reports-body');
+        const rows=Array.from(tbody.querySelectorAll('tr'));
+        const visible=rows.filter(r=>{
+            return !barangayFilter.value || r.dataset.barangay===barangayFilter.value;
         });
-        const visible = rows.filter(r=>r.style.display!=='none');
-        const sortOption = sortFilter.value;
+        // Sorting
+        const sortOption=sortFilter.value;
         if(sortOption){
             visible.sort((a,b)=>{
                 if(sortOption.startsWith('name')){
@@ -304,17 +219,44 @@ function applyFilters(){
                     const nameB=b.cells[0].textContent.toLowerCase();
                     return sortOption==='name-asc'?nameA.localeCompare(nameB):nameB.localeCompare(nameA);
                 } else if(sortOption.startsWith('time')){
-                    const timeA = new Date(a.dataset.timestamp).getTime();
-                    const timeB = new Date(b.dataset.timestamp).getTime();
+                    const timeA=new Date(a.dataset.timestamp).getTime();
+                    const timeB=new Date(b.dataset.timestamp).getTime();
                     return sortOption==='time-new'?timeB-timeA:timeA-timeB;
                 }
             });
-            visible.forEach(r=>tbody.appendChild(r));
         }
+        visible.forEach(r=>tbody.appendChild(r));
+        rows.forEach(r=>r.style.display=visible.includes(r)?'':'none');
+        paginateTable(tbody,status,visible);
     });
 }
-barangayFilter.addEventListener('change', applyFilters);
-sortFilter.addEventListener('change', applyFilters);
+
+// Pagination inside table
+const perPage=5;
+function paginateTable(tbody,status,rows){
+    const pageContainer=document.getElementById(status+'-pagination');
+    pageContainer.innerHTML='';
+    const totalPages=Math.ceil(rows.length/perPage);
+    if(totalPages<=1) return;
+    let currentPage=1;
+
+    function renderPage(page){
+        currentPage=page;
+        rows.forEach((r,i)=>r.style.display=(i>=perPage*(page-1)&&i<perPage*page)?'':'none');
+        pageContainer.innerHTML='';
+        for(let i=1;i<=totalPages;i++){
+            const btn=document.createElement('button');
+            btn.textContent=i;
+            btn.className='px-2 py-1 border rounded '+(i===page?'bg-teal-600 text-white':'bg-gray-100 text-gray-700');
+            btn.addEventListener('click',()=>renderPage(i));
+            pageContainer.appendChild(btn);
+        }
+    }
+    renderPage(1);
+}
+
+// Initial filter & pagination
+applyFilters();
 </script>
 </body>
 </html>

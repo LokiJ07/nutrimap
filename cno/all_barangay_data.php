@@ -52,9 +52,11 @@ foreach ($barangayOptions as $barangay) {
         SELECT r.id AS report_id, b.barangay, r.report_date AS latest_date
         FROM reports r
         JOIN bns_reports b ON r.id = b.report_id
-        WHERE b.year = ? AND b.barangay = ?
-        ORDER BY r.report_date DESC
-        LIMIT 1
+     WHERE b.year = ?
+AND b.barangay = ?
+AND r.status = 'approved'
+ORDER BY r.report_date DESC
+LIMIT 1
     ");
     $stmt->execute([$selectedYear, $barangay]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -65,7 +67,8 @@ foreach ($barangayOptions as $barangay) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CNO - Health and Nutrition Data</title>
+<title>CNO | Health and Nutrition Data</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
@@ -158,7 +161,8 @@ button:hover { background: #0056b3; transform: scale(1.03); }
       <div class="actions">
         <span><?= $consolidated ? htmlspecialchars($consolidated['report_date']) : 'Current Year Consolidated' ?></span>
         <?php if ($consolidated): ?>
-          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>" target="_blank" class="export-link" onclick="event.stopPropagation()">Export PDF</a>
+          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>&format=pdf" target="_blank" class="export-link" onclick="event.stopPropagation()">Export PDF</a>
+          <a href="export_consolidated.php?year=<?= urlencode($selectedYear) ?><?= empty($selectedBarangays) ? '' : '&' . http_build_query(['barangays' => $selectedBarangays]) ?>&format=csv" target="_blank" class="export-link" onclick="event.stopPropagation()">Export CSV</a>
         <?php endif; ?>
       </div>
     </a>
@@ -189,7 +193,8 @@ button:hover { background: #0056b3; transform: scale(1.03); }
           <strong><?= htmlspecialchars($r['barangay']) ?> Health and Nutrition Data</strong>
           <div class="actions">
             <span><?= htmlspecialchars($r['latest_date']) ?></span>
-            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>" target="_blank">Export PDF</a>
+            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>&format=pdf" target="_blank">Export PDF</a>
+            <a href="export_barangay.php?id=<?= urlencode($r['report_id']) ?>&format=csv" target="_blank">Export CSV</a>     
           </div>
         </div>
       <?php endforeach; ?>

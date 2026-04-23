@@ -13,13 +13,13 @@ function sendOTP($toEmail, $otp) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'danmarkpetalcurin@gmail.com';   // 👉 your Gmail
-        $mail->Password   = 'qdal zfxu fsej bqqf';           // 👉 Gmail App Password
+        $mail->Username   = 'citynutritionoffice@elsalvadorcity.gov.ph';   // 👉 your Gmail
+        $mail->Password   = 'ycth coxd gjhz vgwf';           // 👉 Gmail App Password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
         // Recipients
-        $mail->setFrom('danmarkpetalcurin@gmail.com', 'CNO NutriMap');
+        $mail->setFrom('citynutritionoffice@elsalvadorcity.gov.ph', 'CNO NutriMap');
         $mail->addAddress($toEmail);
 
         // Content
@@ -60,12 +60,12 @@ function sendEmailNotification($toEmail, $subject, $message) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'danmarkpetalcurin@gmail.com';
-        $mail->Password   = 'qdal zfxu fsej bqqf';
+        $mail->Username   = 'citynutritionoffice@elsalvadorcity.gov.ph';
+        $mail->Password   = 'ycth coxd gjhz vgwf';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
-        $mail->setFrom('danmarkpetalcurin@gmail.com', 'CNO NutriMap');
+        $mail->setFrom('citynutritionoffice@elsalvadorcity.gov.ph', 'CNO NutriMap');
         $mail->addAddress($toEmail);
 
         $mail->isHTML(true);

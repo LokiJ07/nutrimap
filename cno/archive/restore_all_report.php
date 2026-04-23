@@ -4,7 +4,7 @@ require '../../db/config.php';
 
 // ✅ Require login
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -50,11 +50,11 @@ if (count($reportIds) > 0) {
     logActivity($pdo, $user_id, "Restored all archived reports");
 
     // ✅ Step 5: Redirect to reports page
-    header("Location: ../archive.php?msg=restored_all");
+    header("Location: ../archive_report.php?msg=restored_all");
     exit();
 
 } else {
-    header("Location: ../archive.php?msg=no_archive");
+    header("Location: ../archive_report.php?msg=no_archive");
     exit();
 }
 ?>

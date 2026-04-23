@@ -4,7 +4,7 @@ require '../../db/config.php';
 
 // ✅ Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -50,12 +50,11 @@ function getBarangayLogo($barangay) {
         'hinigdaan' => 'Hinigdaan.png',
         'kalabaylabay' => 'Kalabaylabay.png',
         'molugan' => 'Molugan.png',
-        'pedro s. baculio' => 'Pedro_sa_Baculio.png',
-        'pedro sa baculio' => 'Pedro_sa_Baculio.png',
+        'bolobolo' => 'Bolobolo.png',
         'poblacion' => 'Poblacion.png',
-        'quibonbon' => 'Quibonbon.png',
+        'kibonbon' => 'Kibonbon.png',
         'sambulawan' => 'Sambulawan.png',
-        'san francisco de asis' => 'San_Francisco_de_Asis.png',
+        'calongonan' => 'Calongonan.png',
         'sinaloc' => 'Sinaloc.png',
         'taytay' => 'Taytay.png',
         'ulaliman' => 'Ulaliman.png'
@@ -87,7 +86,8 @@ if (!empty($_SESSION['user_id'])) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>View BNS Report — CNO NutriMap</title>
+<title>BNS | Edit Report</title>
+<link rel="icon" type="image/png" href="../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -156,7 +156,7 @@ function copyTitle() {
                        value="<?= isset($row['title']) ? htmlspecialchars($row['title']) : '' ?>">
             </div>
         </div>
-        <a href="../report_history.php" class="button-cancel top-right-button">Cancel</a>
+        <a href="javascript:history.back()" class="button-cancel top-right-button">Cancel</a>
     </div>
 
     <!-- PAGE 1 -->
@@ -224,10 +224,10 @@ function copyTitle() {
     <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td>
         <td><input type="number" name="ind7" value="<?= $has_bns ? htmlspecialchars($row['ind7']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>8. Actual Population of Preschool Children 0-59 Months</td>
+    <tr><td>8. Estimate Population of Preschool Children 0-59 Months</td>
         <td><input type="number" name="ind8" value="<?= $has_bns ? htmlspecialchars($row['ind8']) : '' ?>" style="width:100px;"></td>
     </tr>
-        <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td>
+        <tr><td>9. Actual Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td>
         <td><input type="number" name="ind9" value="<?= $has_bns ? htmlspecialchars($row['ind9']) : '' ?>" style="width:100px;"></td>
     </tr>
     <tr><td>a. Percent (%) Measured Coverage (OPT Plus)</td>
@@ -240,7 +240,7 @@ function copyTitle() {
     $nutri = ['Severely underweight','Underweight','Normal weight','Severely wasted','Wasted','Overweight','Obese','Severely stunted','Stunted'];
     for ($i=1;$i<=9;$i++): ?>
     <tr class="indent">
-        <td><?= $i.') '.$nutri[$i-1] ?></td>
+        <td><?= $i.'. '.$nutri[$i-1] ?></td>
         <td class="number-cell">
             <div><input type="number" name="ind9b<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_no"]) : '' ?>" style="width:70px;"></div>
             <div><input type="text" name="ind9b<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_pct"]) : '' ?>" style="width:70px;"></div>
@@ -441,7 +441,7 @@ function copyTitle() {
       <td><?= $label ?></td>
       <td class="number-cell">
         <div><input type="number" name="ind30<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_no"]) : '' ?>" style="width:70px;"></div>
-        <div><input type="text" name="ind0<3?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;"></div>
+        <div><input type="text" name="ind30<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;"></div>
       </td>
     </tr>
     <?php $i++; endforeach; ?>
@@ -477,76 +477,22 @@ function copyTitle() {
 
     <tr class="indent">
  <tr>
-  <td>33. Total Number of Eateries/Carenderia</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind33_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind33_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind33_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind33_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
 
-<tr>
-  <td>34. Total Number Sari-Sari Stores Related Iodized Salt</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind34_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind34_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind34_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind34_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <td>35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind35_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind35_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind35_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind35_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <td>36. Total Number of Bakery With Fortified Flour</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind36_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind36_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind36_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind36_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
+     <tr><td>32. Total Number of Households Using Iodized Salt</td>
+        <td><input type="number" name="ind23" value="<?= $has_bns ? htmlspecialchars($row['ind32']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>33. Total Number of Eateries/Carenderia</td>
+        <td><input type="number" name="ind23" value="<?= $has_bns ? htmlspecialchars($row['ind33']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>34. Total Number Sari-Sari Stores Related Iodized Salt</td>
+        <td><input type="number" name="ind24" value="<?= $has_bns ? htmlspecialchars($row['ind34']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
+        <td><input type="number" name="ind25" value="<?= $has_bns ? htmlspecialchars($row['ind35']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>36. Total Number of Bakery With Fortified Flour</td>
+        <td><input type="number" name="ind26" value="<?= $has_bns ? htmlspecialchars($row['ind36']) : '' ?>" style="width:100px;"></td>
+    </tr>
 
       <td>37. Number of Health and Nutrition Workers:</td>
       <td></td>
@@ -573,7 +519,7 @@ function copyTitle() {
         </table>
 
         <div class="button-group">
-            <button type="submit" class="button-save">Updates</button>
+            <button type="submit" class="button-save">Update</button>
         </div>
 
         <div class="page-number">Page 3</div>
@@ -582,5 +528,185 @@ function copyTitle() {
 </form>
 </div>
 </div>
+
+
+<script>
+const indMale = document.querySelector("input[name='ind_male']");
+const indFemale = document.querySelector("input[name='ind_female']");
+const ind1 = document.querySelector("input[name='ind1']");
+
+function computeTotalPopulation() {
+    const male = parseFloat(indMale.value) || 0;
+    const female = parseFloat(indFemale.value) || 0;
+    ind1.value = male + female;
+}
+
+// Add event listeners
+[indMale, indFemale].forEach(input => {
+    input.addEventListener('input', computeTotalPopulation);
+});
+
+
+// 1️⃣ Preschool Children Measured Coverage
+const ind8 = document.querySelector("input[name='ind8']"); // Estimated Population
+const ind9 = document.querySelector("input[name='ind9']"); // Actual Measured
+const ind9a = document.querySelector("input[name='ind9a']"); // Percent Measured Coverage
+ind9a.readOnly = true;
+
+function computeMeasuredCoverage() {
+    const total = parseFloat(ind8.value) || 0;
+    const measured = parseFloat(ind9.value) || 0;
+    ind9a.value = total > 0 ? ((measured / total) * 100).toFixed(2) : 0;
+}
+[ind8, ind9].forEach(input => input.addEventListener('input', computeMeasuredCoverage));
+
+// Percent of Nutritional Status (ind9b1 - ind9b9)
+const ind9Total = ind9; // total measured preschool children
+for (let i = 1; i <= 9; i++) {
+    const noInput = document.querySelector(`input[name='ind9b${i}_no']`);
+    const pctInput = document.querySelector(`input[name='ind9b${i}_pct']`);
+    pctInput.readOnly = true;
+
+    [noInput, ind9Total].forEach(input => {
+        input.addEventListener('input', () => {
+            const total = parseFloat(ind9Total.value) || 0;
+            const val = parseFloat(noInput.value) || 0;
+            pctInput.value = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
+        });
+    });
+}
+
+// 2️⃣ School Children Percentage (ind21)
+const ind18 = document.querySelector("input[name='ind18']");
+const ind19 = document.querySelector("input[name='ind19']");
+const ind20 = document.querySelector("input[name='ind20']");
+const ind21 = document.querySelector("input[name='ind21']");
+ind21.readOnly = true;
+
+function computeInd21() {
+    const val18 = parseFloat(ind18.value) || 0;
+    const val19 = parseFloat(ind19.value) || 0;
+    const val20 = parseFloat(ind20.value) || 0;
+    const total = val18 + val19;
+    ind21.value = val20 > 0 ? ((total / val20) * 100).toFixed(2) : 0;
+}
+[ind18, ind19, ind20].forEach(input => input.addEventListener('input', computeInd21));
+
+// Percent for School Children Nutritional Status (ind22a - ind22g)
+for (let i = 0; i <= 6; i++) {
+    const letter = String.fromCharCode(97 + i);
+    const noInput = document.querySelector(`input[name='ind22${letter}_no']`);
+    const pctInput = document.querySelector(`input[name='ind22${letter}_pct']`);
+    pctInput.readOnly = true;
+
+    [noInput, ind21].forEach(input => {
+        input.addEventListener('input', () => {
+            const total = parseFloat(ind21.value) || 0;
+            const val = parseFloat(noInput.value) || 0;
+            pctInput.value = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
+        });
+    });
+}
+
+// 3️⃣ Generic helper for other sections using Total Households (ind2)
+const ind2Total = document.querySelector("input[name='ind2']");
+function setupPercentCalculation(sectionPrefix, count, totalInput) {
+    for (let i = 0; i < count; i++) {
+        const letter = String.fromCharCode(97 + i);
+        const noInput = document.querySelector(`input[name='${sectionPrefix}${letter}_no']`);
+        const pctInput = document.querySelector(`input[name='${sectionPrefix}${letter}_pct']`);
+        pctInput.readOnly = true;
+
+        [noInput, totalInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const total = parseFloat(totalInput.value) || 0;
+                const val = parseFloat(noInput.value) || 0;
+                pctInput.value = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
+            });
+        });
+    }
+}
+
+// Sections that depend on ind2
+setupPercentCalculation('ind27', 5, ind2Total);
+setupPercentCalculation('ind28', 4, ind2Total);
+setupPercentCalculation('ind29', 7, ind2Total);
+setupPercentCalculation('ind30', 4, ind2Total);
+setupPercentCalculation('ind31', 6, ind2Total);
+
+// 4️⃣ Number input validation (optional, blocks letters)
+document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        const isNumber = /[0-9]/.test(char);
+        const isDecimal = char === '.' && !this.value.includes('.');
+        if (!isNumber && !isDecimal) e.preventDefault();
+    });
+    input.addEventListener('paste', function(e) {
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^\d*\.?\d*$/.test(paste)) e.preventDefault();
+    });
+});
+
+
+// Add keypress validation to prevent letters
+numberInputs.forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        const isNumber = /[0-9]/.test(char);
+        const isDecimal = char === '.' && !this.value.includes('.');
+        if (!isNumber && !isDecimal) {
+            e.preventDefault(); // block any other character
+        }
+    });
+
+    // Optional: prevent pasting non-numeric values
+    input.addEventListener('paste', function(e) {
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^\d*\.?\d*$/.test(paste)) {
+            e.preventDefault();
+        }
+    });
+});
+
+const calculatedFields = document.querySelectorAll(
+  "input[name='ind1'], input[name='ind9a'], input[name='ind21'], input[type='number'][name$='_pct']"
+);
+
+calculatedFields.forEach(input => input.setAttribute('readonly', true));
+ind1.readOnly = true;
+
+
+// ===== 1️⃣ Make calculated fields readonly =====
+const readonlyFields = [
+  'ind1','ind9a','ind21', 
+  ...Array.from({length:9}, (_,i)=>`ind9b${i+1}_pct`),
+  ...Array.from({length:7}, (_,i)=>`ind22${String.fromCharCode(97+i)}_pct`),
+  ...Array.from({length:5}, (_,i)=>`ind27${String.fromCharCode(97+i)}_pct`),
+  ...Array.from({length:4}, (_,i)=>`ind28${String.fromCharCode(97+i)}_pct`),
+  ...Array.from({length:7}, (_,i)=>`ind29${String.fromCharCode(97+i)}_pct`),
+  ...Array.from({length:4}, (_,i)=>`ind30${String.fromCharCode(97+i)}_pct`),
+  ...Array.from({length:6}, (_,i)=>`ind31${String.fromCharCode(97+i)}_pct`)
+];
+
+readonlyFields.forEach(name=>{
+    const el = document.querySelector(`input[name='${name}']`);
+    if(el) el.readOnly = true;
+});
+
+// ===== 2️⃣ Force number-only input for numeric fields =====
+document.querySelectorAll('input[type="number"]').forEach(input=>{
+    input.addEventListener('keypress', function(e){
+        const char = String.fromCharCode(e.which);
+        const isNumber = /[0-9]/.test(char);
+        const isDecimal = char === '.' && !this.value.includes('.');
+        if(!isNumber && !isDecimal) e.preventDefault();
+    });
+    input.addEventListener('paste', function(e){
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        if(!/^\d*\.?\d*$/.test(paste)) e.preventDefault();
+    });
+});
+</script>
 </body>
 </html>

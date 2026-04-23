@@ -4,7 +4,7 @@ require '../../db/config.php';
 
 // ✅ Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -45,7 +45,7 @@ $can_edit = in_array($row['status'], ['Pending', 'Rejected']);
 // ✅ Barangay logo function
 function getBarangayLogo($barangay) {
     $map = [
-        'cno' => 'CNO.png',
+       'cno' => 'CNO.png',
         'amoros' => 'Amoros.png',
         'bolisong' => 'Bolisong.png',
         'cogon' => 'Cogon.png',
@@ -53,12 +53,11 @@ function getBarangayLogo($barangay) {
         'hinigdaan' => 'Hinigdaan.png',
         'kalabaylabay' => 'Kalabaylabay.png',
         'molugan' => 'Molugan.png',
-        'pedro s. baculio' => 'Pedro_sa_Baculio.png',
-        'pedro sa baculio' => 'Pedro_sa_Baculio.png',
+        'bolobolo' => 'Bolobolo.png',
         'poblacion' => 'Poblacion.png',
-        'quibonbon' => 'Quibonbon.png',
+        'kibonbon' => 'Kibonbon.png',
         'sambulawan' => 'Sambulawan.png',
-        'san francisco de asis' => 'San_Francisco_de_Asis.png',
+        'calongonan' => 'Calongonan.png',
         'sinaloc' => 'Sinaloc.png',
         'taytay' => 'Taytay.png',
         'ulaliman' => 'Ulaliman.png'
@@ -89,7 +88,8 @@ if (isset($_SESSION['user_id'])) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>View BNS Report — CNO NutriMap</title>
+<title>BNS | Edit Report</title>
+<link rel="icon" type="image/png" href="../../img/CNO_Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -238,10 +238,10 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
     <tr><td>7. Total Number of Households With Preschool Children 0-59 Months</td>
         <td><input type="number" name="ind7" value="<?= $has_bns ? htmlspecialchars($row['ind7']) : '' ?>" style="width:100px;"></td>
     </tr>
-    <tr><td>8. Actual Population of Preschool Children 0-59 Months</td>
+    <tr><td>8. Estimate Population of Preschool Children 0-59 Months</td>
         <td><input type="number" name="ind8" value="<?= $has_bns ? htmlspecialchars($row['ind8']) : '' ?>" style="width:100px;"></td>
     </tr>
-        <tr><td>9. Total Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td>
+        <tr><td>9. Actual Number of Preschool Children 0-50 Months Old Measured During OPT Plus</td>
         <td><input type="number" name="ind9" value="<?= $has_bns ? htmlspecialchars($row['ind9']) : '' ?>" style="width:100px;"></td>
     </tr>
     <tr><td>a. Percent (%) Measured Coverage (OPT Plus)</td>
@@ -254,7 +254,7 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
     $nutri = ['Severely underweight','Underweight','Normal weight','Severely wasted','Wasted','Overweight','Obese','Severely stunted','Stunted'];
     for ($i=1;$i<=9;$i++): ?>
     <tr class="indent">
-        <td><?= $i.') '.$nutri[$i-1] ?></td>
+        <td><?= $i.'. '.$nutri[$i-1] ?></td>
         <td class="number-cell">
             <div><input type="number" name="ind9b<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_no"]) : '' ?>" style="width:70px;"></div>
             <div><input type="text" name="ind9b<?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind9b{$i}_pct"]) : '' ?>" style="width:70px;"></div>
@@ -452,7 +452,7 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
       <td><?= $label ?></td>
       <td class="number-cell">
         <div><input type="number" name="ind30<?= $i ?>_no" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_no"]) : '' ?>" style="width:70px;"></div>
-        <div><input type="text" name="ind0<3?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;"></div>
+        <div><input type="text" name="ind30<3?= $i ?>_pct" value="<?= $has_bns ? htmlspecialchars($row["ind30{$i}_pct"]) : '' ?>" style="width:70px;"></div>
       </td>
     </tr>
     <?php $i++; endforeach; ?>
@@ -487,95 +487,24 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
     <?php $i++; endforeach; ?>
 
     <tr class="indent">
-
      <tr>
-  <td>32. Total Number of Households Using Iodized Salt</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind32_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind32_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind32_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind32_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
- <tr>
-  <td>33. Total Number of Eateries/Carenderia</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind33_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind33_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind33_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind33_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
 
-<tr>
-  <td>34. Total Number Sari-Sari Stores Related Iodized Salt</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind34_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind34_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind34_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind34_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
+    <tr><td>32. Total Number of Households Using Iodized Salt</td>
+        <td><input type="number" name="ind23" value="<?= $has_bns ? htmlspecialchars($row['ind32']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>33. Total Number of Eateries/Carenderia</td>
+        <td><input type="number" name="ind24" value="<?= $has_bns ? htmlspecialchars($row['ind33']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>34. Total Number Sari-Sari Stores Related Iodized Salt</td>
+        <td><input type="number" name="ind25" value="<?= $has_bns ? htmlspecialchars($row['ind34']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
+        <td><input type="number" name="ind26" value="<?= $has_bns ? htmlspecialchars($row['ind35']) : '' ?>" style="width:100px;"></td>
+    </tr>
+    <tr><td>36. Total Number of Bakery With Fortified Flour</td>
+        <td><input type="number" name="ind26" value="<?= $has_bns ? htmlspecialchars($row['ind36']) : '' ?>" style="width:100px;"></td>
+    </tr>
 
-<tr>
-  <td>35. Total Number of Sari-Sari Stores Related to Cooking Oil</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind35_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind35_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind35_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind35_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <td>36. Total Number of Bakery With Fortified Flour</td>
-  <td class="number-cell">
-    <div>
-      <input type="number" 
-             name="ind36_no" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind36_no'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-    <div>
-      <input type="text" 
-             name="ind36_pct" 
-             value="<?= $has_bns ? htmlspecialchars($row['ind36_pct'] ?? '') : '' ?>" 
-             style="width:70px;">
-    </div>
-  </td>
-</tr>
 
       <td>37. Number of Health and Nutrition Workers:</td>
       <td></td>
@@ -604,7 +533,7 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
 
         <?php if ($can_edit): ?>
         <div class="button-group">
-            <button type="submit" class="button-save">Save Changes</button> 
+            <button type="submit" class="button-save">Update</button> 
         </div>
         <?php endif; ?>
             <div class="page-number">Page 3</div>
@@ -614,5 +543,172 @@ You cannot edit this report because its status is <?= htmlspecialchars($row['sta
 </form>
 </div>
 </div>
+
+
+<script>
+// ===============================
+// PREVENT NEGATIVE VALUES
+// ===============================
+document.querySelectorAll("input[type='number']").forEach(input => {
+    input.addEventListener("input", function () {
+        if (this.value < 0) this.value = 0;
+    });
+});
+
+// ===============================
+// AUTO: MALE + FEMALE = TOTAL POP
+// ===============================
+const totalPop = document.querySelector("input[name='ind1']");
+const male = document.querySelector("input[name='ind_male']");
+const female = document.querySelector("input[name='ind_female']");
+
+function computeTotalPopulation() {
+    const m = parseFloat(male.value) || 0;
+    const f = parseFloat(female.value) || 0;
+    totalPop.value = m + f;
+}
+
+[male, female].forEach(input => {
+    input.addEventListener("input", computeTotalPopulation);
+});
+
+totalPop.readOnly = true;
+
+// ===============================
+// IND9a = COVERAGE % (OPT)
+// ind9 / ind8 * 100
+// ===============================
+const ind8 = document.querySelector("input[name='ind8']");
+const ind9 = document.querySelector("input[name='ind9']");
+const ind9a = document.querySelector("input[name='ind9a']");
+
+function computeInd9a() {
+    const estimated = parseFloat(ind8.value) || 0;
+    const measured = parseFloat(ind9.value) || 0;
+
+    ind9a.value = estimated > 0
+        ? ((measured / estimated) * 100).toFixed(2)
+        : 0;
+}
+
+[ind8, ind9].forEach(input => input.addEventListener("input", computeInd9a));
+ind9a.readOnly = true;
+
+// ===============================
+// IND9b NUTRITION STATUS %
+// % = no / ind9 * 100
+// ===============================
+function computeNutritionPercent(prefix, totalFieldName) {
+    const totalField = document.querySelector(`input[name='${totalFieldName}']`);
+
+    for (let i = 1; i <= 9; i++) {
+        const noField = document.querySelector(`input[name='${prefix}${i}_no']`);
+        const pctField = document.querySelector(`input[name='${prefix}${i}_pct']`);
+
+        if (!noField || !pctField) continue;
+
+        noField.addEventListener("input", () => {
+            const total = parseFloat(totalField.value) || 0;
+            const value = parseFloat(noField.value) || 0;
+
+            pctField.value = total > 0
+                ? ((value / total) * 100).toFixed(2)
+                : 0;
+        });
+
+        pctField.readOnly = true;
+    }
+}
+
+computeNutritionPercent("ind9b", "ind9");
+
+// ===============================
+// IND21 SCHOOL COVERAGE %
+// ind20 / (ind18 + ind19) * 100
+// ===============================
+const ind18 = document.querySelector("input[name='ind18']");
+const ind19 = document.querySelector("input[name='ind19']");
+const ind20 = document.querySelector("input[name='ind20']");
+const ind21 = document.querySelector("input[name='ind21']");
+
+function computeInd21() {
+    const enrolledKinder = parseFloat(ind18.value) || 0;
+    const enrolledG1G6 = parseFloat(ind19.value) || 0;
+    const measured = parseFloat(ind20.value) || 0;
+
+    const totalEnrolled = enrolledKinder + enrolledG1G6;
+
+    ind21.value = totalEnrolled > 0
+        ? ((measured / totalEnrolled) * 100).toFixed(2)
+        : 0;
+}
+
+[ind18, ind19, ind20].forEach(input => input.addEventListener("input", computeInd21));
+ind21.readOnly = true;
+
+// ===============================
+// GENERIC FUNCTION FOR % TABLES
+// % = no / totalHouseholds * 100
+// used for ind27, ind28, ind29, ind30, ind31
+// ===============================
+function computePercentGroup(prefix, totalFieldName) {
+    const totalField = document.querySelector(`input[name='${totalFieldName}']`);
+
+    if (!totalField) return;
+
+    document.querySelectorAll(`input[name^='${prefix}'][name$='_no']`).forEach(noField => {
+        const pctFieldName = noField.name.replace("_no", "_pct");
+        const pctField = document.querySelector(`input[name='${pctFieldName}']`);
+
+        if (!pctField) return;
+
+        noField.addEventListener("input", () => {
+            const total = parseFloat(totalField.value) || 0;
+            const value = parseFloat(noField.value) || 0;
+
+            pctField.value = total > 0
+                ? ((value / total) * 100).toFixed(2)
+                : 0;
+        });
+
+        pctField.readOnly = true;
+    });
+}
+
+// total households = ind2
+computePercentGroup("ind27", "ind2");
+computePercentGroup("ind28", "ind2");
+computePercentGroup("ind29", "ind2");
+computePercentGroup("ind30", "ind2");
+computePercentGroup("ind31", "ind2");
+
+const numberInputs = document.querySelectorAll('input[type="number"]');
+
+// Add keypress validation to prevent letters
+numberInputs.forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        const isNumber = /[0-9]/.test(char);
+        const isDecimal = char === '.' && !this.value.includes('.');
+        if (!isNumber && !isDecimal) {
+            e.preventDefault(); // block any other character
+        }
+    });
+
+    // Optional: prevent pasting non-numeric values
+    input.addEventListener('paste', function(e) {
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^\d*\.?\d*$/.test(paste)) {
+            e.preventDefault();
+        }
+    });
+});
+
+const calculatedFields = document.querySelectorAll(
+  "input[name='ind1'], input[name='ind9a'], input[name='ind21'], input[type='number'][name$='_pct']"
+);
+
+calculatedFields.forEach(input => input.setAttribute('readonly', true));
+</script>
 </body>
 </html>

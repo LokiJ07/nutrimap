@@ -6,7 +6,7 @@ require 'otp/mailer.php';
 $error = '';
 
 // ✅ If "Remember Me" cookies exist, auto-fill email
-$rememberedEmail = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : '';
+$rememberedEmail = $_COOKIE['remember_email'] ?? '';
 
 // ✅ Activity log function
 function logActivity($pdo, $user_id, $action, $details = null) {
@@ -17,33 +17,47 @@ function logActivity($pdo, $user_id, $action, $details = null) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
-    $remember = isset($_POST['remember']); // ✅ Capture remember me checkbox
+    $remember = isset($_POST['remember']);
 
     if (!empty($email) && !empty($password)) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
+
+        // ✅ Fetch user by email or username
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ? LIMIT 1");
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash'])) {
+        // ===========================
+        //   ✅ STATUS & PASSWORD CHECK
+        // ===========================
+        if (!$user) {
+            $error = "Invalid email/username or password!";
+        } elseif ($user['status'] !== 'Active') {
+            $error = "Your account is Inactive. Please contact the CNO.";
+        } elseif (!password_verify($password, $user['password_hash'])) {
+            $error = "Invalid email/username or password!";
+        } else {
+            // ===========================
+            //   ✅ LOGIN CONTINUES HERE
+            // ===========================
 
-            // ✅ Save Remember Me cookie for 7 days if checked
+            // Remember Me cookie
             if ($remember) {
                 setcookie('remember_email', $email, time() + (7 * 24 * 60 * 60), "/");
             } else {
-                setcookie('remember_email', '', time() - 3600, "/"); // Clear if unchecked
+                setcookie('remember_email', '', time() - 3600, "/");
             }
 
-            // ✅ Generate or retrieve device token
+            // Device token
             if (empty($_COOKIE['device_token'])) {
                 $device_token = bin2hex(random_bytes(16));
-                setcookie('device_token', $device_token, time() + (365 * 24 * 60 * 60), "/"); // 1 year
+                setcookie('device_token', $device_token, time() + (365 * 24 * 60 * 60), "/");
             } else {
                 $device_token = $_COOKIE['device_token'];
             }
 
-            // ✅ Check if this device is already trusted
+            // Check if device token exists for this user
             $checkDevice = $pdo->prepare("
-                SELECT id, session_id FROM login_history 
+                SELECT id FROM login_history 
                 WHERE user_id = ? AND device_token = ? 
                 LIMIT 1
             ");
@@ -55,52 +69,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ip = $_SERVER['REMOTE_ADDR'];
 
             if ($existingDevice) {
-                // ✅ Trusted device → skip OTP and log in directly
+                // Trusted device → direct login
                 $_SESSION['user_id']    = $user['id'];
                 $_SESSION['user_type']  = $user['user_type'];
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['email']      = $user['email'];
                 $_SESSION['barangay']   = $user['barangay'];
 
-                // ✅ Update login time & session id
+                // Update login history
                 $update = $pdo->prepare("UPDATE login_history SET login_time = NOW(), logout_time = NULL, session_id = ? WHERE id = ?");
                 $update->execute([$session_id, $existingDevice['id']]);
 
-                // ✅ Save current session in users table
+                // Update users table session
                 $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
                     ->execute([$session_id, $user['id']]);
 
-                // ✅ Log activity
-                logActivity($pdo, $user['id'], "User logged in", "Trusted device login from IP $ip");
+                logActivity($pdo, $user['id'], "User logged in", "Device token login from IP $ip");
 
-                // Redirect based on role
-                if ($user['user_type'] === 'CNO') {
-                    header("Location: cno/home.php");
-                } else {
-                    header("Location: bns/home.php");
-                }
+                // Redirect
+                header("Location: " . ($user['user_type'] === 'CNO' ? 'cno/home.php' : 'bns/home.php'));
                 exit();
-
             } else {
-                // ✅ New device → send OTP and save as pending
-                $historyStmt = $pdo->prepare("
-                    INSERT INTO login_history (user_id, session_id, browser, ip_address, device_token, login_time)
-                    VALUES (?, ?, ?, ?, ?, NOW())
-                ");
-                $historyStmt->execute([$user['id'], $session_id, $browser, $ip, $device_token]);
-
-                // ✅ Save current session in users table for reference
-                $pdo->prepare("UPDATE users SET current_session = ? WHERE id = ?")
-                    ->execute([$session_id, $user['id']]);
-
-                // ✅ Generate OTP
+                // New device → send OTP
                 $otp = rand(100000, 999999);
                 $expires = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
                 $stmt = $pdo->prepare("INSERT INTO otp_codes (user_id, otp_code, expires_at) VALUES (?, ?, ?)");
                 $stmt->execute([$user['id'], $otp, $expires]);
 
-                // ✅ Save user info temporarily until OTP verification
+                // Temp session data for OTP verification
                 $_SESSION['pending_user_id']      = $user['id'];
                 $_SESSION['pending_user_type']    = $user['user_type'];
                 $_SESSION['pending_first_name']   = $user['first_name'];
@@ -108,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['pending_barangay']     = $user['barangay'];
                 $_SESSION['pending_device_token'] = $device_token;
 
-                // ✅ Log activity for new device
                 logActivity($pdo, $user['id'], "OTP sent for new device login", "Device token: $device_token, IP: $ip");
 
                 if (sendOTP($user['email'], $otp)) {
@@ -120,9 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: otp/verify_otp.php");
                 exit;
             }
-
-        } else {
-            $error = "Invalid email/username or password!";
         }
     } else {
         $error = "All fields are required!";
@@ -130,16 +123,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CNO NutriMap - Login</title>
+  <title>CNO NutriMap | Login</title>
+  <link rel="icon" type="image/png" href="img/CNO_Logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome for Eye Icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">

@@ -5,7 +5,7 @@ require_once '../otp/mailer.php'; // ✅ include mailer
 
 // ✅ Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -25,12 +25,13 @@ function logActivity($pdo, $user_id, $action, $details = null) {
 try {
     $pdo->beginTransaction();
 
-    // 1️⃣ Fetch old report and bns_report
+    // 1️⃣ Fetch old report
     $stmt = $pdo->prepare("SELECT * FROM reports WHERE id = :id");
     $stmt->execute(['id' => $reportId]);
     $oldReport = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$oldReport) throw new Exception("Report not found");
 
+    // 1️⃣ Fetch old BNS
     $stmt = $pdo->prepare("SELECT * FROM bns_reports WHERE report_id = :report_id");
     $stmt->execute(['report_id' => $reportId]);
     $oldBns = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -38,7 +39,7 @@ try {
 
     // 2️⃣ Create new pending report
     $stmt = $pdo->prepare("
-        INSERT INTO reports (user_id, report_time, report_date, status) 
+        INSERT INTO reports (user_id, report_time, report_date, status)
         VALUES (:user_id, :report_time, :report_date, 'Pending')
     ");
     $stmt->execute([
@@ -48,29 +49,26 @@ try {
     ]);
     $newReportId = $pdo->lastInsertId();
 
-    // 3️⃣ Prepare new BNS data
+    // ✅ Clean clone of old data (remove auto-increment + foreign mismatch)
     $bnsFields = $oldBns;
+    unset($bnsFields['id']); // remove PK
 
-    // Overwrite with submitted values
+    // ✅ Apply updated fields from form POST
     foreach ($_POST as $key => $value) {
-        if ($key !== 'report_id' && $key !== 'title_display') {
+        if (array_key_exists($key, $bnsFields) && $key !== 'id') {
             $bnsFields[$key] = $value;
         }
     }
 
-    // Force correct values
+    // ✅ Force correct links
     $bnsFields['report_id'] = $newReportId;
-    $bnsFields['title'] = $_POST['title'] ?? ($oldBns['title'] ?? '');
+    $bnsFields['title'] = $_POST['title'] ?? ($oldBns['title'] ?? 'No Title');
 
-    // Remove auto fields
-    unset($bnsFields['id']);
-
-    // ✅ Build SQL dynamically with correct placeholders
+    // ✅ Rebuild SQL safely
     $columns = array_keys($bnsFields);
     $placeholders = array_map(fn($c) => ':' . $c, $columns);
     $sql = "INSERT INTO bns_reports (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
-
-    // Ensure array keys have `:` prefix
+    
     $params = [];
     foreach ($bnsFields as $col => $val) {
         $params[":" . $col] = $val;
@@ -79,13 +77,13 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    // 🔔 Set prev_status = NULL so CNO receives notification
+    // ✅ Reset status to ensure notification triggers
     $stmt = $pdo->prepare("UPDATE reports SET prev_status = NULL WHERE id = :id");
     $stmt->execute(['id' => $newReportId]);
 
     $pdo->commit();
 
-    // ✅ Log activity
+    // ✅ Log activity after success
     logActivity(
         $pdo,
         $userId,
@@ -93,7 +91,35 @@ try {
         "Old Report ID: $reportId → New Report ID: $newReportId"
     );
 
-    header("Location: report_history.php?id=$newReportId&msg=Report updated as Pending");
+    // ✅ Email Notification to CNO
+    $stmt = $pdo->prepare("
+        SELECT email, first_name, last_name
+        FROM users
+        WHERE user_type = 'CNO'
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $cnoUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($cnoUser && !empty($cnoUser['email'])) {
+        $to = $cnoUser['email'];
+        $subject = "Report Updated - Pending Review";
+
+        $reportTitle = htmlspecialchars($bnsFields['title']);
+        $senderName = htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+
+        $message = "
+            Hello,<br><br>
+            A report titled <strong>$reportTitle</strong> has been updated by <strong>$senderName</strong> 
+            and is now pending your review.<br><br>
+            <strong>Date:</strong> " . date('Y-m-d') . "<br><br>
+            Please review it in the system.
+        ";
+
+        sendEmailNotification($to, $subject, $message);
+    }
+
+    header("Location: ../reports.php?id=$newReportId&msg=Report updated as Pending");
     exit();
 
 } catch (Exception $e) {
