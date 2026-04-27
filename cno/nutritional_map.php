@@ -197,7 +197,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'CNO') {
           <label class="block text-sm font-medium text-gray-600">Select Barangay</label>
           <select id="barangayFilter" class="mt-1 block w-48 rounded border border-gray-300 shadow-sm">
             <option value="All">All</option>
-            <option value="city_total">City Total (Average)</option>
             <option value="Amoros">Amoros</option>
             <option value="Bolisong">Bolisong</option>
             <option value="Himaya">Himaya</option>
